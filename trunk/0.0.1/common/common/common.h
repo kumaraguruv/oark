@@ -34,10 +34,5 @@ typedef enum STATUS_e
 
 } STATUS_t;
 
-typedef struct e_s
-{
-	DWORD eax;
-	ULONG ebx;
-} e_t;
 
 #endif /* __COMMON_H__ */
