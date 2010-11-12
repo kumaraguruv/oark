@@ -190,7 +190,7 @@
 				Name="common"
 				>
 				<File
-					RelativePath="..\..\common\common.h"
+					RelativePath="..\..\common\common\common.h"
 					>
 				</File>
 			</Filter>
