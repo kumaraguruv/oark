@@ -2,6 +2,7 @@
 TARGETNAME=oark_driver
 TARGETPATH=obj
 TARGETTYPE=DRIVER
+INCLUDES =..\..\common\common
 
 # Use additional include file
 NTTARGETFILES=makefile.inc

@@ -49,6 +49,7 @@ extern "C" {
 #endif
 
 #include "oark_driver.h"
+#include "common.h"
 
 #ifdef __cplusplus
 namespace { // anonymous namespace to limit the scope of this global variable!
@@ -67,6 +68,7 @@ NTSTATUS OARKDRIVER_DispatchCreateClose(
     Irp->IoStatus.Status = status;
     Irp->IoStatus.Information = 0;
     IoCompleteRequest(Irp, IO_NO_INCREMENT);
+
     return status;
 }
 
@@ -77,7 +79,7 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
 {
     NTSTATUS status = STATUS_SUCCESS;
     PIO_STACK_LOCATION irpSp = IoGetCurrentIrpStackLocation(Irp);
-
+	
     switch(irpSp->Parameters.DeviceIoControl.IoControlCode)
     {
     case IOCTL_OARKDRIVER_OPERATION:

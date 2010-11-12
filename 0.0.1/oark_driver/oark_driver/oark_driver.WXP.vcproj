@@ -4,6 +4,7 @@
 	Version="9,00"
 	Name="oark_driver.WXP"
 	ProjectGUID="{B0900DA8-87D6-4CE9-9A43-E8D7C72711A8}"
+	RootNamespace="oark_driver.WXP"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -28,8 +29,8 @@
 				CleanCommandLine=""
 				Output=""
 				PreprocessorDefinitions="DBG=0;WINVER=0x0500"
-				IncludeSearchPath=""
-				ForcedIncludes=""
+				IncludeSearchPath="C:\WinDDK\6001.17121\inc\api;C:\WinDDK\6001.17121\inc\ddk;..\..\common\common"
+				ForcedIncludes="C:\WinDDK\6001.17121\inc\api;C:\WinDDK\6001.17121\inc\ddk;..\..\common\common"
 				AssemblySearchPath=""
 				ForcedUsingAssemblies=""
 				CompileAsManaged=""
