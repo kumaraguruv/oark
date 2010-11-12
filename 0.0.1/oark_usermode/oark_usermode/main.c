@@ -22,15 +22,7 @@ THE SOFTWARE.
 
 #include <stdio.h>
 #include <windows.h>
-
-#define OARK_VERSION "0.0.1"
-
-typedef enum STATUS_e
-{
-	ST_ERROR = 0,
-	ST_OK
-
-} STATUS_t;
+#include "common.h"
 
 BOOL debug = TRUE;
 
