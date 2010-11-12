@@ -8,4 +8,4 @@ Content is coming...
 = Details =
 
 This is the:
-  * *The Open Source Anti Rootkit* _oark_
+  * *_oark - The Open Source Anti Rootkit_*
