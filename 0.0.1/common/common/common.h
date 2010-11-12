@@ -25,11 +25,19 @@ THE SOFTWARE.
 
 #define OARK_VERSION "0.0.1"
 
+#include <WinDef.h>
+
 typedef enum STATUS_e
 {
 	ST_ERROR = 0,
 	ST_OK
 
 } STATUS_t;
+
+typedef struct e_s
+{
+	DWORD eax;
+	ULONG ebx;
+} e_t;
 
 #endif /* __COMMON_H__ */
