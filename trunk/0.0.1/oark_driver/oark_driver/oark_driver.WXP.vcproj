@@ -168,6 +168,14 @@
 				RelativePath=".\oark_driver.h"
 				>
 			</File>
+			<Filter
+				Name="common"
+				>
+				<File
+					RelativePath="..\..\common\common.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
