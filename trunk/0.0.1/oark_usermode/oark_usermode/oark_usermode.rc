@@ -47,8 +47,21 @@ END
 #endif    // APSTUDIO_INVOKED
 
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// OARK_DRIVER
+//
 
-IDR_OARK_DRIVER          oark_driver               "oark_driver.sys"
+IDR_OARK_DRIVER         OARK_DRIVER             "oark_driver.sys"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON1               ICON                    "icon1.ico"
 #endif    // Spanish resources
 /////////////////////////////////////////////////////////////////////////////
 
