@@ -22,14 +22,16 @@ THE SOFTWARE.
 
 #include <stdio.h>
 #include <windows.h>
+#include "debug.h"
 #include "common.h"
-
-BOOL debug = TRUE;
+#include "driverusr.h"
 
 STATUS_t EnableDebugPrivilege( void );
 
 int main( void )
 {
+	HANDLE device;
+
 	printf
 	( 
 		"\n"
@@ -49,9 +51,28 @@ int main( void )
 	);
 
 	if ( EnableDebugPrivilege() == ST_ERROR )
-		printf( " Error: EnableDebugPrivilege\n" );
-	else if ( debug )
-		printf( " OK: EnableDebugPrivilege\n" );
+		fprintf( stderr, " Error: EnableDebugPrivilege\n" );
+	else
+	{
+		if ( debug )
+			printf( " OK: EnableDebugPrivilege\n" );
+
+		if ( LoadDriver( & device ) )
+		{
+			if ( debug )
+				printf( " OK: Driver Loaded!\n" );
+
+			if ( UnloadDriver( & device ) )
+			{
+				if ( debug ) 
+					printf( " OK: Driver Unloaded!\n" );
+			}
+			else
+				fprintf( stderr, " Error: Driver Unloaded!\n" );
+		}
+		else
+			fprintf( stderr, " Error: LoadDriver\n" );
+	}
 
 	printf( "\n PRESS ENTER TO EXIT.\n" );
 	getchar();
@@ -76,13 +97,13 @@ STATUS_t EnableDebugPrivilege( void )
 			  if ( AdjustTokenPrivileges( hToken, FALSE, & tokenPriv, sizeof( tokenPriv ), NULL, NULL ) )
 				return ST_OK;
 			  else
-				  printf( " Error: AdjustTokenPrivileges\n" );
+				  fprintf( stderr, " Error: AdjustTokenPrivileges\n" );
 		 } 
 		 else
-			printf( " Error: LookupPrivilegeValue\n" );
+			fprintf( stderr, " Error: LookupPrivilegeValue\n" );
      } 
 	else
-		printf( " Error: OpenProcessToken\n" );
+		fprintf( stderr, " Error: OpenProcessToken\n" );
 
 	return ST_ERROR;
 }
