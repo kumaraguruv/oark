@@ -60,7 +60,7 @@ BOOLEAN LoadDriver( HANDLE * device )
 
 	* device = NULL;
 
-	if ( GetFullTempPath( & full_temp_path, "drv.sys" ) )
+	if ( GetFullTempPath( & full_temp_path, DRIVER_NAME ) )
 	{
 		if ( debug )
 			printf( " OK: Temp driver full path: %s\n", full_temp_path );
