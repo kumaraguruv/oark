@@ -182,6 +182,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\idt.c"
+				>
+			</File>
+			<File
 				RelativePath=".\main.c"
 				>
 			</File>
@@ -197,6 +201,10 @@
 			</File>
 			<File
 				RelativePath=".\driverusr.h"
+				>
+			</File>
+			<File
+				RelativePath=".\idt.h"
 				>
 			</File>
 			<File
