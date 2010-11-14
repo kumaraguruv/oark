@@ -22,6 +22,32 @@ THE SOFTWARE.
 
 #include "driverusr.h"
 
+void * IOCTLReadKernMem( HANDLE device, READ_KERN_MEM_t * read_kern_mem )
+{
+	int i = 0;
+	ULONG bytes_read ;
+
+	bytes_read = 0 ;
+
+	if
+	( 
+		DeviceIoControl
+		( 
+			device,
+			OARK_IOCTL_CHANGE_MODE,
+			read_kern_mem,
+			sizeof( * read_kern_mem ),
+			NULL,
+			0,
+			& bytes_read,
+			( LPOVERLAPPED) NULL
+		)
+	)
+		return read_kern_mem->dst_address;
+
+	return NULL;
+}
+
 BOOLEAN LoadDriver( HANDLE * device )
 {
 	char * full_temp_path;
@@ -30,6 +56,9 @@ BOOLEAN LoadDriver( HANDLE * device )
 	BOOLEAN returnf = FALSE;
 	BOOLEAN aux_return;
 	DWORD last_error;
+	SERVICE_STATUS service_status; 
+
+	* device = NULL;
 
 	if ( GetFullTempPath( & full_temp_path, "drv.sys" ) )
 	{
@@ -66,12 +95,40 @@ BOOLEAN LoadDriver( HANDLE * device )
 					);
 
 				last_error  = GetLastError();
-				if ( last_error == ERROR_SERVICE_EXISTS )
+				if ( ( last_error == ERROR_SERVICE_EXISTS ) || ( last_error == ERROR_SERVICE_MARKED_FOR_DELETE ) )
 				{
 					if ( debug )
-						printf( " OK: ERROR_SERVICE_EXISTS, Opening the service...\n" );
+						printf( " OK: ERROR_SERVICE_EXISTS / ERROR_SERVICE_MARKED_FOR_DELETE, Opening the service..\n" );
 
 					handle_service = OpenServiceA( handle_manager, SERVICE_NAME, SERVICE_ALL_ACCESS );
+
+					if ( ( last_error == ERROR_SERVICE_MARKED_FOR_DELETE ) && ( handle_service != NULL ) )
+					{
+						if ( debug )
+							printf( " OK: ERROR_SERVICE_MARKED_FOR_DELETE, Stoping and recreating the service..\n" );
+						
+						ControlService( handle_service, SERVICE_CONTROL_STOP, & service_status );
+
+						CloseServiceHandle( handle_service );
+
+						handle_service = \
+							CreateServiceA \
+							(	
+								handle_manager,
+								SERVICE_NAME,
+								SERVICE_NAME,
+								SERVICE_ALL_ACCESS,
+								SERVICE_KERNEL_DRIVER,
+								SERVICE_DEMAND_START,
+								SERVICE_ERROR_NORMAL,
+								full_temp_path,
+								NULL,
+								NULL,
+								NULL,
+								NULL,
+								NULL
+							);
+					}
 				}
 				if ( handle_service != NULL )
 				{
@@ -90,7 +147,27 @@ BOOLEAN LoadDriver( HANDLE * device )
 							putchar( '\n' );
 						}
 
-						returnf = TRUE;
+						 * device = \
+							CreateFileA \
+							( 
+								NAMEOF_DEVICE,
+								GENERIC_READ | GENERIC_WRITE,
+								FILE_SHARE_READ | FILE_SHARE_WRITE, 
+								NULL,
+								OPEN_EXISTING,
+								0,
+								NULL
+							);
+
+						if( * device != INVALID_HANDLE_VALUE )
+						{
+							if ( debug )
+								printf( " OK: Get the handle to device: %s\n", NAMEOF_DEVICE );
+
+							returnf = TRUE;
+						}
+						else
+							fprintf( stderr, " Error: Get the handle to device: %s\n", NAMEOF_DEVICE ); 
 					}
 					else
 						fprintf( stderr, " Error: Starting service\n" );
@@ -123,10 +200,12 @@ int UnloadDriver( HANDLE * device )
 {
 	SC_HANDLE handle_manager;
 	SC_HANDLE handle_service;
-	SERVICE_STATUS service_status;
+	SERVICE_STATUS service_status; 
 	BOOLEAN returnf = FALSE;
 	BOOLEAN aux_return;
 	DWORD last_error;
+
+	CloseHandle( * device );
 
 	handle_manager = OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS );
 

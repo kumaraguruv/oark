@@ -20,15 +20,45 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef _DEBUG_H__
-#define _DEBUG_H__
+#ifndef _IDT_H__
+#define _IDT_H__
 
 #include <windows.h>
 #include <stdio.h>
 #include "common.h"
+#include "driverusr.h"
 
-extern BOOL debug;
+typedef struct _KIDTENTRY
+{
+     WORD Offset;
+     WORD Selector;
+     WORD Access;
+     WORD ExtendedOffset;
+} KIDTENTRY, *PKIDTENTRY;
 
-STATUS_t EnableDebugPrivilege( void );
+typedef struct _KGDTENTRY
+{
+     WORD LimitLow;
+     WORD BaseLow;
+     ULONG HighWord;
+} KGDTENTRY, *PKGDTENTRY;
 
-#endif /* _DEBUG_H__ */
+typedef struct _KPCR
+{
+     NT_TIB NtTib;   /* FIXED UNION: I AM NOT INTERESTED IN THIS */
+     void * SelfPcr; /* FIXED: I AM NOT INTERESTED IN THIS */
+     void * Prcb;    /* FIXED: I AM NOT INTERESTED IN THIS */
+     UCHAR Irql;
+     ULONG IRR;
+     ULONG IrrActive;
+     ULONG IDR;
+     PVOID KdVersionBlock;
+     PKIDTENTRY IDT;
+     PKGDTENTRY GDT;
+
+    /* ... */
+} KPCR, *PKPCR;
+
+int idt( HANDLE );
+
+#endif /* _IDT_H__ */

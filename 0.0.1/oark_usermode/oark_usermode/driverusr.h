@@ -30,6 +30,7 @@ THE SOFTWARE.
 #include "common.h"
 
 
+void * IOCTLReadKernMem( HANDLE, READ_KERN_MEM_t * );
 BOOLEAN LoadDriver( HANDLE * );
 int UnloadDriver( HANDLE * );
 BOOLEAN GetFullTempPath( char **, char * );
