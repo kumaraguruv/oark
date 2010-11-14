@@ -23,9 +23,15 @@ THE SOFTWARE.
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+#include <WinDef.h>
+
 #define OARK_VERSION "0.0.1"
 
-#include <WinDef.h>
+#define DEVICE_NAME			"\\Device\\OARK_DRIVER"
+#define SYMLINK_NAME		"\\DosDevices\\OARK_DRIVER"
+#define NAMEOF_DEVICE       "\\\\.\\OARK_DRIVER"
+#define DRIVER_NAME         "OARK_DRIVER.SYS"
+#define SERVICE_NAME        "OARK_DRIVER"
 
 typedef enum STATUS_e
 {
