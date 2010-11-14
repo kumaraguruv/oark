@@ -32,6 +32,8 @@ THE SOFTWARE.
 #define NAMEOF_DEVICE       "\\\\.\\OARK_DRIVER"
 #define DRIVER_NAME         "OARK_DRIVER.SYS"
 #define SERVICE_NAME        "OARK_DRIVER"
+#define OARK_IOCTL_CHANGE_MODE \
+	CTL_CODE( FILE_DEVICE_UNKNOWN, 0x801, METHOD_OUT_DIRECT, FILE_READ_DATA | FILE_WRITE_DATA)
 
 typedef enum STATUS_e
 {
@@ -40,5 +42,48 @@ typedef enum STATUS_e
 
 } STATUS_t;
 
+typedef enum MEM_SYM_TYP_e
+{
+	SYM_TYP_NULL = 0,
+	SYM_TYP_KPCR,
+	SYM_TYP_IDT
+
+} MEM_SYM_TYP_t;
+
+typedef struct READ_KERN_MEM_s
+{
+	void           * src_address;
+	DWORD            size;
+	MEM_SYM_TYP_t    type;
+	void           * dst_address;
+
+} READ_KERN_MEM_t;
+
+#pragma pack(1)
+
+typedef struct _IDT_DESCRIPTOR
+{
+	WORD offset00_15; 
+	WORD selector; 
+	BYTE unused:5; 
+	BYTE zeroes:3; 
+	BYTE gateType:5; 
+	BYTE DPL:2; 
+	BYTE P:1;
+	WORD offset16_31; 
+} IDT_DESCRIPTOR, *PIDT_DESCRIPTOR;
+
+typedef struct _IDTR
+{
+	WORD nBytes;
+	WORD baseAddressLow;
+	WORD baseAddressHi;
+} IDTR;
+
+#pragma pack()
+
+#define IDT_HARDCODE_SIZE 0x7FF
+
+#define MAKEDWORD(a, b)      ((unsigned int)(((WORD)(a)) | ((WORD)((WORD)(b))) << 16))  
 
 #endif /* __COMMON_H__ */
