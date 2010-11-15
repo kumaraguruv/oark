@@ -46,3 +46,7 @@ The user mode executable have the driver inside (in a .rsrc), when the executabl
 Compile *ALWAYS* in *Release mode*.
 
 = Debugging Environment =
+
+For an easy debuggingenvironment you can install this tools:
+  * *VirtualKD* - allows speeding up (up to 45x) Windows kernel module debugging using VMWare and VirtualBox virtual machines: [http://virtualkd.sysprogs.org/]
+  * *VirtualBox* or *VMWare* (only the versions *compatible* with *VirtualKD*) - x86 virtualization: [http://www.virtualbox.org/] [http://www.vmware.com/]
