@@ -54,4 +54,4 @@ For an easy debugging and testing environment you can install this tools:
   * *Windows Symbol Packages* for the Windows Version of the Virtual Machines: [http://www.microsoft.com/whdc/devtools/debugging/symbolpkg.mspx]
   * If you like the *IDA Pro* for debugging - Kernel debugging with IDA Pro / Windbg plugin and VirtualKd: [http://www.hexblog.com/?p=123]
 
-To test the user mode and the driver the best and the safe way is in a Virtual Machine
+To test the user mode and the driver the best and the safe way is in a Virtual Machine, you need configure this Virtual Machine with Virtual KD for an easy-debugging (without VirtualKD kernel debugging is very very slow). 
