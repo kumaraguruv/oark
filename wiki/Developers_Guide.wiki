@@ -61,4 +61,4 @@ The code have some DKOM code (Direct Kernel Object Manipulation), then it is nec
 
 Of course you need download the Windows Symbols for each Version to view the structs from WinDBG etc..
 
-`VirtualBox` and VMWare have support for shared folders between the Virtual Machine and the Real Machine, then you can configure the output of the project in Visual Studio to the shared folder. Then you dont need copy the output .exe to other folder to test and debug tasks.
+`VirtualBox` and VMWare have support for shared folders between the Virtual Machine and the Real Machine, then you can configure the output of the project in Visual Studio to the shared folder. And after, it is only necessary, compile and execute the .exe from the Virtual Machines.
