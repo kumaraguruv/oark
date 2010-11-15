@@ -12,6 +12,8 @@ For an easy environment you can install this tools:
 
 DDKWizard It is compatible with Visual Studio .NET, Visual Studio .NET 2003, Visual Studio 2005 and 2008 and the Express Editions of Visual C++ 2005 and 2008. The \normal" Visual C++ versions are supposed to work ne as well. Refer to section 2.5 and section 3.1 for some possible limitations depending on your Visual Studio version. Visual Studio 2005 and 2008 (and their avors) support all DDKWizard features!
 
+PD: AnkhSVN dont works in Express Versions.
+
 == Configuring the driver project in Visual Studio ==
 
 In the subversion exist a visual studio project, but you need change:
