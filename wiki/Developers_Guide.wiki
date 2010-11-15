@@ -23,3 +23,10 @@ In the subversion exist a visual studio project, but you need change:
         * *"..\..\common\common"* in *Include Search Path* and *Forced Includes*
     * *WARNING:* NEVER REMOVE THE ENTRY:
         * *"xcopy /y ".\obj%BUILD_ALT_DIR%\i386\`*`.sys" "..\..\oark_usermode\oark_usermode""* in *ddkpostbld.cmd* file
+
+== Configuring the user mode project in Visual Studio ==
+
+The user mode executable have the driver inside (in a .rsrc), when the executable is running it dumps the driver to a temp file and load the driver. When you build the driver project the output with ".sys" extension is copied to the folder of user mode project. When you build the user mode project with a new driver version you need *Clean the project* after compile.
+
+  * *WARNING:* NEVER REMOVE THE ENTRY:
+        * *"..\..\common\common"* in *Project Properties -> Configuration Properties -> C/C++ -> General -> Additional Include Directories*
