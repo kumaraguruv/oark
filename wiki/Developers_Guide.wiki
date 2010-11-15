@@ -33,7 +33,7 @@ You need configure the *"WinDDK Paths"* in the file with extension *".vsprops"*
     * *Name="WXPBASE", "WNETBASE"* etc..
     * *Value="C:\WinDDK_PATH\DDK_VERSION"*, you need add here the PATH of the WinDDK Path Version, you can find the version for build the driver in this wiki. *Example: Value="C:\WinDDK\6001.17121"*
 
-Compile *ALWAYS* in *WXP Free"
+Compile *ALWAYS* in *WXP Free*
 
 == Configuring the user mode project in Visual Studio ==
 
@@ -42,4 +42,4 @@ The user mode executable have the driver inside (in a .rsrc), when the executabl
   * *WARNING:* NEVER REMOVE THE ENTRY:
         * *"..\..\common\common"* in *"Project Properties -> Configuration Properties -> C/C++ -> General -> Additional Include Directories"*
 
-Compile *ALWAYS* in *Release*.
+Compile *ALWAYS* in *Release mode*.
