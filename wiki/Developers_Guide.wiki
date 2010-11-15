@@ -9,4 +9,4 @@ Add your content here.
 
 Tools:
   * *AnkhSVN* - Subversion Support for Visual Studio: [http://ankhsvn.open.collab.net/]
-  * *DDKWizard + DDKBUILD.CMD:* - Driver environment for Visual Studio: [http://ddkwizard.assarbad.net/]
+  * *DDKWizard + DDKBUILD.CMD* - Driver environment for Visual Studio: [http://ddkwizard.assarbad.net/]
