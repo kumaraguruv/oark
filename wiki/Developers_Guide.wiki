@@ -1,6 +1,6 @@
 #summary Developers Guide
 
-= Environment for developers =
+= Environment for Developers =
 
 The driver is built with *WinDDK 6001.17121*, you can install this DDK with others DDKs in the system without problems.
 
