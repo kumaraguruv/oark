@@ -18,5 +18,6 @@ In the subversion exist a visual studio project, but you need change:
   * *Properties* of the solution *.WXP* (right click in the solution project with extension *.WXP*, in solution explorer tab). In the option *"Configuration Properties"* click in *NMake* and add to *Include Search Path* and add the same in *Forced Includes*:
     * *X:\WinDDK_PATH\DDK_VERSION\inc\api*
     * *X:\WinDDK_PATH\DDK_VERSION\inc\ddk*
-    * *WARNING: NEVER REMOVE THE ENTRY "..\..\common\common" in Include Search Path and  Forced Includes
+    * -
+    * *WARNING: NEVER REMOVE THE ENTRY "..\..\common\common" in Include Search Path and  Forced Includes*
     * *WARNING: NEVER REMOVE THE ENTRY "xcopy /y ".\obj%BUILD_ALT_DIR%\i386\`*`.sys" "..\..\oark_usermode\oark_usermode"" in ddkpostbld.cmd file*
