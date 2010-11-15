@@ -152,7 +152,7 @@ BOOLEAN LoadDriver( HANDLE * device )
 							( 
 								NAMEOF_DEVICE,
 								GENERIC_READ | GENERIC_WRITE,
-								FILE_SHARE_READ | FILE_SHARE_WRITE, 
+								0, 
 								NULL,
 								OPEN_EXISTING,
 								0,
@@ -167,7 +167,12 @@ BOOLEAN LoadDriver( HANDLE * device )
 							returnf = TRUE;
 						}
 						else
-							fprintf( stderr, " Error: Get the handle to device: %s\n", NAMEOF_DEVICE ); 
+						{
+							fprintf( stderr, " Error: Get the handle to device: %s", NAMEOF_DEVICE );
+							if ( GetLastError() == ERROR_ACCESS_DENIED )
+								fprintf( stderr, " , Maybe there are other instance with a handle to device!!" );
+							fprintf( stderr, "\n" );
+						}
 					}
 					else
 						fprintf( stderr, " Error: Starting service\n" );
