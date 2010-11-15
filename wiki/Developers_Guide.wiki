@@ -1,14 +1,19 @@
 #summary Developers Guide
 
-= Introduction =
-
-Add your content here.
-
-
 = Environment for developers =
 
-Tools:
+For a easy environment you can install this tools:
   * *AnkhSVN* - Subversion Support for Visual Studio: [http://ankhsvn.open.collab.net/]
   * *DDKWizard + DDKBUILD.CMD* - Driver environment for Visual Studio: [http://ddkwizard.assarbad.net/]
+  * *Visual Studio* - IDE with intellisense ... 
 
 DDKWizard It is compatible with Visual Studio .NET, Visual Studio .NET 2003, Visual Studio 2005 and 2008 and the Express Editions of Visual C++ 2005 and 2008. The \normal" Visual C++ versions are supposed to work ne as well. Refer to section 2.5 and section 3.1 for some possible limitations depending on your Visual Studio version. Visual Studio 2005 and 2008 (and their avors) support all DDKWizard features!
+
+== Configuring the driver project in Visual Studio ==
+
+In the subversion exist a visual studio project, but you need change:
+
+  * *Properties* of the solution *.WXP* (right click in the solution project with extension *.WXP*, in solution explorer tab). In the option *"Configuration Properties"* click in *NMake* and add to *Include Search Path* and add the same in *Forced Includes*:
+    * *X:\WinDDK_PATH\DDK_VERSION\inc\api*
+    * *X:\WinDDK_PATH\DDK_VERSION\inc\ddk*
+    * *WARNING: NEVER REMOVE THE ENTRY "..\..\common\common" in Include Search Path and  Forced Includes
