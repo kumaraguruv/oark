@@ -29,4 +29,4 @@ In the subversion exist a visual studio project, but you need change:
 The user mode executable have the driver inside (in a .rsrc), when the executable is running it dumps the driver to a temp file and load the driver. When you build the driver project the output with ".sys" extension is copied to the folder of user mode project. When you build the user mode project with a new driver version you need *Clean the project* after compile.
 
   * *WARNING:* NEVER REMOVE THE ENTRY:
-        * *"..\..\common\common"* in *Project Properties -> Configuration Properties -> C/C++ -> General -> Additional Include Directories*
+        * *"..\..\common\common"* in *"Project Properties -> Configuration Properties -> C/C++ -> General -> Additional Include Directories"*
