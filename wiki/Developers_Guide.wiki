@@ -1,4 +1,5 @@
 #summary Developers Guide
+#labels a
 
 = Environment for Developers =
 
@@ -59,3 +60,5 @@ To test the user mode and the driver the best and the safe way is in a Virtual M
 The code have some DKOM code (Direct Kernel Object Manipulation), then it is necessary hardcode some offsets of Windows Kernel structures in the code. In each Windows version have different offset for the same field of a structure. Then you need install a lot of Virtual Machines with different Windows Version: XP, Vista, 7 ...
 
 Of course you need download the Windows Symbols for each Version to view the structs from WinDBG etc..
+
+`VirtualBox` and VMWare have support for shared folders between the Virtual Machine and the Real Machine, then you can configure the output of the project in Visual Studio to the shared folder. Then you dont need copy the output .exe to other folder to test and debug tasks.
