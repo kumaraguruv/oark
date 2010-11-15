@@ -49,8 +49,8 @@ Compile *ALWAYS* in *Release mode*.
 = Debugging and Testing Environment =
 
 For an easy debugging and testing environment you can install this tools:
-  * *VirtualKD* - allows speeding up (up to 45x) Windows kernel module debugging using VMWare and `VirtualBox` virtual machines: [http://virtualkd.sysprogs.org/]
-  * *`VirtualBox` or VMWare* (only the versions *compatible* with *VirtualKD*) - x86 virtualization: `VirtualBox` [http://www.virtualbox.org/] VMWare [http://www.vmware.com/]
+  * *VirtualKD* - allows speeding up (up to 45x) Windows kernel module debugging using VMWare and VirtualBox virtual machines: [http://virtualkd.sysprogs.org/]
+  * *VirtualBox or VMWare* (only the versions *compatible* with *VirtualKD*) - x86 virtualization: VirtualBox [http://www.virtualbox.org/] VMWare [http://www.vmware.com/]
   * *Debugging Tools for Windows* 32-bit Versions: [http://www.microsoft.com/whdc/devtools/debugging/installx86.mspx]
   * *Windows Symbol Packages* for the Windows Version of the Virtual Machines: [http://www.microsoft.com/whdc/devtools/debugging/symbolpkg.mspx]
   * If you like the *IDA Pro* for debugging - Kernel debugging with IDA Pro / Windbg plugin and VirtualKd: [http://www.hexblog.com/?p=123]
@@ -61,4 +61,4 @@ The code have some DKOM code (Direct Kernel Object Manipulation), then it is nec
 
 Of course you need download the Windows Symbols for each Version to view the structs from WinDBG etc..
 
-`VirtualBox` and VMWare have support for shared folders between the Virtual Machine and the Real Machine, then you can configure the output of the project in Visual Studio to the shared folder. And after, it is only necessary, compile and execute the .exe from the Virtual Machines.
+VirtualBox and VMWare have support for shared folders between the Virtual Machine and the Real Machine, then you can configure the output of the project in Visual Studio to the shared folder. And after, it is only necessary, compile and execute the .exe from the Virtual Machines.
