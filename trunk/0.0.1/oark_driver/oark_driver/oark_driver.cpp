@@ -221,7 +221,7 @@ NTSTATUS DriverEntry(
         &usDeviceName,
         FILE_DEVICE_UNKNOWN,
         FILE_DEVICE_SECURE_OPEN,
-        FALSE,
+        TRUE,
         &pdoDeviceObj
         )))
     {
