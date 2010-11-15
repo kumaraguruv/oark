@@ -26,6 +26,13 @@ In the subversion exist a visual studio project, but you need change:
     * *WARNING:* NEVER REMOVE THE ENTRY:
         * *INCLUDES =..\..\common\common* in *sources* file
 
+You need configure the *"WinDDK Paths"* in the file with extension *".vsprops"*
+
+    * Name="DDKBUILD_PATH"
+    * Value="C:\DDK_BUILD_PATH.CMD" You can download the CMD from: [http://ddkwizard.assarbad.net/], Example: Value="C:\WINDDK\ddkbuild.cmd"
+    * Name="WXPBASE", "WNETBASE" etc..
+    * Value="C:\WinDDK_PATH\DDK_VERSION", you need add here the PATH of the WinDDK Path Version, you can find the version for build the driver in this wiki. Example: Value="C:\WinDDK\6001.17121"
+
 == Configuring the user mode project in Visual Studio ==
 
 The user mode executable have the driver inside (in a .rsrc), when the executable is running it dumps the driver to a temp file and load the driver. When you build the driver project the output with ".sys" extension is copied to the folder of user mode project. When you build the user mode project with a new driver version you need *Clean the project* after compile.
