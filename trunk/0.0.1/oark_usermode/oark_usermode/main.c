@@ -26,10 +26,12 @@ THE SOFTWARE.
 #include "common.h"
 #include "driverusr.h"
 #include "idt.h"
+#include "others.h"
 
 int main( void )
 {
 	HANDLE device;
+	DWORD other_pid;
 
 	printf
 	( 
@@ -49,32 +51,40 @@ int main( void )
 		OARK_VERSION 
 	);
 
-	if ( EnableDebugPrivilege() == ST_ERROR )
-		fprintf( stderr, " Error: EnableDebugPrivilege\n" );
-	else
+	if ( LockInstance( & other_pid ) == ST_OK )
 	{
 		if ( debug )
-			printf( " OK: EnableDebugPrivilege\n" );
+			printf( " ON: Only this instance running\n" );
 
-		if ( LoadDriver( & device ) )
+		if ( EnableDebugPrivilege() == ST_ERROR )
+			fprintf( stderr, " Error: EnableDebugPrivilege\n" );
+		else
 		{
 			if ( debug )
-				printf( " OK: Driver Loaded!\n" );
+				printf( " OK: EnableDebugPrivilege\n" );
 
-			printf( " INFO: Searching in IDT:\n" );
-			idt( device );
-
-			if ( UnloadDriver( & device ) )
+			if ( LoadDriver( & device ) )
 			{
-				if ( debug ) 
-					printf( " OK: Driver Unloaded!\n" );
+				if ( debug )
+					printf( " OK: Driver Loaded!\n" );
+
+				printf( " INFO: Searching in IDT:\n" );
+				idt( device );
+
+				if ( UnloadDriver( & device ) )
+				{
+					if ( debug ) 
+						printf( " OK: Driver Unloaded!\n" );
+				}
+				else
+					fprintf( stderr, " Error: Driver Unloaded!\n" );
 			}
 			else
-				fprintf( stderr, " Error: Driver Unloaded!\n" );
+				fprintf( stderr, " Error: LoadDriver\n" );
 		}
-		else
-			fprintf( stderr, " Error: LoadDriver\n" );
 	}
+	else
+		fprintf( stderr, " Error: Other instance running!, please terminate the process with PID: %d\n", other_pid );
 
 	printf( "\n PRESS ENTER TO EXIT.\n" );
 	getchar();

@@ -20,22 +20,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef _DRIVERUSR_H__
-#define _DRIVERUSR_H__
+#ifndef _OTHERS_H__
+#define __OTHERS_H__
 
-#include <stdio.h>
 #include <windows.h>
-#include "resource.h"
-#include "debug.h"
+#include <tlhelp32.h>
 #include "common.h"
-#include "others.h"
+#include "debug.h"
 
-
-void * IOCTLReadKernMem( HANDLE, READ_KERN_MEM_t * );
-BOOLEAN LoadDriver( HANDLE * );
-int UnloadDriver( HANDLE * );
-BOOLEAN GetFullTempPath( char **, char * );
+STATUS_t LockInstance( DWORD * );
 BOOLEAN DumpRSRC( char *, int, char * );
+BOOLEAN GetFullTempPath( char **, char * );
 
-#endif /* _DRIVERUSR_H__ */
-
+#endif /* _OTHERS_H__ */
