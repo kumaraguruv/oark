@@ -193,6 +193,10 @@
 				RelativePath=".\others.c"
 				>
 			</File>
+			<File
+				RelativePath=".\pebhooking.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -213,6 +217,10 @@
 			</File>
 			<File
 				RelativePath=".\others.h"
+				>
+			</File>
+			<File
+				RelativePath=".\pebhooking.h"
 				>
 			</File>
 			<File

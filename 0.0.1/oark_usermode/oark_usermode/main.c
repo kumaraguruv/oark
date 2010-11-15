@@ -68,7 +68,7 @@ int main( void )
 				if ( debug )
 					printf( " OK: Driver Loaded!\n" );
 
-				printf( " INFO: Searching in IDT:\n" );
+				printf( " INFO: Showing IDT Info:\n" );
 				idt( device );
 
 				if ( UnloadDriver( & device ) )
