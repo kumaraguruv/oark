@@ -189,6 +189,10 @@
 				RelativePath=".\main.c"
 				>
 			</File>
+			<File
+				RelativePath=".\others.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -205,6 +209,10 @@
 			</File>
 			<File
 				RelativePath=".\idt.h"
+				>
+			</File>
+			<File
+				RelativePath=".\others.h"
 				>
 			</File>
 			<File
