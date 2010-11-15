@@ -29,9 +29,9 @@ In the subversion exist a visual studio project, but you need change:
 You need configure the *"WinDDK Paths"* in the file with extension *".vsprops"*
 
     * *Name="DDKBUILD_PATH"*
-    * *Value="C:\DDK_BUILD_PATH.CMD"* You can download the CMD from: *[http://ddkwizard.assarbad.net/]*, Example: *Value="C:\WINDDK\ddkbuild.cmd"*
+    * *Value="C:\DDK_BUILD_PATH.CMD"* You can download the CMD from: *[http://ddkwizard.assarbad.net/]*, *Example: Value="C:\WINDDK\ddkbuild.cmd"*
     * *Name="WXPBASE", "WNETBASE"* etc..
-    * *Value="C:\WinDDK_PATH\DDK_VERSION"*, you need add here the PATH of the WinDDK Path Version, you can find the version for build the driver in this wiki. Example: *Value="C:\WinDDK\6001.17121"*
+    * *Value="C:\WinDDK_PATH\DDK_VERSION"*, you need add here the PATH of the WinDDK Path Version, you can find the version for build the driver in this wiki. *Example: Value="C:\WinDDK\6001.17121"*
 
 == Configuring the user mode project in Visual Studio ==
 
