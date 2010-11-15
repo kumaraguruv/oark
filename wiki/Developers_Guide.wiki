@@ -44,3 +44,5 @@ The user mode executable have the driver inside (in a .rsrc), when the executabl
         * *"..\..\common\common"* in *"Project Properties -> Configuration Properties -> C/C++ -> General -> Additional Include Directories"*
 
 Compile *ALWAYS* in *Release mode*.
+
+= Debugging Environment =
