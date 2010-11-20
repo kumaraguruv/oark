@@ -260,3 +260,37 @@ printf
 }}}
 
 Please use comments if this are necessary.
+
+GO-TO, go-to is allow but only if this is necessary like in some driver parts, in user mode if is better if you can avoid the use of goto for example:
+
+{{{
+BOOLEN Example( void )
+{
+    char * first;
+    char * second;
+    char * third;
+    BOOLEAN returnf = FALSE;
+
+    first = calloc( ... );
+    if ( first != NULL )
+    {
+        second = calloc( ... );
+        if ( second != NULL )
+        {
+            third = calloc( ... );
+            if ( third != NULL )
+            {
+                free( third );
+ 
+                returnf = TRUE;
+            }
+
+            free( second );
+        }
+
+        free( first );
+    }
+
+    return returnf;
+}
+}}}
