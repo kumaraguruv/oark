@@ -14,5 +14,7 @@
     * Drivers
     * Files (Raw file system parsing)
     * DLLs in memory
+    * Sockets
+    * Hidden objects...
   * Others:
     * x86 dissasembler
