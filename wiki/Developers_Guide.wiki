@@ -93,13 +93,61 @@ THE SOFTWARE.
 */
 }}}
 
-Braces of functions in new paragraph:
+Identation always with 4 spaces (without TAB CHAR!).
+
+Braces of functions and IF in new paragraph:
 
 {{{
 void Function( void )
 { 
-
-/* content */
-
+    if ( condition )
+    {
+     
+    }
 } 
 }}}
+
+Params in functions and args with spaces after the comma:
+
+{{{
+void Function( int arg1, char arg2 )
+{ 
+    OtherFunction( arg1, arg2, arg3 );
+} 
+}}}
+
+If-else, valid:
+
+{{{
+if ( condition )
+    one_thing
+else
+    one_thing
+
+if ( condition )
+{
+    one_or_more_thing
+}
+else
+{
+    one_or_more_thing
+}
+
+if ( condition )
+    one_thing
+else
+{
+    two_or_more_thing
+}
+
+if ( condition )
+{
+    two_or_more_thing
+}
+else
+    one_thing
+
+}}}
+
+NOT VALID: an if with one thing with braces and the else with one thing without braces, it is incongruent.
+
