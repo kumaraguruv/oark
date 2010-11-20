@@ -226,3 +226,25 @@ Example of spaces in printf and fprintf:
 printf( "bla bla %d %d", integer, integer );
 fprintf( stderr, "bla bla %d %d", integer, integer );
 }}}
+
+Large Functions in IF, or some large stuff:
+{{{
+if 
+(
+    LoooooooooooooooooooooooooooooooooooooooooooongFunction
+    (
+        arg1,
+        arg2
+    )
+)
+{
+}
+
+variable_name = \
+    LoooooooooooooooooooooooooooooooooooooooooooongFunction \
+    (
+        arg1,
+        arg2
+    )
+
+}}}
