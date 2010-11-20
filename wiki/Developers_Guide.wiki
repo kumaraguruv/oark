@@ -97,7 +97,9 @@ Braces of functions in new paragraph:
 
 {{{
 void Function( void )
-{ /* here */
+{ 
+
 /* content */
-} /* and here */
+
+} 
 }}}
