@@ -2,6 +2,8 @@
 
 = TO-DO list =
 
+*WARNING: View always the Issue Tracker, maybe other developer is already working in a feature of the TO-DO!*
+
   * Hooks detection:
     * Service Descriptor Table
     * Shadow Service Descriptor Table 
