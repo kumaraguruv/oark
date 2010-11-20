@@ -257,6 +257,29 @@ printf
     arg1,
     arg2
 );
+
+if ( condition ) 
+{
+    printf
+        ( " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ", aa, bb );
+}
+
+if ( condition ) 
+{
+    printf
+    ( 
+        " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ", aa, bb 
+    );
+}
+
+if ( condition ) 
+{
+    printf
+    ( 
+        " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ", 
+        aa, bb 
+    );
+}
 }}}
 
 Please use comments if this are necessary.
