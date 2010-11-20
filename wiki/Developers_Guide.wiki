@@ -247,4 +247,13 @@ variable_name = \
         arg2
     )
 
+printf
+(
+    " blablabla\n"
+    "ble ble ble"
+    ,
+    arg1,
+    arg2
+);
+
 }}}
