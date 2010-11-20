@@ -3,7 +3,7 @@
 = INDEX =
 
   # [#Environment_for_Developers]
-    # [#Configuring_the_driver_project_in_Visual Studio]
+    # [#Configuring_the_driver_project_in_Visual_Studio]
     # [#Debugging_and_Testing_Environment]
   # [#Coding_Style]
 
