@@ -3,8 +3,8 @@
 = INDEX =
 
   # [#Environment_for_Developers]
-    # [#Configuring the driver project in Visual Studio]
-    # [#Debugging and Testing Environment]
+    # [#Configuring_the_driver_project_in_Visual Studio]
+    # [#Debugging_and_Testing_Environment]
   # [#Coding_Style]
 
 = Environment for Developers =
