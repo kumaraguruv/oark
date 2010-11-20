@@ -219,3 +219,10 @@ typedef enum OWN_ENUM_e
     BLA3
 } OWN_ENUM_t;
 }}}
+
+Example of spaces in printf and fprintf:
+
+{{{
+printf( "bla bla %d %d", integer, integer );
+fprintf( stderr, "bla bla %d %d", integer, integer );
+}}}
