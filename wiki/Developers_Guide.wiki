@@ -163,3 +163,7 @@ switch ( option )
     break;
 }
 }}}
+
+Name of functions with the first letter of each word UPPER: Example
+
+{{{ WhatIsYourName() }}}
