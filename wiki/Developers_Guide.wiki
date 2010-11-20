@@ -70,7 +70,7 @@ Of course you need download the Windows Symbols for each Version to view the str
 
 !VirtualBox and VMWare have support for shared folders between the Virtual Machine and the Real Machine, then you can configure the output of the project in Visual Studio to the shared folder. And after, it is only necessary, compile and execute the .exe from the Virtual Machines.
 
-= Coding Style =
+=Coding Style=
 
 All headers or source files must be with the MIT License:
 
