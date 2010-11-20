@@ -307,7 +307,7 @@ BOOLEN Example( void )
 
     first = calloc( ... );
     if ( first == NULL )
-        goto end_ret
+        goto first_fail
     
     second = calloc( ... );
     if ( second == NULL )
