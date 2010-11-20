@@ -294,3 +294,44 @@ BOOLEN Example( void )
     return returnf;
 }
 }}}
+
+Please AVOID THIS KIND OF CODE:
+
+{{{
+BOOLEN Example( void )
+{
+    char * first;
+    char * second;
+    char * third;
+    BOOLEAN returnf = FALSE;
+
+    first = calloc( ... );
+    if ( first == NULL )
+        goto first_fail
+    
+    second = calloc( ... );
+    if ( second == NULL )
+        goto second_fail
+
+    third = calloc( ... );
+    if ( third == NULL )
+        goto third_fail
+
+    returnf = TRUE;
+    goto end
+
+    third_fail:
+        free( third );
+
+    second_fail:
+        free( second );
+
+    first_fail:
+        free( first );
+
+    end:
+        return returnf;
+}
+}}}
+
+Of course there are scenarios which GO-TO is better and more clear than other complex logic, but in examples like the last is better avoid the use of goto.
