@@ -318,15 +318,13 @@ BOOLEN Example( void )
         goto third_fail
 
     returnf = TRUE;
-    goto end
+    
+    free( third );
 
     third_fail:
-        free( third );
-
-    second_fail:
         free( second );
 
-    first_fail:
+    second_fail:
         free( first );
 
     end:
