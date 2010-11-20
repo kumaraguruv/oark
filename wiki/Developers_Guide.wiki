@@ -177,5 +177,8 @@ char * WhatIsYourName( char ** arg1, char * arg2 )
    char * returnf;
 
    returnf = NULL;
+   * arg1 = NULL;
+
+   return returnf;
 }
 }}}
