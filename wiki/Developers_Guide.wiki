@@ -205,3 +205,9 @@ do
 
 } while ( ... );
 }}}
+
+Variable names in lower, separation with _, example:
+
+i_am_a_variable
+
+#define, constants, and enums in UPPER, example: #define BLA( x ) ...
