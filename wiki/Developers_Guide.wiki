@@ -167,3 +167,15 @@ switch ( option )
 Name of functions with the first letter of each word UPPER: Example
 
 {{{ WhatIsYourName() }}}
+
+The ptrs always with space between the name, example:
+
+{{{
+
+char * WhatIsYourName( char ** arg1, char * arg2 )
+{
+   char * returnf;
+
+   returnf = NULL;
+}
+}}}
