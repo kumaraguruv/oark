@@ -3,7 +3,7 @@
 = INDEX =
 
 [Developers_Guide#Environment_for_Developers]
-[Developers_Guide#Coding_Style]
+[Developers Guide#Coding_Style]
 
 = Environment for Developers =
 
