@@ -93,6 +93,8 @@ THE SOFTWARE.
 */
 }}}
 
+The code must be justified to 77 columns, you can configure the Visual Assist -> Options -> Display: 77 columns
+
 Identation always with 4 spaces (without TAB CHAR!).
 
 Braces of functions and IF in new paragraph:
