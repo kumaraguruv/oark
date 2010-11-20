@@ -151,15 +151,17 @@ else
 
 NOT VALID: an if with one thing with braces and the else with one thing without braces, it is incongruent.
 
-The Switch with space (this is not a function):
+The Switch with space (this is not a function), using case and breaks like a brace:
 
 {{{
 switch ( option )
 {
     case 1:
+        Function();
     break;
 
     default:
+        other stuff....
     break;
 }
 }}}
@@ -182,7 +184,7 @@ char * WhatIsYourName( char ** arg1, char * arg2 )
 }
 }}}
 
-While, For:
+While, For, Do-while:
 
 {{{
 while ( 1 )
@@ -191,4 +193,15 @@ while ( 1 )
     {
     }
 }
+
+while ( 1 )
+    one_thing
+
+for ( i = 0; i < x; i++ )
+    one_thing
+
+do
+{
+
+} while ( ... );
 }}}
