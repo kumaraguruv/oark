@@ -1,0 +1,18 @@
+#summary TO-DO
+
+= TO-DO list =
+
+  * Hooks detection:
+    * Service Descriptor Table
+    * Shadow Service Descriptor Table 
+    * SYSENTER / INT 0x2E
+    * EAT (Export Address Table) / IAT (Import Address Table)
+    * IRP
+    * IDT (Interrupt Descriptor Table)
+  * Hidden information:
+    * Processes
+    * Drivers
+    * Files (Raw file system parsing)
+    * DLLs in memory
+  * Others:
+    * x86 dissasembler
