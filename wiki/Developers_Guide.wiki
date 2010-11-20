@@ -59,7 +59,7 @@ Compile *ALWAYS* in *Release mode*.
 
 For an easy debugging and testing environment you can install this tools:
   * *!VirtualKD* - allows speeding up (up to 45x) Windows kernel module debugging using VMWare and !VirtualBox virtual machines: [http://virtualkd.sysprogs.org/]
-  * *!VirtualBox or VMWare* (only the versions *compatible* with *!VirtualKD*) - x86 virtualization: *!VirtualBox* [http://www.virtualbox.org/] *VMWare* [http://www.vmware.com/]
+  * *VirtualBox or VMWare* (only the versions *compatible* with *!VirtualKD*) - x86 virtualization: *!VirtualBox* [http://www.virtualbox.org/] *VMWare* [http://www.vmware.com/]
   * *Debugging Tools for Windows* 32-bit Versions: [http://www.microsoft.com/whdc/devtools/debugging/installx86.mspx]
   * *Windows Symbol Packages* for the Windows Version of the Virtual Machines: [http://www.microsoft.com/whdc/devtools/debugging/symbolpkg.mspx]
   * If you like the *IDA Pro* for debugging - Kernel debugging with IDA Pro / Windbg plugin and !VirtualKd: [http://www.hexblog.com/?p=123]
