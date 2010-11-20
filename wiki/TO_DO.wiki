@@ -9,6 +9,7 @@
     * EAT (Export Address Table) / IAT (Import Address Table)
     * IRP
     * IDT (Interrupt Descriptor Table)
+    * Inline hooking 
   * Hidden information:
     * Processes
     * Drivers
