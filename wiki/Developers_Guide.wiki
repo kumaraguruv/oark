@@ -4,11 +4,11 @@
 
 The driver is built with *WinDDK 6001.17121*, you can install this DDK with others DDKs in the system without problems.
 
-For an easy environment you can install this tools (There are a internal links for Developers, Commiters...):
+For an easy environment you can install this tools:
   * *AnkhSVN* - Subversion Support for Visual Studio: [http://ankhsvn.open.collab.net/]
   * *DDKWizard + DDKBUILD.CMD* - Driver environment for Visual Studio: [http://ddkwizard.assarbad.net/]
   * *Visual Studio* - IDE with intellisense ...: [http://msdn.microsoft.com/en-us/vstudio/default.aspx]
-  * *WinDDK 6001.17121* - The DDK to build the driver. 
+  * *WinDDK 6001.17121* - The DDK to build the driver: there is a internal link for developers, commiters...
   * *Visual Assist X* - (Optional Tool, but very useful) provides productivity enhancements that help you read, write, navigate and refactor code with blazing speed in all Microsoft IDEs: [http://www.wholetomato.com/]
 
 DDKWizard It is compatible with Visual Studio .NET, Visual Studio .NET 2003, Visual Studio 2005 and 2008 and the Express Editions of Visual C++ 2005 and 2008. The \normal" Visual C++ versions are supposed to work ne as well. Refer to section 2.5 and section 3.1 for some possible limitations depending on your Visual Studio version. Visual Studio 2005 and 2008 (and their avors) support all DDKWizard features!
