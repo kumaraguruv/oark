@@ -22,6 +22,8 @@ DDKWizard It is compatible with Visual Studio .NET, Visual Studio .NET 2003, Vis
 
 PD: AnkhSVN dont works in Express Versions.
 
+<wiki:video url="http://www.youtube.com/watch?v=JwQZFMJ3_PA"/>
+
 == Configuring the driver project in Visual Studio ==
 
 In the subversion exist a visual studio project, but you need change:
