@@ -3,8 +3,8 @@
 Destination of donations:
   * *First*: Domain, Hosting of the project...
   * *Second*: If there are more donations and the *First* has been paid, the money is for:
-    * Main Developers
-    * Main Commiters
+    * *Main Developers*
+    * *Main Commiters*
 
 Donations click here:
 
