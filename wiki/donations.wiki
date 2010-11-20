@@ -1,5 +1,6 @@
-#summary Destination of donations
+#summary Donations and the destination
 
+Destination of donations:
   * *First*: Domain, Hosting of the project, other project stuff...
   * *Second*: If there are more donations and the *First* has been paid, the money is for:
     * *Main Developers*
