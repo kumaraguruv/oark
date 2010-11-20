@@ -151,3 +151,15 @@ else
 
 NOT VALID: an if with one thing with braces and the else with one thing without braces, it is incongruent.
 
+The Switch with space (this is not a function):
+
+{{{
+switch ( option )
+{
+    case 1:
+    break;
+
+    default:
+    break;
+}
+}}}
