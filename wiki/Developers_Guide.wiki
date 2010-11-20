@@ -64,13 +64,13 @@ For an easy debugging and testing environment you can install this tools:
   * *Windows Symbol Packages* for the Windows Version of the Virtual Machines: [http://www.microsoft.com/whdc/devtools/debugging/symbolpkg.mspx]
   * If you like the *IDA Pro* for debugging - Kernel debugging with IDA Pro / Windbg plugin and !VirtualKd: [http://www.hexblog.com/?p=123]
 
-To test the user mode and the driver the best and the safe way is in a Virtual Machine, you need configure this Virtual Machine with VirtualKD for an easy-debugging (without !VirtualKD kernel debugging is very very slow). 
+To test the user mode and the driver the best and the safe way is in a Virtual Machine, you need configure this Virtual Machine with VirtualKD for an easy-debugging (without VirtualKD kernel debugging is very very slow). 
 
 The code have some DKOM code (Direct Kernel Object Manipulation), then it is necessary hardcode some offsets of Windows Kernel structures in the code. In each Windows version have different offset for the same field of a structure. Then you need install a lot of Virtual Machines with different Windows Version: XP, Vista, 7 ...
 
 Of course you need download the Windows Symbols for each Version to view the structs from WinDBG etc..
 
-VirtualBox and VMWare have support for shared folders between the Virtual Machine and the Real Machine, then you can configure the output of the project in Visual Studio to the shared folder. And after, it is only necessary, compile and execute the .exe from the Virtual Machines.
+!VirtualBox and VMWare have support for shared folders between the Virtual Machine and the Real Machine, then you can configure the output of the project in Visual Studio to the shared folder. And after, it is only necessary, compile and execute the .exe from the Virtual Machines.
 
 = Coding Style =
 
