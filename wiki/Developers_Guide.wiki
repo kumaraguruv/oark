@@ -171,7 +171,6 @@ Name of functions with the first letter of each word UPPER: Example
 The ptrs always with space between the name, example:
 
 {{{
-
 char * WhatIsYourName( char ** arg1, char * arg2 )
 {
    char * returnf;
@@ -180,5 +179,16 @@ char * WhatIsYourName( char ** arg1, char * arg2 )
    * arg1 = NULL;
 
    return returnf;
+}
+}}}
+
+While, For:
+
+{{{
+while ( 1 )
+{
+    for ( i = 0; i < x; i++ )
+    {
+    }
 }
 }}}
