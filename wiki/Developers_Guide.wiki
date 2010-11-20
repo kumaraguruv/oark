@@ -69,6 +69,7 @@ VirtualBox and VMWare have support for shared folders between the Virtual Machin
 
 All headers or source files must be with the MIT License:
 
+{{{
 /*
 Copyright (c) <THE_YEAR> <Author, maybe an email or other info>
 
@@ -90,3 +91,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+}}}
