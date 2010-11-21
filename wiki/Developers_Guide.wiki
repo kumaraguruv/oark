@@ -1,5 +1,5 @@
 #summary Developers Guide
-#labels Phase-Design,Featured
+#labels Phase-Design
 
 = INDEX =
 
