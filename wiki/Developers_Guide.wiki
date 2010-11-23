@@ -41,6 +41,8 @@ Others necessary reads:
   * *[http://www.freewebs.com/four-f/ MemoryManagement at KernelMode]*
   * *[http://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/IRPs.doc Handling IRPs: What Every Driver Writer Needs to Know]*
 
+Of course you can send questions to our mailing list (aka Google Groups) (view [http://code.google.com/p/oark/ Project Home page])
+
 = Environment for Developers =
 
 The driver is built with *WinDDK 6001.17121*, you can install this DDK with others DDKs in the system without problems.
