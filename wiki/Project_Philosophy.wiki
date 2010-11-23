@@ -15,4 +15,4 @@ Our Philosophy:
   * If you want a new feature which is good for the project, no problem: you can make a donation and we will try do your features as soon as possible.
   * Of course new developers of companies interesting in our project, are wellcome BUT there are rules:
     * If you want features for your product/company that we dont want, we can create a new branch for you, but you *always must collaborate* with the official project. Please: do not try to change the direction of the project.
-  * Donations are wellcome, but if you want a feature that we dont want, if the donation is good for us, we can create a special branch for you, if the donation is less, bad lucky. In this scenario, Please: ask before donating.
+  * Donations are wellcome, but if you want a feature that we dont want, only if the donation is good for us: we can create a special branch for you (if the donation is less, bad lucky, please ask before donating if you want new features).
