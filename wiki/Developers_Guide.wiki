@@ -27,7 +27,7 @@ If you colaborate with the project, but *you dont know if you are the Knowledge/
   * *[http://www.amazon.com/Rootkit-Arsenal-Escape-Evasion-Corners/dp/1598220616 Wordware The Rootkit Arsenal May 2009]*
   * [http://www.amazon.com/Professional-Rootkits-Programmer-Ric-Vieler/dp/0470101547 Wrox Professional Rootkits Mar 2007]
   * [http://www.amazon.com/Shellcoders-Handbook-Discovering-Exploiting-Security/dp/0764544683 Wiley The Shellcoders Handbook]
-  * *[http://www.amazon.de/Windows-Device-Addison-Wesley-Microsoft-Technology/dp/0321670213 Windows 7 Device Driver (Addison-Wesley Microsoft Technology)]*
+  * *[http://www.amazon.com/Windows-Device-Addison-Wesley-Microsoft-Technology/dp/0321670213 Windows 7 Device Driver (Addison-Wesley Microsoft Technology)]*
 
 Others necessary reads:
 
