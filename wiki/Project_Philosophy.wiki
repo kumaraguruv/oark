@@ -1,0 +1,16 @@
+#summary Philosophy of the project
+#labels Phase-Design
+
+= Introduction =
+
+Our Philosophy:
+  * The project is not for sale.
+  * Our License is [ http://www.opensource.org/licenses/mit-license.php MIT] you can do anything with the code for your personal/private product/project ...
+  * Of course, you can hire us and we can:
+    * Add a new special version for you (if you want a special public version with features that we dont want)
+    * Code a private version for you. BUT there are rules:
+      * Only we code a private code if we dont want include in the future the new features. We dont want *NEVER* limit the future of the project with this kind of hire.
+    * Trainings: project, rootkits, anything related to the project...
+    * Automation stuff: maybe you have for example a sandbox and you want add some automation with the project.
+  * If you want a new feature which is good for the project, no problem: you can make a donation and we will try do your features as soon as possible.
+    
