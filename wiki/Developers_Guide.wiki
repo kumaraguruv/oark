@@ -8,6 +8,25 @@
     # [#Debugging_and_Testing_Environment Debugging and Testing Environment] 
   # [#Coding_Style Coding Style]
 
+= I want to be a Developer / Commiter / Contributor =
+
+If you colaborate with the project, but *you dont know if you are the Knowledge/skills* for the project, *this is not a problem*, you only need read some books (with the link to amazon):
+
+  * [http://www.amazon.com/Undocumented-Windows-NT%C2%AE-Prasad-Dabak/dp/0764545698 Programming - Undocumented Windows NT]
+  * [http://www.amazon.com/Advanced-Windows-Debugging-Mario-Hewardt/dp/0321374460 Addison Wesley Advanced Windows Debugging Nov 2007]
+  * [http://www.amazon.com/Rootkits-Subverting-Windows-Greg-Hoglund/dp/0321294319 Addison Wesley Professional Rootkits Subverting the windows Kernel Jul 2005]
+  * [http://www.amazon.com/Windows-2000-Device-Driver-Book/dp/0130204315 DRIVERS Windows2k Device Driver Book A Guide for Programmers]
+  * [http://www.amazon.com/Programming-Microsoft-Windows-Driver-Model/dp/0735618038 MS Press - Programming the Windows Driver Model 2nd]
+  * [http://www.amazon.com/Developing-Drivers-Windows-Foundation-Developer/dp/0735623740 Microsoft Press Developing Drivers with the Windows Driver Foundation Apr 2007]
+  * [http://www.amazon.com/Windows-File-System-Internals-Developers/dp/1565922492 O'Reilly - Windows NT File System Internals, A Developer's Guide]
+  * [http://www.amazon.com/Reversing-Secrets-Engineering-Eldad-Eilam/dp/0764574817 Reversing Secrets of Reverse Engineering]
+  * [http://www.amazon.com/Undocumented-Windows-2000-Secrets-Programmers/dp/0201721872 Undocumented Windows 2000 Secrets - The Programmers Cookbook]
+  * [http://www.amazon.com/Windows-2000-Native-API-Reference/dp/1578701996 Windows 2000 native API reference]
+  * [http://www.amazon.com/Windows-System-Programming-Johnson-Hart/dp/0321256190 Windows System Programming Third Edition]
+  * [http://www.amazon.com/Rootkit-Arsenal-Escape-Evasion-Corners/dp/1598220616 Wordware The Rootkit Arsenal May 2009]
+  * [http://www.amazon.com/Professional-Rootkits-Programmer-Ric-Vieler/dp/0470101547 Wrox Professional Rootkits Mar 2007]
+  * [http://www.amazon.com/Shellcoders-Handbook-Discovering-Exploiting-Security/dp/0764544683 Wiley The Shellcoders Handbook]
+
 = Environment for Developers =
 
 The driver is built with *WinDDK 6001.17121*, you can install this DDK with others DDKs in the system without problems.
