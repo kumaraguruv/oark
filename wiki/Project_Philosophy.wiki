@@ -1,8 +1,6 @@
 #summary Philosophy of the project
 #labels Phase-Design
 
-= Introduction =
-
 Our Philosophy:
   * The project is not for sale *NEVER*.
   * Our License is [ http://www.opensource.org/licenses/mit-license.php MIT] you can do anything with the code for your personal/private product/project ...
