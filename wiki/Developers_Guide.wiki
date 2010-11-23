@@ -27,6 +27,19 @@ If you colaborate with the project, but *you dont know if you are the Knowledge/
   * *[http://www.amazon.com/Rootkit-Arsenal-Escape-Evasion-Corners/dp/1598220616 Wordware The Rootkit Arsenal May 2009]*
   * [http://www.amazon.com/Professional-Rootkits-Programmer-Ric-Vieler/dp/0470101547 Wrox Professional Rootkits Mar 2007]
   * [http://www.amazon.com/Shellcoders-Handbook-Discovering-Exploiting-Security/dp/0764544683 Wiley The Shellcoders Handbook]
+  * *[http://www.amazon.de/Windows-Device-Addison-Wesley-Microsoft-Technology/dp/0321670213 Windows 7 Device Driver (Addison-Wesley Microsoft Technology)]*
+
+Others necessary reads:
+
+  * *[http://download.microsoft.com/download/d/1/d/d1dd7745-426b-4cc3-a269-abbbe427c0ef/sys-t774_ddc08.pptx Avoiding driver security pitfalls by Matt Miller]*
+  * *[http://www.codeproject.com/KB/system/driverdev.aspx Driver Development Part 1: Introduction to Drivers]*
+  * *[http://www.codeproject.com/KB/system/driverdev2.aspx Driver Development Part 2: Introduction to Implementing IOCTLs]*
+  * *[http://www.codeproject.com/KB/system/driverdev3.aspx Driver Development Part 3: Introduction to driver contexts]*
+  * *[http://www.codeproject.com/KB/system/driverdev4asp.aspx Driver Development Part 4: Introduction to device stacks]*
+  * *[http://www.codeproject.com/KB/system/driverdev5asp.aspx Driver Development Part 5: Introduction to the Transport Device Interface]*
+  * *[http://www.codeproject.com/KB/system/driverdev6asp.aspx Driver Development Part 6: Introduction to Display Drivers]*
+  * *[http://www.freewebs.com/four-f/ MemoryManagement at KernelMode]*
+  * *[http://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/IRPs.doc Handling IRPs: What Every Driver Writer Needs to Know]*
 
 = Environment for Developers =
 
