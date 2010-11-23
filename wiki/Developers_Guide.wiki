@@ -13,8 +13,8 @@
 
 If you colaborate with the project, but *you dont know if you are the Knowledge/skills* for the project, *this is not a problem*, you only need read some books (with the link to amazon, in bold the books more important for the project):
 
-  * *[http://www.amazon.com/Rootkit-Arsenal-Escape-Evasion-Corners/dp/1598220616 Wordware The Rootkit Arsenal May 2009]* <- Very Important!
-  * *[http://www.amazon.com/Rootkits-Subverting-Windows-Greg-Hoglund/dp/0321294319 Addison Wesley Professional Rootkits Subverting the windows Kernel Jul 2005]* <- Very Important!
+  * *[http://www.amazon.com/Rootkit-Arsenal-Escape-Evasion-Corners/dp/1598220616 Wordware The Rootkit Arsenal May 2009] <- Very Important!*
+  * *[http://www.amazon.com/Rootkits-Subverting-Windows-Greg-Hoglund/dp/0321294319 Addison Wesley Professional Rootkits Subverting the windows Kernel Jul 2005] <- Very Important!*
   * *[http://www.amazon.com/Undocumented-Windows-NT%C2%AE-Prasad-Dabak/dp/0764545698 Programming - Undocumented Windows NT]*
   * *[http://www.amazon.com/Advanced-Windows-Debugging-Mario-Hewardt/dp/0321374460 Addison Wesley Advanced Windows Debugging Nov 2007]*
   * *[http://www.amazon.com/Windows-2000-Device-Driver-Book/dp/0130204315 DRIVERS Windows2k Device Driver Book A Guide for Programmers]*
