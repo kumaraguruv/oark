@@ -10,7 +10,6 @@ Our Philosophy:
       * Only we code a private code if we dont want include in the future the new features. We dont want *NEVER* limit the future of the project with this kind of hire.
     * Trainings: project, rootkits, anything related to the project...
     * Automation stuff: maybe you have for example a sandbox and you want add some automation with the project.
-    * Malware, rootkit remove / forensic / reversing: we can do a malware analysis, or a forensic of your machine/s, and if you want, we cant remove the malware or advise you.
   * If you want a new feature which is good for the project, no problem: you can make a donation and we will try do your features as soon as possible.
   * Of course new developers of companies interesting in our project, are wellcome BUT there are rules:
     * If you want features for your product/company that we dont want, we can create a new branch for you, but you *always must collaborate* with the official project. Please: do not try to change the direction of the project.
