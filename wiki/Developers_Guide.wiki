@@ -58,6 +58,10 @@ DDKWizard It is compatible with Visual Studio .NET, Visual Studio .NET 2003, Vis
 
 PD: AnkhSVN dont works in Express Versions.
 
+Video about the features of Visual Assist X (read this to understand the refactor feature etc..): [http://www.wholetomato.com/flash/demoLg/demoLg.html]
+
+Video about the features of the DDKWizard: [http://ddkwizard.assarbad.net/demo/]
+
 == Configuring the driver project in Visual Studio ==
 
 In the subversion exist a visual studio project, but you need change:
