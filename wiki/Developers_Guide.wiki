@@ -8,6 +8,7 @@
     # [#Configuring_the_driver_project_in_Visual_Studio Configuring the driver project in Visual Studio]
     # [#Debugging_and_Testing_Environment Debugging and Testing Environment] 
   # [#Coding_Style Coding Style]
+    # [#Comment_Code Comment Code]
 
 = I want to be a Developer / Commiter / Contributor =
 
