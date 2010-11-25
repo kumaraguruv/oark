@@ -412,7 +412,20 @@ We use Doxygen to comment code, you need install:
 
   * Doxygen: [http://www.stack.nl/~dimitri/doxygen/], the binary distribution for windows have a easy Doxygen GUI.
   * MiKTeX: [http://www.miktex.org/]
-  * MinGW: [http://www.mingw.org/]
+  * MinGW: [http://www.mingw.org/] (or Cygwin Make)
+  * egrep.exe & expr.exe of Cygwin (base-system): [http://www.cygwin.com/]
+  * nmake 
+
+You need add to the system PATH variable the directories bin of the MiKTeX, MinGW and Cygwin.
+
+Cleaning the build: nmake clean
+
+Microsoft (R) Program Maintenance Utility Version 9.00.21022.08
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+        del *.ps *.dvi *.aux *.toc *.idx *.ind *.ilg *.log *.out refman.pdf
+
+Making doc in the directory doc/latex of the project: mingw32-make.exe pdf
 
 How to comment-code the code for Doxygen:
 
