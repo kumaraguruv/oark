@@ -456,17 +456,12 @@ How to comment-code the code for Doxygen:
 boolean example(int repeat);
 int var; /**< Detailed description after the member */
 
-    //! An enum.
-    /*! More detailed enum description. */
-    enum TEnum { 
-                 TVal1, /*!< Enum value TVal1. */  
-                 TVal2, /*!< Enum value TVal2. */  
-                 TVal3  /*!< Enum value TVal3. */  
-               } 
-         //! Enum pointer.
-         /*! Details. */
-         *enumPtr, 
-         //! Enum variable.
-         /*! Details. */
-         enumVar;  
+//! An enum.
+/*! More detailed enum description. */
+enum TEnum 
+{ 
+    TVal1, /*!< Enum value TVal1. */  
+    TVal2, /*!< Enum value TVal2. */  
+    TVal3  /*!< Enum value TVal3. */  
+} 
 }}}
