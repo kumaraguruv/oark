@@ -423,7 +423,7 @@ Cleaning the build: nmake clean
 Microsoft (R) Program Maintenance Utility Version 9.00.21022.08
 Copyright (C) Microsoft Corporation.  All rights reserved.
 
-        del *.ps *.dvi *.aux *.toc *.idx *.ind *.ilg *.log *.out refman.pdf
+        {{{del *.ps *.dvi *.aux *.toc *.idx *.ind *.ilg *.log *.out refman.pdf}}}
 
 Making doc in the directory doc/latex of the project: mingw32-make.exe pdf
 
