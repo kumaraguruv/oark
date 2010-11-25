@@ -403,3 +403,45 @@ BOOLEN Example( void )
 }}}
 
 Of course there are scenarios which GO-TO is better and more clear than other complex logic, but in examples like the last is better avoid the use of goto.
+
+
+== Comment Code ==
+
+We use Doxygen to comment code, you need install:
+
+  * Doxygen: [http://www.stack.nl/~dimitri/doxygen/], the binary distribution for windows have a easy Doxygen GUI.
+  * MiKTeX: [http://www.miktex.org/]
+  * MinGW: [http://www.mingw.org/]
+
+How to comment-code the code for Doxygen:
+
+{{{
+/**
+ * @file   example_action.h
+ * @Author Me (me@example.com)
+ * @date   September, 2008
+ * @brief  Brief description of file.
+ *
+ * Detailed description of file.
+ */
+
+/**
+ * @name    Example API Actions
+ * @brief   Example actions available.
+ * @ingroup example
+ *
+ * This API provides certain actions as an example.
+ *
+ * @param [in] repeat  Number of times to do nothing.
+ *
+ * @retval TRUE   Successfully did nothing.
+ * @retval FALSE  Oops, did something.
+ *
+ * Example Usage:
+ * @code
+ *    example_nada(3); // Do nothing 3 times.
+ * @endcode
+ */
+boolean example(int repeat);
+int var; /**< Detailed description after the member */
+}}}
