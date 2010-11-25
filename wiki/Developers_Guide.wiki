@@ -418,7 +418,9 @@ We use Doxygen to comment code, you need install:
 
 You need add to the system PATH variable the directories bin of the MiKTeX, MinGW and Cygwin.
 
-Cleaning the build with *NMAKE*: *nmake clean*
+You need download the *Doxyfile* from *SUBVERSION* of the project in the *ROOT* of the project, then you can open it with the Doxygen GUI to generate the Latex output in the doc directory:
+
+Cleaning the build in the directory doc/latex with *NMAKE*: *nmake clean*
 
 Making doc in the directory doc/latex of the project with *MAKE* of *CygWing* or *MinGW-MAKE* (you need installed the egrep.exe and expr.exe, I use the make of MinGW and the other .exes of CygWin): *mingw32-make.exe pdf*
 
