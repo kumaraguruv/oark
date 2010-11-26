@@ -422,7 +422,7 @@ You need download the *Doxyfile* from *SUBVERSION* of the project in the *ROOT* 
 
 You need edit one entry in Doxyfile:
 
-OUTPUT_DIRECTORY = ROOT_PROJECT_PATH/doc
+*OUTPUT_DIRECTORY = ROOT_PROJECT_PATH/doc*
 
 For example: OUTPUT_DIRECTORY = C:/WinDDK/6001.17121/src/oark/doc
 
