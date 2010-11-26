@@ -418,7 +418,13 @@ We use Doxygen to comment code, you need install:
 
 You need add to the system PATH variable the directories bin of the MiKTeX, MinGW and Cygwin.
 
-You need download the *Doxyfile* from *SUBVERSION* of the project in the *ROOT* of the project, then you can open it with the Doxygen GUI to generate the Latex output in the doc directory:
+You need download the *Doxyfile* from *SUBVERSION* of the project in the *ROOT* of the project, then you can open it with the Doxygen GUI to generate the Latex output in the doc directory.
+
+You need edit one entry in Doxyfile:
+
+OUTPUT_DIRECTORY = ROOT_PROJECT_PATH/doc
+
+For example: OUTPUT_DIRECTORY = C:/WinDDK/6001.17121/src/oark/doc
 
 Cleaning the build in the directory doc/latex with *NMAKE*: *nmake clean*
 
