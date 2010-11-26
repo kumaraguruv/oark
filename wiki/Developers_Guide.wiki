@@ -416,7 +416,7 @@ We use Doxygen to comment code, you need install:
   * *egrep.exe & expr.exe of Cygwin* (base-system): [http://www.cygwin.com/]
   * *nmake* (if you have installed visual studio etc.. you dont need install this again).
 
-You need add to the system PATH variable the directories bin of the MiKTeX, MinGW and Cygwin.
+You need add to the system PATH variable the directories bin of the MiKTeX, MinGW and !Cygwin.
 
 You need download the *Doxyfile* from *SUBVERSION* of the project in the *ROOT* of the project, then you can open it with the Doxygen GUI to generate the Latex output in the doc directory.
 
@@ -428,7 +428,7 @@ For example: OUTPUT_DIRECTORY = C:/WinDDK/6001.17121/src/oark/doc
 
 Cleaning the build in the directory doc/latex with *NMAKE*: *nmake clean*
 
-Making doc in the directory doc/latex of the project with *MAKE* of *CygWing* or *MinGW-MAKE* (you need installed the egrep.exe and expr.exe, I use the make of MinGW and the other .exes of CygWin): *mingw32-make.exe pdf*
+Making doc in the directory doc/latex of the project with *MAKE* of *!CygWing* or *MinGW-MAKE* (you need installed the egrep.exe and expr.exe, I use the make of MinGW and the other .exes of !CygWin): *mingw32-make.exe pdf*
 
 And then you can view the PDF output with the all documentation of the project: doc/latex/refman.pdf
 
