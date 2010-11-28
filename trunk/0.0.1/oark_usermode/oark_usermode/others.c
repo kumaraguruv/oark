@@ -217,3 +217,22 @@ BOOLEAN DumpRSRC( char * full_temp_path, int resource_id, char * driver_name )
 
 	return returnf;
 }
+
+STATUS_t Init( void )
+{
+	ZwQueryInformationProcess = (ZWQUERYINFORMATIONPROCESS_t) \
+		GetProcAddress( GetModuleHandleA( "ntdll.dll" ), "ZwQueryInformationProcess" );
+
+	if ( ZwQueryInformationProcess == NULL )
+	{
+		fprintf( stderr, " Error: Getting ZwQueryInformationProcess from ntdll\n" );
+		return ST_ERROR;
+	}
+	else
+	{
+		if ( debug )
+			printf( " OK: Getting ZwQueryInformationProcess from ntdll\n" );
+		return ST_OK;
+	}
+};
+

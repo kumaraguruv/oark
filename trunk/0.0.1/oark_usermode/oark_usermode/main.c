@@ -27,6 +27,7 @@ THE SOFTWARE.
 #include "driverusr.h"
 #include "idt.h"
 #include "others.h"
+#include "pebhooking.h"
 
 int main( void )
 {
@@ -63,24 +64,35 @@ int main( void )
 			if ( debug )
 				printf( " OK: EnableDebugPrivilege\n" );
 
-			if ( LoadDriver( & device ) )
+			if ( Init() == ST_OK )
 			{
 				if ( debug )
-					printf( " OK: Driver Loaded!\n" );
+					printf( " OK: Init\n" );
 
-				printf( " INFO: Showing IDT Info:\n" );
-				idt( device );
-
-				if ( UnloadDriver( & device ) )
+				if ( LoadDriver( & device ) )
 				{
-					if ( debug ) 
-						printf( " OK: Driver Unloaded!\n" );
+					if ( debug )
+						printf( " OK: Driver Loaded!\n" );
+
+					printf( " INFO: Detecting PEB Hooking:\n" );
+					CheckPEBHooking();
+
+					printf( " INFO: Showing IDT Info:\n" );
+					//idt( device );
+
+					if ( UnloadDriver( & device ) )
+					{
+						if ( debug ) 
+							printf( " OK: Driver Unloaded!\n" );
+					}
+					else
+						fprintf( stderr, " Error: Driver Unloaded!\n" );
 				}
 				else
-					fprintf( stderr, " Error: Driver Unloaded!\n" );
+					fprintf( stderr, " Error: LoadDriver\n" );
 			}
 			else
-				fprintf( stderr, " Error: LoadDriver\n" );
+				fprintf( stderr, " Error: Init\n" );
 		}
 	}
 	else
@@ -91,3 +103,4 @@ int main( void )
 
 	return 0;
 }
+
