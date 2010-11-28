@@ -74,11 +74,15 @@ int main( void )
 					if ( debug )
 						printf( " OK: Driver Loaded!\n" );
 
-					printf( " INFO: Detecting PEB Hooking:\n" );
-					CheckPEBHooking();
+					CheckOSVersion();
 
+					printf( " INFO: Detecting PEB Hooking:\n" );
+					CheckPEBHooking( device );
+
+					/*
 					printf( " INFO: Showing IDT Info:\n" );
-					//idt( device );
+					idt( device );
+					*/
 
 					if ( UnloadDriver( & device ) )
 					{

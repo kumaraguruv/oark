@@ -236,3 +236,67 @@ STATUS_t Init( void )
 	}
 };
 
+void CheckOSVersion( void )
+{
+	DWORD dwMajorVersion = 0;
+	DWORD dwMinorVersion = 0; 
+	DWORD dwVersion;
+
+	if ( debug )
+		printf( " INFO: Checking version\n" );
+
+	Offsets.isSupported = TRUE;
+
+	dwVersion = GetVersion();
+
+	dwMajorVersion = (DWORD) ( LOBYTE( LOWORD( dwVersion ) ) );
+	dwMinorVersion = (DWORD) ( HIBYTE( LOWORD( dwVersion ) ) );
+
+	if ( debug )
+		printf( " OK: dwMajorVersion: %d dwMinorVersion: %d\n", dwMajorVersion, dwMinorVersion );
+
+	switch ( dwMajorVersion )
+	{
+		case 5:
+			if ( debug )
+				printf( " INFO: OS=2000, XP, Server 2003\n" );
+
+			Offsets.VAD_ROOT = 0x11c;
+		break;
+
+		case 6:
+			switch ( dwMinorVersion )
+			{
+				case 0:
+					if ( debug )
+						printf( " INFO: OS=Vista, Server 2008\n" );
+
+					Offsets.VAD_ROOT = 0x11c;
+				break;
+
+				case 1:
+					if ( debug )
+						printf( " INFO: OS=7\n" );
+					
+					Offsets.VAD_ROOT = 0x11c;
+				break;
+
+				default:
+					fprintf( stderr, " Error: KERNEL MINOR NOT SUPPORTED, DKOM DISABLE, USING STANDARD WAYS...\n" );
+					Offsets.isSupported = FALSE;
+				break;
+			}
+			break;
+
+		default:
+			fprintf( stderr, " Error: KERNEL MINOR NOT SUPPORTED, DKOM DISABLE, USING STANDARD WAYS...\n" );
+			Offsets.isSupported = FALSE;
+		break;
+	}
+
+	if ( Offsets.isSupported )
+	{
+		if ( debug )
+			printf( " OK: VAD ROOT: 0x%X\n", Offsets.VAD_ROOT );
+	}
+}
