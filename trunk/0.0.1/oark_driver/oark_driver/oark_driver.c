@@ -112,6 +112,8 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
 	READ_KERN_MEM_t      read_kern_mem;
 	void               * ptrdat;
 	IDTR                 idtr;
+	PEPROCESS eprocess;
+	NTSTATUS retf;
 	
     switch(irpSp->Parameters.DeviceIoControl.IoControlCode)
     {
@@ -158,6 +160,19 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
 				case SYM_TYP_NULL:
 					ptrdat = read_kern_mem.src_address;
 					DbgPrint( " Reading... 0x%08X\n", ptrdat );
+				break;
+
+				case SYM_TYP_PSLOUPRBYID:
+					 retf = PsLookupProcessByProcessId( (HANDLE) read_kern_mem.src_address, & eprocess );
+					 ptrdat = & eprocess;
+					 if( retf != STATUS_SUCCESS )
+						eprocess = NULL;
+				break;
+
+				case SYM_TYP_OBDEREFOBJ:
+					ObDereferenceObject( read_kern_mem.src_address );
+
+					ptrdat = NULL;
 				break;
 
 				default:

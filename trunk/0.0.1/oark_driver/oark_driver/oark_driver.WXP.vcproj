@@ -145,7 +145,7 @@
 			Filter="cpp;c;cxx;def;asm;mc"
 			>
 			<File
-				RelativePath=".\oark_driver.cpp"
+				RelativePath=".\oark_driver.c"
 				>
 			</File>
 		</Filter>
