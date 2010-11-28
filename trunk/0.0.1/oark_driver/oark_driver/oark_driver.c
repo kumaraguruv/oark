@@ -78,7 +78,8 @@ int WriteUserMode( void * address, DWORD size, void * data )
 		}
 
 		try {
-			memcpy( address, data, size );
+			if ( MmIsAddressValid( data ) )
+				memcpy( address, data, size );
 		} except (EXCEPTION_EXECUTE_HANDLER) { DbgPrint( " memcpy exception\n" ); }
 
 		MmUnlockPages( mdl );
