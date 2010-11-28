@@ -131,12 +131,19 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node )
 							fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
 						else
 						{
+							rvad_node.StartingVpn <<=  12;
+							rvad_node.EndingVpn <<= 12;
 							if ( debug )
 								printf
 								( 
-								" File Name: %S starting_vpn: 0x%x, ending_vpn: 0x%x\n"
-								,
-								dll_name, rvad_node.StartingVpn, rvad_node.EndingVpn
+									" -----------------------\n"
+									" File Name: %S\n" 
+									" starting_vpn: 0x%08x\n"
+									" ending_vpn: 0x%08x\n"
+									,
+									dll_name, 
+									rvad_node.StartingVpn , 
+									rvad_node.EndingVpn 
 								);
 						}
 					}
