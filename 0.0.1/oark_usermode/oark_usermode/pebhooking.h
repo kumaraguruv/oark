@@ -23,5 +23,29 @@ THE SOFTWARE.
 #ifndef _PEBHOOKING_H__
 #define _PEBHOOKING_H__
 
+#include <stdio.h>
+#include <windows.h>
+#include <time.h>
+#include <Shlwapi.h>
+#include "others.h"
+#include "debug.h"
+
+typedef struct LDR_USEFULL_s
+{
+	SLIST_ENTRY SingleListEntry;
+
+	char full_dll_name[(MAX_PATH * 2) + 2];
+	char base_dll_name[(MAX_PATH * 2) + 2];
+	DWORD ep_without_ba;
+	DWORD base_address;
+	DWORD size_of_image;
+	DWORD time_data_stamp;
+
+} LDR_USEFULL_t;
+
+void CheckDuplicateEntries( PSLIST_HEADER, LDR_USEFULL_t * );
+void CheckRawFile( LDR_USEFULL_t * );
+int _CheckPEBHooking( PID );
+STATUS_t CheckPEBHooking( void );
 
 #endif /* _PEBHOOKING_H__ */
