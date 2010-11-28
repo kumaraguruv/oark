@@ -39,7 +39,7 @@ THE SOFTWARE.
 #include "pebhooking.h"
 
 
-STATUS_t CheckPEBHooking( void )
+STATUS_t CheckPEBHooking( HANDLE device )
 {
 	HANDLE hProcessSnap;
 	PROCESSENTRY32 pe32;
@@ -58,8 +58,10 @@ STATUS_t CheckPEBHooking( void )
 			{
 				if ( pe32.th32ProcessID != own_pid )
 				{
-					if ( _CheckPEBHooking( pe32.th32ProcessID ) == -1 )
+					if ( _CheckPEBHooking( device, pe32.th32ProcessID ) == -1 )
 						fprintf( stderr, " Error: Checking PEB HOOKING PID :%d\n", pe32.th32ProcessID );
+
+					getchar();
 				}
 
 			} while( Process32Next( hProcessSnap, & pe32 ) );
@@ -72,7 +74,7 @@ STATUS_t CheckPEBHooking( void )
 	return ST_OK;
 }
 
-int _CheckPEBHooking( DWORD PID )
+int _CheckPEBHooking( HANDLE device, DWORD PID )
 {
 	HANDLE hProcess;
 	int returnf = -1;
@@ -360,6 +362,12 @@ int _CheckPEBHooking( DWORD PID )
 
 				}
 			}
+
+			if ( debug )
+				printf( "\n Checking VADs:..\n" );
+
+			CheckVAD( device, PID );
+
 			CloseHandle( hProcess );
 		}
 	}

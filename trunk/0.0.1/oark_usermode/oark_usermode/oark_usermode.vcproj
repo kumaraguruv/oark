@@ -115,7 +115,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="..\..\common\common"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -197,6 +197,10 @@
 				RelativePath=".\pebhooking.c"
 				>
 			</File>
+			<File
+				RelativePath=".\vad.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -225,6 +229,10 @@
 			</File>
 			<File
 				RelativePath=".\resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\vad.h"
 				>
 			</File>
 			<Filter

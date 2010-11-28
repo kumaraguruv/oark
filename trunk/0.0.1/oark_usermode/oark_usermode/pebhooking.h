@@ -29,6 +29,7 @@ THE SOFTWARE.
 #include <Shlwapi.h>
 #include "others.h"
 #include "debug.h"
+#include "vad.h"
 
 typedef struct LDR_USEFULL_s
 {
@@ -45,7 +46,7 @@ typedef struct LDR_USEFULL_s
 
 void CheckDuplicateEntries( PSLIST_HEADER, LDR_USEFULL_t * );
 void CheckRawFile( LDR_USEFULL_t * );
-int _CheckPEBHooking( PID );
-STATUS_t CheckPEBHooking( void );
+int _CheckPEBHooking( HANDLE, DWORD );
+STATUS_t CheckPEBHooking( HANDLE );
 
 #endif /* _PEBHOOKING_H__ */

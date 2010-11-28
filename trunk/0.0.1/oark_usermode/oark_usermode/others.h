@@ -30,6 +30,18 @@ THE SOFTWARE.
 
 #define STATUS_SUCCESS ((NTSTATUS)0x00000000L) 
 
+
+typedef struct _OFFSETS
+{
+	BOOLEAN isSupported;
+
+	DWORD VAD_ROOT;
+
+} OFFSETS;
+
+OFFSETS Offsets;
+
+
 typedef LPVOID         *PPVOID;
 
 typedef struct _PEB_FREE_BLOCK 
@@ -211,5 +223,6 @@ STATUS_t LockInstance( DWORD * );
 BOOLEAN DumpRSRC( char *, int, char * );
 BOOLEAN GetFullTempPath( char **, char * );
 STATUS_t Init( void );
+void CheckOSVersion( void );
 
 #endif /* __OTHERS_H__ */
