@@ -71,7 +71,16 @@ int WriteUserMode( void * address, DWORD size, void * data )
 	mdl_src = IoAllocateMdl( data, size,  FALSE, FALSE, NULL );
 	if ( mdl_src )
 	{
-		MmProbeAndLockPages( mdl_src, KernelMode, IoWriteAccess );
+		returnf = 0;
+		try 
+		{     
+			MmProbeAndLockPages( mdl_src, KernelMode, IoWriteAccess );
+		}
+		except(EXCEPTION_EXECUTE_HANDLER) 
+		{
+			goto out_first;
+		}
+
 		data = MmGetSystemAddressForMdlSafe( mdl_src, NormalPagePriority );
 
 		if ( data )
@@ -79,7 +88,14 @@ int WriteUserMode( void * address, DWORD size, void * data )
 			mdl = IoAllocateMdl( address, size,  FALSE, FALSE, NULL );
 			if( mdl )
 			{         
-				MmProbeAndLockPages( mdl, UserMode, IoWriteAccess );
+				try 
+				{     
+					MmProbeAndLockPages( mdl, UserMode, IoWriteAccess );
+				}
+				except(EXCEPTION_EXECUTE_HANDLER) 
+				{
+					goto out_second;
+				}
 
 				address = MmGetSystemAddressForMdlSafe( mdl, NormalPagePriority );
 
@@ -90,12 +106,14 @@ int WriteUserMode( void * address, DWORD size, void * data )
 				}
 
 				MmUnlockPages( mdl );
-				IoFreeMdl( mdl );  
+				out_second:
+					IoFreeMdl( mdl );  
 			}
 		}
 
 		MmUnlockPages( mdl_src );
-		IoFreeMdl( mdl_src );
+		out_first:
+			IoFreeMdl( mdl_src );
 	}
 
 	return returnf;
