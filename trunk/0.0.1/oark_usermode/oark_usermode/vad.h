@@ -27,86 +27,6 @@ THE SOFTWARE.
 #include "others.h"
 #include "driverusr.h"
 
-typedef struct _DISPATCHER_HEADER
-{
-	union
-	{
-		struct
-		{
-			UCHAR Type;
-			union
-			{
-				UCHAR Abandoned;
-				UCHAR Absolute;
-				UCHAR NpxIrql;
-				UCHAR Signalling;
-			};
-			union
-			{
-				UCHAR Size;
-				UCHAR Hand;
-			};
-			union
-			{
-				UCHAR Inserted;
-				UCHAR DebugActive;
-				UCHAR DpcActive;
-			};
-		};
-		LONG Lock;
-	};
-	LONG SignalState;
-	LIST_ENTRY WaitListHead;
-} DISPATCHER_HEADER, *PDISPATCHER_HEADER;
-
-
-typedef struct _KEVENT
-{
-	DISPATCHER_HEADER Header;
-} KEVENT, *PKEVENT;
-
-typedef struct _IO_COMPLETION_CONTEXT
-{
-	PVOID Port;
-	PVOID Key;
-} IO_COMPLETION_CONTEXT, *PIO_COMPLETION_CONTEXT;
-
-
-typedef struct _FILE_OBJECT
-{
-	SHORT Type;
-	SHORT Size;
-	PVOID DeviceObject; /*PDEVICE_OBJECT DeviceObject;  I am not interested in this */
-	PVOID Vpb; /* PVPB Vpb; */
-	PVOID FsContext;
-	PVOID FsContext2;
-	PVOID SectionObjectPointer; /* PSECTION_OBJECT_POINTERS SectionObjectPointer; */
-	PVOID PrivateCacheMap;
-	LONG FinalStatus;
-	struct _FILE_OBJECT * RelatedFileObject; /* PFILE_OBJECT RelatedFileObject; */
-	UCHAR LockOperation;
-	UCHAR DeletePending;
-	UCHAR ReadAccess;
-	UCHAR WriteAccess;
-	UCHAR DeleteAccess;
-	UCHAR SharedRead;
-	UCHAR SharedWrite;
-	UCHAR SharedDelete;
-	ULONG Flags;
-	UNICODE_STRING FileName;
-	LARGE_INTEGER CurrentByteOffset;
-	ULONG Waiters;
-	ULONG Busy;
-	PVOID LastLock;
-	KEVENT Lock;
-	KEVENT Event;
-	PIO_COMPLETION_CONTEXT CompletionContext;
-	ULONG IrpListLock;
-	LIST_ENTRY IrpList;
-	PVOID FileObjectExtension;
-} FILE_OBJECT, *PFILE_OBJECT;
-
-
 typedef struct _CONTROL_AREA
 {
 	struct _SEGMENT* Segment;
@@ -118,7 +38,7 @@ typedef struct _CONTROL_AREA
 	UINT16 FlushInProgressCount;
 	UINT32 NumberOfUserReferences;
 	UINT32 u;
-	PFILE_OBJECT FilePointer;
+	PVOID FilePointer; /* PFILE_OBJECT FilePointer; */
 	struct _EVENT_COUNTER* WaitingForDeletion;
 	UINT16 ModifiedWriteCount;
 	UINT16 NumberOfSystemCacheViews;
