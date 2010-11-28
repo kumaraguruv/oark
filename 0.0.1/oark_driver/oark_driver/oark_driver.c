@@ -63,33 +63,42 @@ int WriteUserMode( void * address, DWORD size, void * data )
 {
 	NTSTATUS Status;
 	PMDL mdl;
+	PMDL mdl_src;
+	int returnf;
 
-	mdl = IoAllocateMdl( address, size,  FALSE, FALSE, NULL );
-	if( mdl )
-	{         
-			MmProbeAndLockPages( mdl, UserMode, IoWriteAccess );
+	returnf = -1;
 
-		address = MmGetSystemAddressForMdlSafe( mdl, NormalPagePriority );
+	mdl_src = IoAllocateMdl( data, size,  FALSE, FALSE, NULL );
+	if ( mdl_src )
+	{
+		MmProbeAndLockPages( mdl_src, KernelMode, IoWriteAccess );
+		data = MmGetSystemAddressForMdlSafe( mdl_src, NormalPagePriority );
 
-		if(!address) {
-			MmUnlockPages( mdl );
-			IoFreeMdl( mdl );
-			goto out;          
+		if ( data )
+		{
+			mdl = IoAllocateMdl( address, size,  FALSE, FALSE, NULL );
+			if( mdl )
+			{         
+				MmProbeAndLockPages( mdl, UserMode, IoWriteAccess );
+
+				address = MmGetSystemAddressForMdlSafe( mdl, NormalPagePriority );
+
+				if( address ) 
+				{
+					returnf = 0;
+					memcpy( address, data, size );
+				}
+
+				MmUnlockPages( mdl );
+				IoFreeMdl( mdl );  
+			}
 		}
 
-		try {
-			if ( MmIsAddressValid( data ) )
-				memcpy( address, data, size );
-		} except (EXCEPTION_EXECUTE_HANDLER) { DbgPrint( " memcpy exception\n" ); }
-
-		MmUnlockPages( mdl );
-		IoFreeMdl( mdl );  
+		MmUnlockPages( mdl_src );
+		IoFreeMdl( mdl_src );
 	}
 
-	return 0;
-
-	out:
-		return -1;
+	return returnf;
 }
 
 NTSTATUS OARKDRIVER_DispatchCreateClose(
