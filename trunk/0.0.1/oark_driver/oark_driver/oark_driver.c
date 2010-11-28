@@ -68,52 +68,55 @@ int WriteUserMode( void * address, DWORD size, void * data )
 
 	returnf = -1;
 
-	mdl_src = IoAllocateMdl( data, size,  FALSE, FALSE, NULL );
-	if ( mdl_src )
+	if ( MmIsAddressValid( data ) && MmIsAddressValid( address ) )
 	{
-		returnf = 0;
-		try 
-		{     
-			MmProbeAndLockPages( mdl_src, KernelMode, IoWriteAccess );
-		}
-		except(EXCEPTION_EXECUTE_HANDLER) 
+		mdl_src = IoAllocateMdl( data, size,  FALSE, FALSE, NULL );
+		if ( mdl_src )
 		{
-			goto out_first;
-		}
-
-		data = MmGetSystemAddressForMdlSafe( mdl_src, NormalPagePriority );
-
-		if ( data )
-		{
-			mdl = IoAllocateMdl( address, size,  FALSE, FALSE, NULL );
-			if( mdl )
-			{         
-				try 
-				{     
-					MmProbeAndLockPages( mdl, UserMode, IoWriteAccess );
-				}
-				except(EXCEPTION_EXECUTE_HANDLER) 
-				{
-					goto out_second;
-				}
-
-				address = MmGetSystemAddressForMdlSafe( mdl, NormalPagePriority );
-
-				if( address ) 
-				{
-					returnf = 0;
-					memcpy( address, data, size );
-				}
-
-				MmUnlockPages( mdl );
-				out_second:
-					IoFreeMdl( mdl );  
+			returnf = 0;
+			try 
+			{     
+				MmProbeAndLockPages( mdl_src, KernelMode, IoReadAccess );
 			}
-		}
+			except(EXCEPTION_EXECUTE_HANDLER) 
+			{
+				goto out_first;
+			}
 
-		MmUnlockPages( mdl_src );
-		out_first:
-			IoFreeMdl( mdl_src );
+			data = MmGetSystemAddressForMdlSafe( mdl_src, NormalPagePriority );
+
+			if ( data )
+			{
+				mdl = IoAllocateMdl( address, size,  FALSE, FALSE, NULL );
+				if( mdl )
+				{         
+					try 
+					{     
+						MmProbeAndLockPages( mdl, UserMode, IoWriteAccess );
+					}
+					except(EXCEPTION_EXECUTE_HANDLER) 
+					{
+						goto out_second;
+					}
+
+					address = MmGetSystemAddressForMdlSafe( mdl, NormalPagePriority );
+
+					if( address ) 
+					{
+						returnf = 0;
+						memcpy( address, data, size );
+					}
+
+					MmUnlockPages( mdl );
+					out_second:
+						IoFreeMdl( mdl );  
+				}
+			}
+
+			MmUnlockPages( mdl_src );
+			out_first:
+				IoFreeMdl( mdl_src );
+		}
 	}
 
 	return returnf;
