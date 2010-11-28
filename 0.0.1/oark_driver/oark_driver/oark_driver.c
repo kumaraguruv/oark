@@ -77,7 +77,9 @@ int WriteUserMode( void * address, DWORD size, void * data )
 			goto out;          
 		}
 
-		memcpy( address, data, size );
+		try {
+			memcpy( address, data, size );
+		} except (EXCEPTION_EXECUTE_HANDLER) { DbgPrint( " memcpy exception\n" ); }
 
 		MmUnlockPages( mdl );
 		IoFreeMdl( mdl );  
