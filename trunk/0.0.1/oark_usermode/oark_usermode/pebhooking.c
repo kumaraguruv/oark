@@ -89,6 +89,7 @@ int _CheckPEBHooking( HANDLE device, DWORD PID )
 	PSLIST_HEADER ldr_usefull_head;
 	LDR_USEFULL_t * ldr_usefull_entry;
 	char * aux;
+	PSLIST_HEADER vad_usefull_head;
 
 	ldr_usefull_head = (PSLIST_HEADER) _aligned_malloc( sizeof( * ldr_usefull_head ), MEMORY_ALLOCATION_ALIGNMENT );
 	if( ldr_usefull_head != NULL )
@@ -364,7 +365,7 @@ int _CheckPEBHooking( HANDLE device, DWORD PID )
 			if ( debug )
 				printf( "\n Checking VADs:..\n" );
 
-			CheckVAD( device, PID );
+			CheckVAD( device, PID, & vad_usefull_head );
 
 			CloseHandle( hProcess );
 		}

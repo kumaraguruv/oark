@@ -58,8 +58,18 @@ typedef struct _MMVAD
 	ULONG32 u2;
 } MMVAD, *PMMVAD;
 
-VOID CheckVAD( HANDLE, DWORD );
-VOID _CheckVAD( HANDLE, PMMVAD );
+typedef struct VAD_USEFULL_s
+{
+	SLIST_ENTRY SingleListEntry;
+
+	DWORD starting_vpn;
+	DWORD ending_vpn;
+	char dll_name[(MAX_PATH * 2) + 2];
+
+} VAD_USEFULL_t;
+
+VOID CheckVAD( HANDLE, DWORD, PSLIST_HEADER * vad_usefull_head );
+VOID _CheckVAD( HANDLE, PMMVAD, PSLIST_HEADER );
 
 
 
