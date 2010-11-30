@@ -88,7 +88,6 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head )
 	ULONG ending_vpn = 0;
 	MMVAD rvad_node;
 	READ_KERN_MEM_t read_kern_mem;
-	char dll_name[(MAX_PATH * 2) + 2];
 	CONTROL_AREA control_area;
 	UNICODE_STRING file_pointer;
 	VAD_USEFULL_t * vad_usefull_entry;
@@ -134,7 +133,7 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head )
 					if ( debug )
 						printf
 						( 
-							" ------------------------"
+							" ------------------------\n"
 							" StartingVpn: 0x%08X\n"
 							" EndingVpn: 0x%08X\n"
 							, 
@@ -155,12 +154,10 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head )
 						{
 							if ( file_pointer.Buffer != NULL )
 							{
-								memset( dll_name, 0, sizeof( dll_name ) );
-
-								if ( file_pointer.Length > ( sizeof( dll_name ) - 2 ) )
-									file_pointer.Length = ( sizeof( dll_name ) - 2 );
+								if ( file_pointer.Length > ( sizeof( vad_usefull_entry->dll_name ) - 2 ) )
+									file_pointer.Length = ( sizeof( vad_usefull_entry->dll_name ) - 2 );
 								read_kern_mem.type        = SYM_TYP_NULL;
-								read_kern_mem.dst_address = dll_name;
+								read_kern_mem.dst_address = vad_usefull_entry->dll_name;
 								read_kern_mem.size        = file_pointer.Length;
 								read_kern_mem.src_address = file_pointer.Buffer;
 							}
@@ -169,8 +166,6 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head )
 								fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
 							else
 							{
-								memcpy( vad_usefull_entry->dll_name, dll_name, file_pointer.Length );
-
 								if ( debug )
 									printf( " File Name: %S\n", vad_usefull_entry->dll_name );
 							}
