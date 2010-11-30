@@ -11,7 +11,8 @@
     * EAT (Export Address Table) / IAT (Import Address Table)
     * IRP
     * IDT (Interrupt Descriptor Table)
-    * Inline hooking 
+    * Inline hooking
+
   * Hidden information:
     * Processes
     * Drivers
@@ -19,5 +20,6 @@
     * DLLs in memory
     * Sockets
     * Hidden objects...
+
   * Others:
     * x86 dissasembler
