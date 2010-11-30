@@ -47,31 +47,42 @@ VOID ObDereferenceObject( HANDLE device, char * eprocess )
 	IOCTLReadKernMem( device, & read_kern_mem );
 }
 
-VOID CheckVAD( HANDLE device, DWORD PID )
+VOID CheckVAD( HANDLE device, DWORD PID, PSLIST_HEADER * vad_usefull_head )
 {
 	char * eprocess = NULL;
 	PMMVAD vad_root;
 	READ_KERN_MEM_t read_kern_mem;
 
-	PsLookupProcessByProcessId( device, PID, & eprocess );
-	if ( eprocess != NULL )
+	* vad_usefull_head = (PSLIST_HEADER) _aligned_malloc( sizeof( ** vad_usefull_head ), MEMORY_ALLOCATION_ALIGNMENT );
+	if( * vad_usefull_head != NULL )
 	{
-		read_kern_mem.type        = SYM_TYP_NULL;
-		read_kern_mem.dst_address = & vad_root;
-		read_kern_mem.size        = sizeof( vad_root );
-		read_kern_mem.src_address = ( eprocess + Offsets.VAD_ROOT );
+		if ( debug )
+			printf( " OK: Init vad_usefull_head\n" );
 
-		if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
-			fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
-		else
-			_CheckVAD( device, vad_root );
+		InitializeSListHead( * vad_usefull_head );
 
-		ObDereferenceObject( device, eprocess );
+		PsLookupProcessByProcessId( device, PID, & eprocess );
+		if ( eprocess != NULL )
+		{
+			read_kern_mem.type        = SYM_TYP_NULL;
+			read_kern_mem.dst_address = & vad_root;
+			read_kern_mem.size        = sizeof( vad_root );
+			read_kern_mem.src_address = ( eprocess + Offsets.VAD_ROOT );
+
+			if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
+				fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
+			else
+				_CheckVAD( device, vad_root, * vad_usefull_head );
+
+			ObDereferenceObject( device, eprocess );
+		}
 	}
+	else
+		fprintf( stderr, " Error: Init vad_usefull_head\n" );
 }
 
 
-VOID _CheckVAD( HANDLE device, PMMVAD vad_node )
+VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head )
 {
 	ULONG starting_vpn = 0;
 	ULONG ending_vpn = 0;
@@ -80,6 +91,7 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node )
 	char dll_name[(MAX_PATH * 2) + 2];
 	CONTROL_AREA control_area;
 	UNICODE_STRING file_pointer;
+	VAD_USEFULL_t * vad_usefull_entry;
 
 	read_kern_mem.type        = SYM_TYP_NULL;
 	read_kern_mem.dst_address = & rvad_node;
@@ -91,7 +103,7 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node )
 	else
 	{
 		if ( rvad_node.LeftChild != NULL )
-			_CheckVAD( device, rvad_node.LeftChild );
+			_CheckVAD( device, rvad_node.LeftChild, vad_usefull_head );
 
 		if ( rvad_node.ControlArea != NULL )
 		{
@@ -104,47 +116,64 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node )
 				fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
 			else
 			{
-				if ( control_area.FilePointer != NULL )
+				vad_usefull_entry = (VAD_USEFULL_t *) _aligned_malloc \
+					( sizeof(* vad_usefull_entry), MEMORY_ALLOCATION_ALIGNMENT ); 
+
+				if( vad_usefull_entry == NULL )
+					fprintf( stderr, " Error: Memory allocation failed.\n" );
+				else
 				{
-					read_kern_mem.type        = SYM_TYP_NULL;
-					read_kern_mem.dst_address = & file_pointer;
-					read_kern_mem.size        = sizeof( file_pointer );
-					read_kern_mem.src_address = ( (char *) control_area.FilePointer ) + Offsets.VAD_FILE_POINTER;
+					memset( vad_usefull_entry, 0, sizeof( * vad_usefull_entry ) );
+	
+					vad_usefull_entry->starting_vpn = rvad_node.StartingVpn << 12;
+					vad_usefull_entry->ending_vpn = rvad_node.EndingVpn << 12;
 
-					if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
-						fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
-					else
+					InterlockedPushEntrySList
+						( vad_usefull_head, &( vad_usefull_entry->SingleListEntry ) );
+
+					if ( debug )
+						printf
+						( 
+							" ------------------------"
+							" StartingVpn: 0x%08X\n"
+							" EndingVpn: 0x%08X\n"
+							, 
+							vad_usefull_entry->starting_vpn,
+							vad_usefull_entry->ending_vpn
+						);
+
+					if ( control_area.FilePointer != NULL )
 					{
-						if ( file_pointer.Buffer != NULL )
-						{
-							memset( dll_name, 0, sizeof( dll_name ) );
-
-							if ( file_pointer.Length > ( sizeof( dll_name ) - 2 ) )
-								file_pointer.Length = ( sizeof( dll_name ) - 2 );
-							read_kern_mem.type        = SYM_TYP_NULL;
-							read_kern_mem.dst_address = dll_name;
-							read_kern_mem.size        = file_pointer.Length;
-							read_kern_mem.src_address = file_pointer.Buffer;
-						}
+						read_kern_mem.type        = SYM_TYP_NULL;
+						read_kern_mem.dst_address = & file_pointer;
+						read_kern_mem.size        = sizeof( file_pointer );
+						read_kern_mem.src_address = ( (char *) control_area.FilePointer ) + Offsets.VAD_FILE_POINTER;
 
 						if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
 							fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
 						else
 						{
-							rvad_node.StartingVpn <<=  12;
-							rvad_node.EndingVpn <<= 12;
-							if ( debug )
-								printf
-								( 
-									" -----------------------\n"
-									" File Name: %S\n" 
-									" starting_vpn: 0x%08x\n"
-									" ending_vpn: 0x%08x\n"
-									,
-									dll_name, 
-									rvad_node.StartingVpn , 
-									rvad_node.EndingVpn 
-								);
+							if ( file_pointer.Buffer != NULL )
+							{
+								memset( dll_name, 0, sizeof( dll_name ) );
+
+								if ( file_pointer.Length > ( sizeof( dll_name ) - 2 ) )
+									file_pointer.Length = ( sizeof( dll_name ) - 2 );
+								read_kern_mem.type        = SYM_TYP_NULL;
+								read_kern_mem.dst_address = dll_name;
+								read_kern_mem.size        = file_pointer.Length;
+								read_kern_mem.src_address = file_pointer.Buffer;
+							}
+
+							if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
+								fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
+							else
+							{
+								memcpy( vad_usefull_entry->dll_name, dll_name, file_pointer.Length );
+
+								if ( debug )
+									printf( " File Name: %S\n", vad_usefull_entry->dll_name );
+							}
 						}
 					}
 				}
@@ -152,7 +181,7 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node )
 		}
 
 		if ( rvad_node.RightChild != NULL )
-			_CheckVAD( device, rvad_node.RightChild );
+			_CheckVAD( device, rvad_node.RightChild, vad_usefull_head );
 	}
 }
 
