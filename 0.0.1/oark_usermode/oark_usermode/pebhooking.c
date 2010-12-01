@@ -520,14 +520,6 @@ void ComparePEBEntryVADInfo( LDR_USEFULL_t * ldr_usefull_entry, PSLIST_HEADER va
 
 	if ( found == TRUE )
 	{
-		if 
-		(
-			( vad_usefull_entry->ending_vpn - vad_usefull_entry->starting_vpn ) 
-			!= 
-			ldr_usefull_entry->size_of_image
-		)
-			printf( " MAYBE PEB HOOKING! VAD SIZE DIFFERENT OF PEB ENTRY SIZE\n" );
-
 		if ( IsVADStringEqPebStr( vad_usefull_entry->dll_name, ldr_usefull_entry->full_dll_name ) == FALSE )
 			printf( " MAYBE PEB HOOKING! VAD MEMORY FULL PATH DIFFERENT OF PEB ENTRY PATH\n" );
 	}
@@ -540,6 +532,7 @@ BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
 	char peb_converted[(MAX_PATH * 2) + 2];
 	char * aux = NULL;
 	int i, j;
+	BOOLAN found = FALSE;
 
 	if ( debug )
 		printf
@@ -618,26 +611,7 @@ BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
 														if ( getenv( "SystemRoot" ) != NULL )
 														{
 															printf( " SystemRoot!: %s\n", getenv( "SystemRoot" )  );
-															aux = calloc \
-																( 
-																	1, 
-																	( 
-																		( 
-																			strlen
-																			( 
-																				getenv( "SystemRoot" ) 
-																			)
-																			+
-																			2
-																			+
-																			(lstrlenW( peb_name ) * 2)
-																		)
-																		-
-																		( strlen( "\\SystemRoot\\" ) * 2 )
-																	)
-																	+ 
-																	2
-																);
+															aux = calloc( 1, (MAX_PATH * 2) + 2 );
 															if ( aux != NULL )
 															{
 																for 
@@ -649,8 +623,6 @@ BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
 																{
 																	aux[i] = getenv( "SystemRoot" )[j];
 																}
-																aux[i] = '\\';
-																i += 2;
 
 																memcpy
 																( 
@@ -658,12 +630,14 @@ BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
 																	& peb_name[(strlen( "\\SystemRoot\\" ) * 2  ) - 2],
 																	(
 																		( 
-																			(lstrlenW( peb_name ) * 2) 
-																			- 
-																			( strlen( "\\SystemRoot\\" ) * 2 )
+																			( 
+																				(lstrlenW( peb_name ) * 2) 
+																				- 
+																				( strlen( "\\SystemRoot\\" ) * 2 )
+																			)
+																			+ 
+																			2
 																		)
-																		-
-																		2
 																	)
 																);
 
@@ -691,6 +665,9 @@ BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
 		{
 			lstrcpyW( peb_converted, & peb_name[i] );
 			printf( " PEB CONVERTED: %S\n", peb_converted );
+
+			if ( lstrcmpiW( peb_converted, vad_name ) == 0 )
+				found = TRUE;
 			break;
 		}
 
@@ -701,5 +678,5 @@ BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
 
 	getchar();
 
-	return FALSE;
+	return found;
 }
