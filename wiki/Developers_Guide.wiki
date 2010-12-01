@@ -98,8 +98,8 @@ Compile *ALWAYS* in *Release mode*.
 
 Also, you need change the Option in *"Project Properties -> Build Events -> Post-Build Event -> Command Line"*. The idea is use a command line for an easy debugging, for example with a shared folder between the real machine and the virtual machine, here an example:
 
-*del /Q C:\Users\Dreg\Desktop\share
-copy $(OutDir)\oark.exe C:\Users\Dreg\Desktop\share*
+  * *del /Q C:\Users\Dreg\Desktop\share*
+  * *copy $(OutDir)\oark.exe C:\Users\Dreg\Desktop\share*
 
 And after, you can create a symlink in the virtual machine to oark.exe (in the shared folder) and only for testing you need: Compile & run the oark.exe in the virtual machine.
 
