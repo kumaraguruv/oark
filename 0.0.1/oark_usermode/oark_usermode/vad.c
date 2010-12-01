@@ -154,7 +154,7 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head, 
 						read_kern_mem.type        = SYM_TYP_NULL;
 						read_kern_mem.dst_address = & file_pointer;
 						read_kern_mem.size        = sizeof( file_pointer );
-						read_kern_mem.src_address = ( (char *) control_area.FilePointer ) + Offsets.VAD_FILE_POINTER;
+						read_kern_mem.src_address = (char *) & control_area.FilePointer->FileName;
 
 						if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
 							fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
