@@ -47,10 +47,10 @@ VOID ObDereferenceObject( HANDLE device, char * eprocess )
 	IOCTLReadKernMem( device, & read_kern_mem );
 }
 
-STATUS_t CheckVAD( HANDLE device, DWORD PID, PSLIST_HEADER * vad_usefull_head )
+STATUS_t CheckVAD( HANDLE device, DWORD PID, PSLIST_HEADER * vad_usefull_head, BOOLEAN is_2k_xp )
 {
 	char * eprocess = NULL;
-	PMMVAD vad_root;
+	void * vad_root;
 	READ_KERN_MEM_t read_kern_mem;
 	STATUS_t returnf = ST_ERROR;
 	STATUS_t aux_returnf = ST_ERROR;
@@ -66,19 +66,27 @@ STATUS_t CheckVAD( HANDLE device, DWORD PID, PSLIST_HEADER * vad_usefull_head )
 		PsLookupProcessByProcessId( device, PID, & eprocess );
 		if ( eprocess != NULL )
 		{
-			read_kern_mem.type        = SYM_TYP_NULL;
-			read_kern_mem.dst_address = & vad_root;
-			read_kern_mem.size        = sizeof( vad_root );
-			read_kern_mem.src_address = ( eprocess + Offsets.VAD_ROOT );
-
-			if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
-				fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
-			else
+			if ( is_2k_xp )
 			{
-				_CheckVAD( device, vad_root, * vad_usefull_head, & aux_returnf );
+				read_kern_mem.type        = SYM_TYP_NULL;
+				read_kern_mem.dst_address = & vad_root;
+				read_kern_mem.size        = sizeof( vad_root );
+				read_kern_mem.src_address = ( eprocess + Offsets.VAD_ROOT );
+
+				if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
+				{
+					fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
+					vad_root = NULL;
+				}
+			}
+			else
+				vad_root = ( eprocess + Offsets.VAD_ROOT );
+
+			if ( vad_root != NULL )
+			{
+				_CheckVAD( device, vad_root, * vad_usefull_head, & aux_returnf, is_2k_xp );
 				returnf = aux_returnf;
 			}
-
 			ObDereferenceObject( device, eprocess );
 		}
 	}
@@ -88,16 +96,16 @@ STATUS_t CheckVAD( HANDLE device, DWORD PID, PSLIST_HEADER * vad_usefull_head )
 	return returnf;
 }
 
-
-VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head, STATUS_t * returnf )
+VOID _CheckVAD( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_head, STATUS_t * returnf, BOOLEAN is_2k_xp )
 {
 	ULONG starting_vpn = 0;
 	ULONG ending_vpn = 0;
-	MMVAD rvad_node;
+	RVA_NODE_t rvad_node;
 	READ_KERN_MEM_t read_kern_mem;
 	CONTROL_AREA control_area;
 	UNICODE_STRING file_pointer;
 	VAD_USEFULL_t * vad_usefull_entry;
+	void * child;
 
 	read_kern_mem.type        = SYM_TYP_NULL;
 	read_kern_mem.dst_address = & rvad_node;
@@ -108,15 +116,20 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head, 
 		fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
 	else
 	{
-		if ( rvad_node.LeftChild != NULL )
-			_CheckVAD( device, rvad_node.LeftChild, vad_usefull_head, returnf );
+		if ( is_2k_xp )
+			child = rvad_node.mmvad_rvad_node.LeftChild;
+		else
+			child = rvad_node.mmaddr_rvad_node.LeftChild;
 
-		if ( rvad_node.ControlArea != NULL )
+		if ( child != NULL )
+			_CheckVAD( device, child, vad_usefull_head, returnf, is_2k_xp );
+
+		if ( rvad_node.mmvad_rvad_node.ControlArea != NULL )
 		{
 			read_kern_mem.type        = SYM_TYP_NULL;
 			read_kern_mem.dst_address = & control_area;
 			read_kern_mem.size        = sizeof( control_area );
-			read_kern_mem.src_address = rvad_node.ControlArea;
+			read_kern_mem.src_address = rvad_node.mmvad_rvad_node.ControlArea;
 
 			if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
 				fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
@@ -130,9 +143,20 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head, 
 				else
 				{
 					memset( vad_usefull_entry, 0, sizeof( * vad_usefull_entry ) );
-	
-					vad_usefull_entry->starting_vpn = rvad_node.StartingVpn << 12;
-					vad_usefull_entry->ending_vpn = rvad_node.EndingVpn << 12;
+					if ( is_2k_xp )
+					{
+						starting_vpn = rvad_node.mmvad_rvad_node.StartingVpn;
+						ending_vpn = rvad_node.mmvad_rvad_node.EndingVpn;
+					}
+					else
+					{
+						starting_vpn = rvad_node.mmaddr_rvad_node.StartingVpn;
+						ending_vpn = rvad_node.mmaddr_rvad_node.EndingVpn;
+					}
+					printf( " 0x%08X 0x%08X\n", starting_vpn, ending_vpn );
+						
+					vad_usefull_entry->starting_vpn = starting_vpn << 12;
+					vad_usefull_entry->ending_vpn = ending_vpn << 12;
 
 					InterlockedPushEntrySList
 						( vad_usefull_head, &( vad_usefull_entry->SingleListEntry ) );
@@ -175,7 +199,7 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head, 
 							else
 							{
 								if ( debug )
-									printf( " File Name: %S\n", vad_usefull_entry->dll_name );
+									printf( " File Name: %S\n", vad_usefull_entry->dll_name ); getchar();
 							}
 						}
 					}
@@ -183,8 +207,13 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head, 
 			}
 		}
 
-		if ( rvad_node.RightChild != NULL )
-			_CheckVAD( device, rvad_node.RightChild, vad_usefull_head, returnf );
+		if ( is_2k_xp )
+			child = rvad_node.mmvad_rvad_node.RightChild;
+		else
+			child = rvad_node.mmaddr_rvad_node.RightChild;
+
+		if ( child != NULL )
+			_CheckVAD( device, child, vad_usefull_head, returnf, is_2k_xp );
 	}
 }
 
