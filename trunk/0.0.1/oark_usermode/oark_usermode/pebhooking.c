@@ -302,8 +302,20 @@ int _CheckPEBHooking( HANDLE device, DWORD PID )
 				ldr_usefull_entry = (LDR_USEFULL_t *) ldr_usefull_head->Next.Next;
 				if ( debug )
 					printf( " -------------------------------\n" );
+
+				if ( debug )
+					printf( "\n Getting VADs:..\n" );
+
+				CheckVAD( device, PID, & vad_usefull_head );
+
 				while ( ldr_usefull_entry != NULL )
 				{
+
+					if ( debug )
+						printf( " Compare PEB entry Info with VAD entry Info...\n" );
+
+					ComparePEBEntryVADInfo( ldr_usefull_entry, vad_usefull_head );
+
 					if ( debug )
 					{
 						printf
@@ -354,6 +366,7 @@ int _CheckPEBHooking( HANDLE device, DWORD PID )
 						printf( "\n Checking raw file in disk (for arks the best way with driver parsing ntfs..):\n" );
 					CheckRawFile( ldr_usefull_entry );
 
+
 					if ( debug ) 
 						printf( " -------------------------------\n" );
 
@@ -361,11 +374,6 @@ int _CheckPEBHooking( HANDLE device, DWORD PID )
 
 				}
 			}
-
-			if ( debug )
-				printf( "\n Checking VADs:..\n" );
-
-			CheckVAD( device, PID, & vad_usefull_head );
 
 			CloseHandle( hProcess );
 		}
@@ -483,4 +491,64 @@ void CheckDuplicateEntries( PSLIST_HEADER ldr_usefull_head, LDR_USEFULL_t * in_l
 
 		ldr_usefull_entry = (LDR_USEFULL_t *) ldr_usefull_entry->SingleListEntry.Next;		
 	}
+}
+
+void ComparePEBEntryVADInfo( LDR_USEFULL_t * ldr_usefull_entry, PSLIST_HEADER vad_usefull_head )
+{
+	VAD_USEFULL_t * vad_usefull_entry;
+	BOOLEAN found = FALSE;
+
+	vad_usefull_entry = (VAD_USEFULL_t *) vad_usefull_head->Next.Next;
+
+	if ( debug )
+		printf
+		( 
+		" Compare PEB entry Info with VAD entry Info...: %S - 0x%08X\n", 
+		ldr_usefull_entry->base_dll_name, ldr_usefull_entry->base_address 
+		);
+
+	while ( vad_usefull_entry != NULL )
+	{
+		if ( ldr_usefull_entry->base_address == vad_usefull_entry->starting_vpn )
+		{
+			found = TRUE;
+			break;
+		}
+
+		vad_usefull_entry = (VAD_USEFULL_t *) vad_usefull_entry->SingleListEntry.Next;
+	}
+
+	if ( found == TRUE )
+	{
+		if 
+		(
+			( vad_usefull_entry->ending_vpn - vad_usefull_entry->starting_vpn ) 
+			!= 
+			ldr_usefull_entry->size_of_image
+		)
+			printf( " MAYBE PEB HOOKING! VAD SIZE DIFFERENT OF PEB ENTRY SIZE\n" );
+
+		if ( IsVADStringEqPebStr( vad_usefull_entry->dll_name, ldr_usefull_entry->full_dll_name ) == FALSE )
+			printf( " MAYBE PEB HOOKING! VAD MEMORY FULL PATH DIFFERENT OF PEB ENTRY PATH\n" );
+	}
+	else
+		printf( " MAYBE PEB HOOKING ONLY HIDDEN WITH VAD!\n" );
+}
+
+BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
+{
+	if ( debug )
+		printf
+		( 
+			" --------\n"
+			" VAD NAME: %S\n"
+			" PEB NAME: %S\n"
+			,
+			vad_name,
+			peb_name
+		);
+
+	getchar();
+
+	return FALSE;
 }

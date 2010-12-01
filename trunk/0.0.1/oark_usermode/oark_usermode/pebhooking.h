@@ -48,5 +48,7 @@ void CheckDuplicateEntries( PSLIST_HEADER, LDR_USEFULL_t * );
 void CheckRawFile( LDR_USEFULL_t * );
 int _CheckPEBHooking( HANDLE, DWORD );
 STATUS_t CheckPEBHooking( HANDLE );
+void ComparePEBEntryVADInfo( LDR_USEFULL_t *, PSLIST_HEADER );
+BOOLEAN IsVADStringEqPebStr( char *, char * );
 
 #endif /* _PEBHOOKING_H__ */
