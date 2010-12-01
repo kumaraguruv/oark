@@ -36,7 +36,6 @@ typedef struct _OFFSETS
 	BOOLEAN isSupported;
 
 	DWORD VAD_ROOT;
-	DWORD VAD_FILE_POINTER;
 
 } OFFSETS;
 

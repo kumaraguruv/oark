@@ -260,8 +260,6 @@ void CheckOSVersion( void )
 		case 5:
 			if ( debug )
 				printf( " INFO: OS=2000, XP, Server 2003\n" );
-
-			Offsets.VAD_FILE_POINTER = 0x30;
 			Offsets.VAD_ROOT = 0x11c;
 		break;
 
@@ -271,17 +269,13 @@ void CheckOSVersion( void )
 				case 0:
 					if ( debug )
 						printf( " INFO: OS=Vista, Server 2008\n" );
-
-					Offsets.VAD_FILE_POINTER = 0x30;
-					Offsets.VAD_ROOT = 0x11c;
+					Offsets.VAD_ROOT = 0x238;
 				break;
 
 				case 1:
 					if ( debug )
 						printf( " INFO: OS=7\n" );
-					
-					Offsets.VAD_FILE_POINTER = 0x30;
-					Offsets.VAD_ROOT = 0x11c;
+					Offsets.VAD_ROOT = 0x278;
 				break;
 
 				default:
