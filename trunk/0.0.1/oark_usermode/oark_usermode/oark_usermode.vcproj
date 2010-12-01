@@ -135,6 +135,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\oark.exe"
+				Version="0.0.1"
 				LinkIncremental="1"
 				UACExecutionLevel="2"
 				GenerateDebugInformation="true"
@@ -163,6 +164,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="del /Q C:\Users\Dreg\Desktop\share&#x0D;&#x0A;copy $(OutDir)\oark.exe C:\Users\Dreg\Desktop\share"
 			/>
 		</Configuration>
 	</Configurations>
