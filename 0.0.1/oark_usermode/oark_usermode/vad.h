@@ -159,6 +159,26 @@ typedef struct _MMVAD
 	ULONG32 u2;
 } MMVAD, *PMMVAD;
 
+typedef struct _MMADDRESS_NODE          // 5 elements, 0x14 bytes (sizeof)
+{
+	union                               // 2 elements, 0x4 bytes (sizeof)
+	{
+		/*0x000*/         LONG32       Balance : 2;       // 0 BitPosition
+		/*0x000*/         struct _MMADDRESS_NODE* Parent;
+	}u1;
+	/*0x004*/     struct _MMADDRESS_NODE* LeftChild;
+	/*0x008*/     struct _MMADDRESS_NODE* RightChild;
+	/*0x00C*/     ULONG32      StartingVpn;
+	/*0x010*/     ULONG32      EndingVpn;
+} MMADDRESS_NODE, *PMMADDRESS_NODE;
+
+typedef union RVA_NODE_u
+{
+	MMVAD mmvad_rvad_node;
+	MMADDRESS_NODE mmaddr_rvad_node; 
+
+} RVA_NODE_t;
+
 typedef struct VAD_USEFULL_s
 {
 	SLIST_ENTRY SingleListEntry;
@@ -170,8 +190,8 @@ typedef struct VAD_USEFULL_s
 } VAD_USEFULL_t;
 
 
-STATUS_t CheckVAD( HANDLE, DWORD, PSLIST_HEADER * vad_usefull_head );
-VOID _CheckVAD( HANDLE, PMMVAD, PSLIST_HEADER, STATUS_t * );
+STATUS_t CheckVAD( HANDLE, DWORD, PSLIST_HEADER * vad_usefull_head, BOOLEAN );
+VOID _CheckVAD( HANDLE, void *, PSLIST_HEADER, STATUS_t *, BOOLEAN );
 
 
 

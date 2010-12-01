@@ -91,6 +91,10 @@ int _CheckPEBHooking( HANDLE device, DWORD PID )
 	LDR_USEFULL_t * ldr_usefull_entry;
 	char * aux;
 	PSLIST_HEADER vad_usefull_head;
+	DWORD dwMajorVersion = 0;
+	DWORD dwMinorVersion = 0; 
+	DWORD dwVersion;
+	BOOLEAN is_2k_xp;
 
 	ldr_usefull_head = (PSLIST_HEADER) _aligned_malloc( sizeof( * ldr_usefull_head ), MEMORY_ALLOCATION_ALIGNMENT );
 	if( ldr_usefull_head != NULL )
@@ -307,7 +311,16 @@ int _CheckPEBHooking( HANDLE device, DWORD PID )
 				if ( debug )
 					printf( "\n Getting VADs:..\n" );
 
-				if ( CheckVAD( device, PID, & vad_usefull_head ) != ST_OK )
+				dwVersion = GetVersion();
+
+				dwMajorVersion = (DWORD) ( LOBYTE( LOWORD( dwVersion ) ) );
+				dwMinorVersion = (DWORD) ( HIBYTE( LOWORD( dwVersion ) ) );
+
+				if ( dwMajorVersion == 5 )
+					is_2k_xp = TRUE;
+				else
+					is_2k_xp = FALSE;
+				if ( CheckVAD( device, PID, & vad_usefull_head, is_2k_xp ) != ST_OK )
 					vad_usefull_head = NULL;
 
 				while ( ldr_usefull_entry != NULL )
