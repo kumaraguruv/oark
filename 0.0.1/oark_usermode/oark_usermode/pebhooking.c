@@ -521,7 +521,9 @@ void ComparePEBEntryVADInfo( LDR_USEFULL_t * ldr_usefull_entry, PSLIST_HEADER va
 	if ( found == TRUE )
 	{
 		if ( IsVADStringEqPebStr( vad_usefull_entry->dll_name, ldr_usefull_entry->full_dll_name ) == FALSE )
+		{
 			printf( " MAYBE PEB HOOKING! VAD MEMORY FULL PATH DIFFERENT OF PEB ENTRY PATH\n" );
+		}
 	}
 	else
 		printf( " MAYBE PEB HOOKING ONLY HIDDEN WITH VAD!\n" );
@@ -532,7 +534,7 @@ BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
 	char peb_converted[(MAX_PATH * 2) + 2];
 	char * aux = NULL;
 	int i, j;
-	BOOLAN found = FALSE;
+	BOOLEAN found = FALSE;
 
 	if ( debug )
 		printf
