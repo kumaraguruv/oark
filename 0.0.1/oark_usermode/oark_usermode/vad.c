@@ -47,11 +47,13 @@ VOID ObDereferenceObject( HANDLE device, char * eprocess )
 	IOCTLReadKernMem( device, & read_kern_mem );
 }
 
-VOID CheckVAD( HANDLE device, DWORD PID, PSLIST_HEADER * vad_usefull_head )
+STATUS_t CheckVAD( HANDLE device, DWORD PID, PSLIST_HEADER * vad_usefull_head )
 {
 	char * eprocess = NULL;
 	PMMVAD vad_root;
 	READ_KERN_MEM_t read_kern_mem;
+	STATUS_t returnf = ST_ERROR;
+	STATUS_t aux_returnf = ST_ERROR;
 
 	* vad_usefull_head = (PSLIST_HEADER) _aligned_malloc( sizeof( ** vad_usefull_head ), MEMORY_ALLOCATION_ALIGNMENT );
 	if( * vad_usefull_head != NULL )
@@ -72,17 +74,22 @@ VOID CheckVAD( HANDLE device, DWORD PID, PSLIST_HEADER * vad_usefull_head )
 			if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
 				fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
 			else
-				_CheckVAD( device, vad_root, * vad_usefull_head );
+			{
+				_CheckVAD( device, vad_root, * vad_usefull_head, & aux_returnf );
+				returnf = aux_returnf;
+			}
 
 			ObDereferenceObject( device, eprocess );
 		}
 	}
 	else
 		fprintf( stderr, " Error: Init vad_usefull_head\n" );
+
+	return returnf;
 }
 
 
-VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head )
+VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head, STATUS_t * returnf )
 {
 	ULONG starting_vpn = 0;
 	ULONG ending_vpn = 0;
@@ -102,7 +109,7 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head )
 	else
 	{
 		if ( rvad_node.LeftChild != NULL )
-			_CheckVAD( device, rvad_node.LeftChild, vad_usefull_head );
+			_CheckVAD( device, rvad_node.LeftChild, vad_usefull_head, returnf );
 
 		if ( rvad_node.ControlArea != NULL )
 		{
@@ -130,6 +137,7 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head )
 					InterlockedPushEntrySList
 						( vad_usefull_head, &( vad_usefull_entry->SingleListEntry ) );
 
+					* returnf = TRUE;
 					if ( debug )
 						printf
 						( 
@@ -176,7 +184,7 @@ VOID _CheckVAD( HANDLE device, PMMVAD vad_node, PSLIST_HEADER vad_usefull_head )
 		}
 
 		if ( rvad_node.RightChild != NULL )
-			_CheckVAD( device, rvad_node.RightChild, vad_usefull_head );
+			_CheckVAD( device, rvad_node.RightChild, vad_usefull_head, returnf );
 	}
 }
 

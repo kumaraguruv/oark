@@ -307,15 +307,18 @@ int _CheckPEBHooking( HANDLE device, DWORD PID )
 				if ( debug )
 					printf( "\n Getting VADs:..\n" );
 
-				CheckVAD( device, PID, & vad_usefull_head );
+				if ( CheckVAD( device, PID, & vad_usefull_head ) != ST_OK )
+					vad_usefull_head = NULL;
 
 				while ( ldr_usefull_entry != NULL )
 				{
+					if ( vad_usefull_head != NULL )
+					{
+						if ( debug )
+							printf( " Compare PEB entry Info with VAD entry Info...\n" );
 
-					if ( debug )
-						printf( " Compare PEB entry Info with VAD entry Info...\n" );
-
-					ComparePEBEntryVADInfo( ldr_usefull_entry, vad_usefull_head );
+						ComparePEBEntryVADInfo( ldr_usefull_entry, vad_usefull_head );
+					}
 
 					if ( debug )
 					{
