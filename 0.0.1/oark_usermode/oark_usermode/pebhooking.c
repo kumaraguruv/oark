@@ -101,7 +101,7 @@ int _CheckPEBHooking( HANDLE device, DWORD PID )
 
 		hProcess = OpenProcess( PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, PID );
 		if( hProcess == NULL )
-			fprintf( stderr, "Error: OpenProcess PROCESS_VM_READ | PROCESS_QUERY_INFORMATION\n" );
+			fprintf( stderr, "Error: OpenProcess PROCESS_VM_READ | PROCESS_QUERY_INFORMATION PID: %d\n", PID );
 		else
 		{
 			if ( ZwQueryInformationProcess
@@ -132,7 +132,7 @@ int _CheckPEBHooking( HANDLE device, DWORD PID )
 					& lpNumberOfBytesRead
 					) == 0 )  
 				{
-					fprintf( stderr, " Error: reading remote PEB." );
+					fprintf( stderr, " Error: reading remote PEB PID: %d", PID );
 					fprintf( stderr, " Read only: %d bytes.\n", lpNumberOfBytesRead );
 				}
 				else
@@ -389,18 +389,21 @@ void CheckRawFile( LDR_USEFULL_t * ldr_usefull_entry )
 	FILE * file;
 	IMAGE_DOS_HEADER image_dos_header;
 	IMAGE_NT_HEADERS image_nt_headers;
+	char * aux;
 
-	file = _wfopen( (wchar_t *) ldr_usefull_entry->full_dll_name, L"rb" );
+	aux = RemovePrePATH( ldr_usefull_entry->full_dll_name );
+
+	file = _wfopen( (wchar_t *) aux, L"rb" );
 
 	if ( file == NULL )
 	{
-		fprintf( stderr, " Error: opening file: %S\n", ldr_usefull_entry->full_dll_name );
+		fprintf( stderr, " Error: opening file: %S\n", aux );
 		perror( "" );
 		return;
 	}
 
 	if ( debug )
-		printf( " OK, Open!: %S\n", ldr_usefull_entry->full_dll_name );
+		printf( " OK, Open!: %S\n", aux );
 
 	fseek( file, 0L, 0L );
 
@@ -445,6 +448,9 @@ void CheckRawFile( LDR_USEFULL_t * ldr_usefull_entry )
 	}
 	else
 		fprintf( stderr, " Error: Reading IMAGE DOS HEADER\n" );
+
+	if ( aux != ldr_usefull_entry->full_dll_name )
+		free( aux );
 
 	fclose( file );
 }
@@ -521,31 +527,16 @@ void ComparePEBEntryVADInfo( LDR_USEFULL_t * ldr_usefull_entry, PSLIST_HEADER va
 	if ( found == TRUE )
 	{
 		if ( IsVADStringEqPebStr( vad_usefull_entry->dll_name, ldr_usefull_entry->full_dll_name ) == FALSE )
-		{
 			printf( " MAYBE PEB HOOKING! VAD MEMORY FULL PATH DIFFERENT OF PEB ENTRY PATH\n" );
-		}
 	}
 	else
 		printf( " MAYBE PEB HOOKING ONLY HIDDEN WITH VAD!\n" );
 }
 
-BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
+char * RemovePrePATH( char  * peb_name )
 {
-	char peb_converted[(MAX_PATH * 2) + 2];
-	char * aux = NULL;
 	int i, j;
-	BOOLEAN found = FALSE;
-
-	if ( debug )
-		printf
-		( 
-			" --------\n"
-			" VAD NAME: %S\n"
-			" PEB NAME: %S\n"
-			,
-			vad_name,
-			peb_name
-		);
+	char * aux;
 
 	/* THE BIG CRAP CODE IN THE WORLD!, COPY MY CODE IF YOU WANT! xD */
 
@@ -609,41 +600,43 @@ BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
 													i += 2;
 													if ( peb_name[i] =='\\' )
 													{
-														
+
 														if ( getenv( "SystemRoot" ) != NULL )
 														{
-															printf( " SystemRoot!: %s\n", getenv( "SystemRoot" )  );
+															if ( debug )
+																printf( " SystemRoot!: %s\n", getenv( "SystemRoot" )  );
 															aux = calloc( 1, (MAX_PATH * 2) + 2 );
 															if ( aux != NULL )
 															{
 																for 
-																( 
+																	( 
 																	i = 0, j = 0; 
-																	i < ( strlen( getenv( "SystemRoot" )  ) * 2 );
-																	i += 2, j++
-																)
+																i < ( strlen( getenv( "SystemRoot" )  ) * 2 );
+																i += 2, j++
+																	)
 																{
 																	aux[i] = getenv( "SystemRoot" )[j];
 																}
 
 																memcpy
-																( 
+																	( 
 																	& aux[i], 
 																	& peb_name[(strlen( "\\SystemRoot\\" ) * 2  ) - 2],
 																	(
-																		( 
-																			( 
-																				(lstrlenW( peb_name ) * 2) 
-																				- 
-																				( strlen( "\\SystemRoot\\" ) * 2 )
-																			)
-																			+ 
-																			2
-																		)
+																	( 
+																	( 
+																	(lstrlenW( peb_name ) * 2) 
+																	- 
+																	( strlen( "\\SystemRoot\\" ) * 2 )
 																	)
-																);
+																	+ 
+																	2
+																	)
+																	)
+																	);
 
-																printf( " AUX: %S\n", aux );
+																if ( debug ) 
+																	printf( " AUX: %S\n", aux );
 																peb_name = aux;
 															}
 														}
@@ -661,12 +654,40 @@ BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
 		}
 	}
 
+	return peb_name;
+}
+
+BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
+{
+	char peb_converted[(MAX_PATH * 2) + 2];
+	char * aux = NULL;
+	int i, j;
+	BOOLEAN found = FALSE;
+
+	if ( debug )
+		printf
+		( 
+			" --------\n"
+			" VAD NAME: %S\n"
+			" PEB NAME: %S\n"
+			,
+			vad_name,
+			peb_name
+		);
+
+	aux = RemovePrePATH( peb_name );
+	if ( aux == peb_name )
+		aux = NULL;
+	else
+		peb_name = aux;
+
 	for ( i = 0; i < (lstrlenW( peb_name ) * 2); i += 2 )
 	{
 		if ( peb_name[i] == '\\' )
 		{
 			lstrcpyW( peb_converted, & peb_name[i] );
-			printf( " PEB CONVERTED: %S\n", peb_converted );
+			if ( debug )
+				printf( " PEB CONVERTED: %S\n", peb_converted );
 
 			if ( lstrcmpiW( peb_converted, vad_name ) == 0 )
 				found = TRUE;
@@ -677,8 +698,6 @@ BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
  
 	if ( aux != NULL )
 		free( aux );
-
-	getchar();
 
 	return found;
 }
