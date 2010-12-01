@@ -9,6 +9,7 @@
     # [#Debugging_and_Testing_Environment Debugging and Testing Environment] 
   # [#Coding_Style Coding Style]
     # [#Comment_Code Comment Code]
+  # [#Direct_Kernel_Object_Manipulation_(DKOM)_Direct_Kernel_Object_Manipulation_(DKOM)]
 
 = I want to be a Developer / Commiter / Contributor =
 
@@ -482,3 +483,5 @@ enum TEnum
     TVal3  /*!< Enum value TVal3. */  
 } 
 }}}
+
+== Direct Kernel Object Manipulation (DKOM) ==
