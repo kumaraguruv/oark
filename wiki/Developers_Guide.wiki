@@ -484,4 +484,6 @@ enum TEnum
 } 
 }}}
 
-== Direct Kernel Object Manipulation (DKOM) ==
+= Direct Kernel Object Manipulation (DKOM) =
+
+Here you have structures definitions and offsets of each field, very usefull for *XP/VISTA/7 compatibility*: [http://msdn.moonsols.com/]
