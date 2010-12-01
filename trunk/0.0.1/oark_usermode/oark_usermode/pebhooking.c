@@ -537,6 +537,10 @@ void ComparePEBEntryVADInfo( LDR_USEFULL_t * ldr_usefull_entry, PSLIST_HEADER va
 
 BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
 {
+	char peb_converted[(MAX_PATH * 2) + 2];
+	char * aux = NULL;
+	int i, j;
+
 	if ( debug )
 		printf
 		( 
@@ -547,6 +551,153 @@ BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
 			vad_name,
 			peb_name
 		);
+
+	/* THE BIG CRAP CODE IN THE WORLD!, COPY MY CODE IF YOU WANT! xD */
+
+	if ( lstrlenW( peb_name ) >= ( strlen("\\??\\") * 2 ) + 2 )
+	{
+		i = 0;
+		if ( peb_name[i] == '\\' )
+		{
+			i += 2;
+			if ( peb_name[i] =='?' )
+			{
+				i += 2;
+				if ( peb_name[i] =='?' )
+				{
+					i += 2;
+					if ( peb_name[i] =='\\' )
+					{
+						i += 2;
+						peb_name = & peb_name[i];
+					}
+				}
+			}
+		}
+	}
+
+	if ( lstrlenW( peb_name ) >= ( strlen("\\SystemRoot\\") * 2 ) + 2 )
+	{
+		i = 0;
+		if ( peb_name[i] == '\\' )
+		{
+			i += 2;
+			if ( peb_name[i] == 'S' )
+			{
+				i += 2;
+				if ( peb_name[i] =='y' )
+				{
+					i += 2;
+					if ( peb_name[i] =='s' )
+					{
+						i += 2;
+						if ( peb_name[i] =='t' )
+						{
+							i += 2;
+							if ( peb_name[i] =='e' )
+							{
+								i += 2;
+								if ( peb_name[i] =='m' )
+								{
+									i += 2;
+									if ( peb_name[i] =='R' )
+									{
+										i += 2;
+										if ( peb_name[i] =='o' )
+										{
+											i += 2;
+											if ( peb_name[i] =='o' )
+											{
+												i += 2;
+												if ( peb_name[i] =='t' )
+												{
+													i += 2;
+													if ( peb_name[i] =='\\' )
+													{
+														
+														if ( getenv( "SystemRoot" ) != NULL )
+														{
+															printf( " SystemRoot!: %s\n", getenv( "SystemRoot" )  );
+															aux = calloc \
+																( 
+																	1, 
+																	( 
+																		( 
+																			strlen
+																			( 
+																				getenv( "SystemRoot" ) 
+																			)
+																			+
+																			2
+																			+
+																			(lstrlenW( peb_name ) * 2)
+																		)
+																		-
+																		( strlen( "\\SystemRoot\\" ) * 2 )
+																	)
+																	+ 
+																	2
+																);
+															if ( aux != NULL )
+															{
+																for 
+																( 
+																	i = 0, j = 0; 
+																	i < ( strlen( getenv( "SystemRoot" )  ) * 2 );
+																	i += 2, j++
+																)
+																{
+																	aux[i] = getenv( "SystemRoot" )[j];
+																}
+																aux[i] = '\\';
+																i += 2;
+
+																memcpy
+																( 
+																	& aux[i], 
+																	& peb_name[(strlen( "\\SystemRoot\\" ) * 2  ) - 2],
+																	(
+																		( 
+																			(lstrlenW( peb_name ) * 2) 
+																			- 
+																			( strlen( "\\SystemRoot\\" ) * 2 )
+																		)
+																		-
+																		2
+																	)
+																);
+
+																printf( " AUX: %S\n", aux );
+																peb_name = aux;
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for ( i = 0; i < (lstrlenW( peb_name ) * 2); i += 2 )
+	{
+		if ( peb_name[i] == '\\' )
+		{
+			lstrcpyW( peb_converted, & peb_name[i] );
+			printf( " PEB CONVERTED: %S\n", peb_converted );
+			break;
+		}
+
+	}
+ 
+	if ( aux != NULL )
+		free( aux );
 
 	getchar();
 
