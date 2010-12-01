@@ -6,6 +6,7 @@
 " - Different SIZE OF IMAGE PEB data and PE32 RAW DISK FILE DATA.\n"
 " - Different ENTRY POINT PEB data and PE32 RAW DISK FILE DATA. Except NTDLL ofc\n"
 " - Different TIME DATE STAMP PEB data and PE32 RAW DISK FILE DATA.\n"
+" - Checks if the VAD info is different of PEB INFO"
 " - \n"
 " - For the arks:\n"
 " - The best way is dump phys memory without APIs like ReadProcessMemory\n"
