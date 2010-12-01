@@ -51,5 +51,6 @@ STATUS_t CheckPEBHooking( HANDLE );
 void ComparePEBEntryVADInfo( LDR_USEFULL_t *, PSLIST_HEADER );
 BOOLEAN IsVADStringEqPebStr( char *, char * );
 char * RemovePrePATH( char  *, BOOLEAN * );
+BOOLEAN IsUNICODEInitEQANSI( char *, char * );
 
 #endif /* _PEBHOOKING_H__ */

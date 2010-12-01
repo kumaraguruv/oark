@@ -538,124 +538,50 @@ void ComparePEBEntryVADInfo( LDR_USEFULL_t * ldr_usefull_entry, PSLIST_HEADER va
 char * RemovePrePATH( char  * peb_name, BOOLEAN * alloc )
 {
 	unsigned int i, j;
-	char * aux;
+	char * aux = NULL;
+	char * str_init;
+	char * system_root_str;
+	int system_root_str_size;
 
 	* alloc = FALSE;
 
-	/* THE BIG CRAP CODE IN THE WORLD!, COPY MY CODE IF YOU WANT! xD */
-
-	if ( (size_t) lstrlenW( ( LPCWSTR ) peb_name ) >= ( strlen("\\??\\") * 2 ) + 2 )
+	str_init = "\\??\\";
+	if ( IsUNICODEInitEQANSI( peb_name, str_init ) )
 	{
-		i = 0;
-		if ( peb_name[i] == '\\' )
-		{
-			i += 2;
-			if ( peb_name[i] =='?' )
-			{
-				i += 2;
-				if ( peb_name[i] =='?' )
-				{
-					i += 2;
-					if ( peb_name[i] =='\\' )
-					{
-						i += 2;
-						peb_name = & peb_name[i];
-					}
-				}
-			}
-		}
+		peb_name += strlen( str_init ) * 2;
+
+		if ( debug )
+			printf( " FOUND: %s - PEB NAME converted: %S\n", str_init, peb_name );
 	}
 
-	if ( (size_t) lstrlenW( (LPCWSTR) peb_name ) >= ( strlen("\\SystemRoot\\") * 2 ) + 2 )
+	str_init = "\\SystemRoot\\"; 
+	if ( IsUNICODEInitEQANSI( peb_name, str_init ) )
 	{
-		i = 0;
-		if ( peb_name[i] == '\\' )
+		system_root_str = getenv( "SystemRoot" );
+		system_root_str_size = strlen( getenv( "SystemRoot" ) );
+		if ( system_root_str != NULL )
 		{
-			i += 2;
-			if ( peb_name[i] == 'S' )
+			if ( debug )
+				printf( " SystemRoot!: %s\n", system_root_str  );
+
+			aux = calloc \
+				( 
+					1, 
+					( ( system_root_str_size + 1 ) * 2 ) + ( ( (size_t) lstrlenW( (LPCWSTR) peb_name ) * 2 ) + 2 )
+				);
+			if ( aux != NULL )
 			{
-				i += 2;
-				if ( peb_name[i] =='y' )
-				{
-					i += 2;
-					if ( peb_name[i] =='s' )
-					{
-						i += 2;
-						if ( peb_name[i] =='t' )
-						{
-							i += 2;
-							if ( peb_name[i] =='e' )
-							{
-								i += 2;
-								if ( peb_name[i] =='m' )
-								{
-									i += 2;
-									if ( peb_name[i] =='R' )
-									{
-										i += 2;
-										if ( peb_name[i] =='o' )
-										{
-											i += 2;
-											if ( peb_name[i] =='o' )
-											{
-												i += 2;
-												if ( peb_name[i] =='t' )
-												{
-													i += 2;
-													if ( peb_name[i] =='\\' )
-													{
+				for ( i = 0, j = 0; i < ( (size_t) system_root_str_size * 2 ); i += 2, j++ )
+					aux[i] = system_root_str[j];
 
-														if ( getenv( "SystemRoot" ) != NULL )
-														{
-															if ( debug )
-																printf( " SystemRoot!: %s\n", getenv( "SystemRoot" )  );
-															aux = calloc( 1, (MAX_PATH * 2) + 2 );
-															if ( aux != NULL )
-															{
-																for 
-																	( 
-																	i = 0, j = 0; 
-																i < ( strlen( getenv( "SystemRoot" )  ) * 2 );
-																i += 2, j++
-																	)
-																{
-																	aux[i] = getenv( "SystemRoot" )[j];
-																}
+				lstrcatW( (LPWSTR) & aux[i], (LPCWSTR) & peb_name[(system_root_str_size * 2 ) + 2] );
 
-																memcpy
-																	( 
-																	& aux[i], 
-																	& peb_name[(strlen( "\\SystemRoot\\" ) * 2  ) - 2],
-																	(
-																	( 
-																	( 
-																	(lstrlenW( (LPCWSTR) peb_name ) * 2) 
-																	- 
-																	( strlen( "\\SystemRoot\\" ) * 2 )
-																	)
-																	+ 
-																	2
-																	)
-																	)
-																	);
+				if ( debug ) 
+					printf( " AUX: %S\n", aux );
+	
+				peb_name = aux;
 
-																if ( debug ) 
-																	printf( " AUX: %S\n", aux );
-																peb_name = aux;
-
-																* alloc = TRUE;
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
+				* alloc = TRUE;
 			}
 		}
 	}
@@ -707,4 +633,24 @@ BOOLEAN IsVADStringEqPebStr( char * vad_name, char * peb_name )
 		free( aux );
 
 	return found;
+}
+
+BOOLEAN IsUNICODEInitEQANSI( char * unicode, char * ansi )
+{
+	int i, j;
+	int ansi_size, unicode_size;
+
+	ansi_size = strlen( ansi ) * 2;
+	unicode_size = lstrlenW( (LPCWSTR) unicode ) * 2;
+
+	if ( unicode_size < ansi_size )
+		return FALSE;
+
+	for ( i = 0, j = 0; i < ansi_size; i += 2, j++ )
+	{
+		if ( ( unicode[i] != ansi[j] ) || ( unicode[i + 1] != '\0' ) )
+			return FALSE;
+	}
+
+	return TRUE;
 }
