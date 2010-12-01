@@ -68,8 +68,8 @@ typedef struct VAD_USEFULL_s
 
 } VAD_USEFULL_t;
 
-VOID CheckVAD( HANDLE, DWORD, PSLIST_HEADER * vad_usefull_head );
-VOID _CheckVAD( HANDLE, PMMVAD, PSLIST_HEADER );
+STATUS_t CheckVAD( HANDLE, DWORD, PSLIST_HEADER * vad_usefull_head );
+VOID _CheckVAD( HANDLE, PMMVAD, PSLIST_HEADER, STATUS_t * );
 
 
 
