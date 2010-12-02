@@ -139,13 +139,24 @@ typedef struct _CONTROL_AREA
 	UINT16 FlushInProgressCount;
 	UINT32 NumberOfUserReferences;
 	UINT32 u;
-	PFILE_OBJECT FilePointer;
+	PVOID FilePointer; /* PFILE_OBJECT FilePointer; */
 	struct _EVENT_COUNTER* WaitingForDeletion;
 	UINT16 ModifiedWriteCount;
 	UINT16 NumberOfSystemCacheViews;
 } CONTROL_AREA, *PCONTROL_AREA;
 
-typedef struct _MMVAD
+typedef struct _EX_FAST_REF       
+{
+	union                        
+	{
+		VOID*        Object;
+		ULONG32      RefCnt : 3; 
+		ULONG32      Value;
+	};
+
+} EX_FAST_REF, *PEX_FAST_REF;
+
+typedef struct _MMVAD_XP
 {
 	UINT32 StartingVpn;
 	UINT32 EndingVpn;
@@ -157,7 +168,59 @@ typedef struct _MMVAD
 	struct _MMPTE* FirstPrototypePte;
 	struct _MMPTE* LastContiguousPte;
 	ULONG32 u2;
-} MMVAD, *PMMVAD;
+} MMVAD_XP, *PMMVAD_XP;
+
+typedef struct _EX_PUSH_LOCK                
+{
+	union                                    
+	{
+		struct                                
+		{
+			ULONG32      Locked : 1;          
+			ULONG32      Waiting : 1;        
+			ULONG32      Waking : 1;          
+			ULONG32      MultipleShared : 1;  
+			ULONG32      Shared : 28;         
+		};
+		ULONG32      Value;
+		VOID*        Ptr;
+	};
+
+} EX_PUSH_LOCK, *PEX_PUSH_LOCK;
+
+typedef struct _SUBSECTION                          
+{
+	struct _CONTROL_AREA* ControlArea;
+	PVOID SubsectionBase; /* struct _MMPTE* SubsectionBase; */
+	struct _SUBSECTION* NextSubsection;
+	ULONG32      PtesInSubsection;                                       
+	ULONG32      UnusedPtes;
+	ULONG32      LongFlags;
+	ULONG32      StartingSector;
+	ULONG32      NumberOfFullSectors;
+
+} SUBSECTION, *PSUBSECTION;
+
+typedef struct _MMVAD_VISTA                        
+{
+	union                                      
+	{
+		LONG32       Balance : 2;            
+		struct _MMVAD_VISTA* Parent;
+	}u1;
+	struct _MMVAD_VISTA* LeftChild;
+	struct _MMVAD_VISTA* RightChild;
+	ULONG32      StartingVpn;
+	ULONG32      EndingVpn;
+	ULONG32      LongFlags;
+	struct _EX_PUSH_LOCK PushLock;             
+	ULONG32      LongFlags3;
+	ULONG32      LongFlags2;
+	struct _SUBSECTION* Subsection;
+
+	PVOID FirstPrototypePte; /* struct _MMPTE* FirstPrototypePte; */
+	PVOID LastContiguousPte; /* struct _MMPTE* LastContiguousPte; */
+} MMVAD_VISTA, *PMMVAD_VISTA;
 
 typedef struct VAD_USEFULL_s
 {
@@ -171,8 +234,8 @@ typedef struct VAD_USEFULL_s
 
 
 STATUS_t CheckVAD( HANDLE, DWORD, PSLIST_HEADER * vad_usefull_head );
-VOID _CheckVAD( HANDLE, void *, PSLIST_HEADER, STATUS_t * );
-
+VOID _CheckVAD2KXP( HANDLE, void *, PSLIST_HEADER, STATUS_t * );
+VOID _CheckVADVista7( HANDLE device, void *, PSLIST_HEADER, STATUS_t * );
 
 
 #endif /* _VAD_H__ */
