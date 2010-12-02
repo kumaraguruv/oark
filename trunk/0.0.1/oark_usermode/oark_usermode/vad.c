@@ -80,6 +80,8 @@ STATUS_t CheckVAD( HANDLE device, DWORD PID, PSLIST_HEADER * vad_usefull_head )
 		PsLookupProcessByProcessId( device, PID, & eprocess );
 		if ( eprocess != NULL )
 		{
+			if ( debug )
+				printf( " EPROCESS: 0x%08X\n", eprocess );
 			if ( is_2k_xp )
 			{
 				read_kern_mem.type        = SYM_TYP_NULL;
@@ -136,7 +138,7 @@ VOID _CheckVADVista7( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_
 		read_kern_mem.type        = SYM_TYP_NULL;
 		read_kern_mem.dst_address = & subsection;
 		read_kern_mem.size        = sizeof( subsection );
-		read_kern_mem.src_address = vad_node;
+		read_kern_mem.src_address = mmvad_rvad_node.Subsection;
 
 		if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
 			fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
@@ -144,6 +146,17 @@ VOID _CheckVADVista7( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_
 		{
 			if ( subsection.ControlArea != NULL )
 			{
+				if ( debug )
+					printf
+					( 
+						" vad_node: 0x%08X\n"
+						" ControlArea: 0x%08X\n"
+						" Subsection: 0x%08X\n"
+						, 
+						vad_node,
+						subsection.ControlArea,
+						mmvad_rvad_node.Subsection
+					);
 				read_kern_mem.type        = SYM_TYP_NULL;
 				read_kern_mem.dst_address = & control_area;
 				read_kern_mem.size        = sizeof( control_area );
