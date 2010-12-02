@@ -6,7 +6,7 @@
 " - Different SIZE OF IMAGE PEB data and PE32 RAW DISK FILE DATA.\n"
 " - Different ENTRY POINT PEB data and PE32 RAW DISK FILE DATA. Except NTDLL ofc\n"
 " - Different TIME DATE STAMP PEB data and PE32 RAW DISK FILE DATA.\n"
-" - Checks if the VAD info is different of PEB INFO"
+" - Checks if the VAD info is different of PEB INFO: dll name and the size method"
 " - \n"
 " - For the arks:\n"
 " - The best way is dump phys memory without APIs like ReadProcessMemory\n"
@@ -546,6 +546,14 @@ void ComparePEBEntryVADInfo( LDR_USEFULL_t * ldr_usefull_entry, PSLIST_HEADER va
 	{
 		if ( IsVADStringEqPebStr( vad_usefull_entry->dll_name, ldr_usefull_entry->full_dll_name ) == FALSE )
 			printf( " MAYBE PEB HOOKING! VAD MEMORY FULL PATH DIFFERENT OF PEB ENTRY PATH\n" );
+
+		if 
+		( 
+			( ldr_usefull_entry->base_address + ldr_usefull_entry->size_of_image )
+			!=  
+			vad_usefull_entry->ending_vpn 
+		)
+			printf( " MAYBE PEB HOOKING! VAD ENTRY SIZE DIFFERENT OF PEB ENTRY SIZE\n" ); 
 	}
 	else
 		printf( " MAYBE PEB HOOKING ONLY HIDDEN WITH VAD!\n" );

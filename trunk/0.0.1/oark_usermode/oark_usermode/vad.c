@@ -153,10 +153,9 @@ VOID _CheckVAD( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_head, 
 						starting_vpn = rvad_node.mmaddr_rvad_node.StartingVpn;
 						ending_vpn = rvad_node.mmaddr_rvad_node.EndingVpn;
 					}
-					printf( " 0x%08X 0x%08X\n", starting_vpn, ending_vpn );
-						
+
 					vad_usefull_entry->starting_vpn = starting_vpn << 12;
-					vad_usefull_entry->ending_vpn = ending_vpn << 12;
+					vad_usefull_entry->ending_vpn = ( ending_vpn + 1 ) << 12; 
 
 					InterlockedPushEntrySList
 						( vad_usefull_head, &( vad_usefull_entry->SingleListEntry ) );
@@ -171,7 +170,7 @@ VOID _CheckVAD( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_head, 
 							, 
 							vad_usefull_entry->starting_vpn,
 							vad_usefull_entry->ending_vpn
-						);
+						); 
 
 					if ( control_area.FilePointer != NULL )
 					{
@@ -188,18 +187,21 @@ VOID _CheckVAD( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_head, 
 							{
 								if ( file_pointer.Length > ( sizeof( vad_usefull_entry->dll_name ) - 2 ) )
 									file_pointer.Length = ( sizeof( vad_usefull_entry->dll_name ) - 2 );
-								read_kern_mem.type        = SYM_TYP_NULL;
-								read_kern_mem.dst_address = vad_usefull_entry->dll_name;
-								read_kern_mem.size        = file_pointer.Length;
-								read_kern_mem.src_address = file_pointer.Buffer;
-							}
-
-							if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
-								fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
-							else
-							{
-								if ( debug )
-									printf( " File Name: %S\n", vad_usefull_entry->dll_name ); getchar();
+								if ( file_pointer.Length > 0 )
+								{
+									read_kern_mem.type        = SYM_TYP_NULL;
+									read_kern_mem.dst_address = vad_usefull_entry->dll_name;
+									read_kern_mem.size        = file_pointer.Length;
+									read_kern_mem.src_address = file_pointer.Buffer;
+								
+									if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
+										fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
+									else
+									{
+										if ( debug )
+											printf( " File Name: %S\n", vad_usefull_entry->dll_name ); 
+									}
+								}
 							}
 						}
 					}
