@@ -128,33 +128,35 @@ typedef struct _FILE_OBJECT
 	VOID*        FileObjectExtension;
 } FILE_OBJECT, *PFILE_OBJECT;
 
-typedef struct _CONTROL_AREA
+#pragma pack(push,1)
+typedef struct _EX_FAST_REF
 {
-	struct _SEGMENT* Segment;
-	LIST_ENTRY DereferenceList;
-	UINT32 NumberOfSectionReferences;
-	UINT32 NumberOfPfnReferences;
-	UINT32 NumberOfMappedViews;
-	UINT16 NumberOfSubsections;
-	UINT16 FlushInProgressCount;
-	UINT32 NumberOfUserReferences;
-	UINT32 u;
-	PVOID FilePointer; /* PFILE_OBJECT FilePointer; */
-	struct _EVENT_COUNTER* WaitingForDeletion;
-	UINT16 ModifiedWriteCount;
-	UINT16 NumberOfSystemCacheViews;
-} CONTROL_AREA, *PCONTROL_AREA;
-
-typedef struct _EX_FAST_REF       
-{
-	union                        
+	union
 	{
-		VOID*        Object;
-		ULONG32      RefCnt : 3; 
-		ULONG32      Value;
+		PVOID Object;
+		ULONG_PTR RefCnt:3;
+		ULONG_PTR Value;
 	};
-
 } EX_FAST_REF, *PEX_FAST_REF;
+#pragma pack(pop)
+
+typedef struct _CONTROL_AREA // 0x50
+{
+	PVOID Segment; //struct _SEGMENT* Segment; // +0x0(0x4)
+	struct _LIST_ENTRY DereferenceList; // +0x4(0x8)
+	ULONG NumberOfSectionReferences; // +0xc(0x4)
+	ULONG NumberOfPfnReferences; // +0x10(0x4)
+	ULONG NumberOfMappedViews; // +0x14(0x4)
+	ULONG NumberOfUserReferences; // +0x18(0x4)
+	ULONG u; // +0x1c(0x4)
+	ULONG FlushInProgressCount; // +0x20(0x4)
+	union
+	{
+		struct _EX_FAST_REF fast_ref; // +0x24(0x4)
+		PFILE_OBJECT pfile_obj;
+	} FilePointer;
+} CONTROL_AREA,*PCONTROL_AREA;
+
 
 typedef struct _MMVAD_XP
 {
@@ -231,6 +233,11 @@ typedef struct VAD_USEFULL_s
 	char dll_name[(MAX_PATH * 2) + 2];
 
 } VAD_USEFULL_t;
+
+typedef struct _OBJECT_NAME_INFORMATION {
+	UNICODE_STRING Name;
+} OBJECT_NAME_INFORMATION, *POBJECT_NAME_INFORMATION;
+
 
 
 STATUS_t CheckVAD( HANDLE, DWORD, PSLIST_HEADER * vad_usefull_head );
