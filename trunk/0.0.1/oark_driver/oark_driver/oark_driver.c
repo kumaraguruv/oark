@@ -147,6 +147,7 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
 	IDTR                 idtr;
 	PEPROCESS eprocess;
 	NTSTATUS retf;
+	ULONG ret_len;
 	
     switch(irpSp->Parameters.DeviceIoControl.IoControlCode)
     {
@@ -155,6 +156,7 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
         if( irpSp->Parameters.DeviceIoControl.InputBufferLength != sizeof( READ_KERN_MEM_t ) ) 
 				break;
 
+		DbgPrint( " IN IOCTL!\n" );
 		read_kern_mem =  * ( (READ_KERN_MEM_t *) Irp->AssociatedIrp.SystemBuffer );
 
 		switch ( read_kern_mem.type )
