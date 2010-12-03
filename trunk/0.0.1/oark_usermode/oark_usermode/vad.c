@@ -119,7 +119,11 @@ VOID _CheckVADVista7( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_
 	void * child;
 	MMVAD_VISTA mmvad_rvad_node;
 	SUBSECTION subsection;
-	EX_FAST_REF file_pointer;                       
+	UNICODE_STRING file_pointer;
+
+	memset( & control_area, 0, sizeof( control_area ) );
+	memset( & subsection, 0, sizeof( subsection ) );
+	memset( & mmvad_rvad_node, 0, sizeof( mmvad_rvad_node ) );
 
 	read_kern_mem.type        = SYM_TYP_NULL;
 	read_kern_mem.dst_address = & mmvad_rvad_node;
@@ -150,12 +154,12 @@ VOID _CheckVADVista7( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_
 					printf
 					( 
 						" vad_node: 0x%08X\n"
-						" ControlArea: 0x%08X\n"
 						" Subsection: 0x%08X\n"
+						" ControlArea: 0x%08X\n"
 						, 
 						vad_node,
-						subsection.ControlArea,
-						mmvad_rvad_node.Subsection
+						mmvad_rvad_node.Subsection,
+						subsection.ControlArea
 					);
 				read_kern_mem.type        = SYM_TYP_NULL;
 				read_kern_mem.dst_address = & control_area;
@@ -181,6 +185,8 @@ VOID _CheckVADVista7( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_
 						InterlockedPushEntrySList
 							( vad_usefull_head, &( vad_usefull_entry->SingleListEntry ) );
 
+						control_area.FilePointer.fast_ref.Value >>= 3;
+						control_area.FilePointer.fast_ref.Value <<= 3;
 						* returnf = TRUE;
 						if ( debug )
 							printf
@@ -188,41 +194,39 @@ VOID _CheckVADVista7( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_
 							" ------------------------\n"
 							" StartingVpn: 0x%08X\n"
 							" EndingVpn: 0x%08X\n"
+							" FilePointer: 0x%08X\n"
 							, 
 							vad_usefull_entry->starting_vpn,
-							vad_usefull_entry->ending_vpn
+							vad_usefull_entry->ending_vpn,
+							control_area.FilePointer.fast_ref.Value
 							); 
 
-						if ( control_area.FilePointer != NULL )
+						read_kern_mem.type        = SYM_TYP_NULL;
+						read_kern_mem.dst_address = & file_pointer;
+						read_kern_mem.size        = sizeof( file_pointer );
+						read_kern_mem.src_address = (void *) & control_area.FilePointer.pfile_obj->FileName;
+
+						if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
+							fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
+						else
 						{
-							printf( " FilePointer 0x%08X\n", control_area.FilePointer );  getchar();
-							read_kern_mem.type        = SYM_TYP_NULL;
-							read_kern_mem.dst_address = & file_pointer;
-							read_kern_mem.size        = sizeof( file_pointer );
-							read_kern_mem.src_address = control_area.FilePointer;
-
-							if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
-								fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
-							else
+							if ( file_pointer.Buffer != NULL )
 							{
-								if ( file_pointer.Object != NULL )
+								if ( file_pointer.Length > ( sizeof( vad_usefull_entry->dll_name ) - 2 ) )
+									file_pointer.Length = ( sizeof( vad_usefull_entry->dll_name ) - 2 );
+								if ( file_pointer.Length > 0 )
 								{
-									if ( file_pointer.Value > ( sizeof( vad_usefull_entry->dll_name ) - 2 ) )
-										file_pointer.Value = ( sizeof( vad_usefull_entry->dll_name ) - 2 );
-									if ( file_pointer.Value > 0 )
-									{
-										read_kern_mem.type        = SYM_TYP_NULL;
-										read_kern_mem.dst_address = vad_usefull_entry->dll_name;
-										read_kern_mem.size        = file_pointer.Value;
-										read_kern_mem.src_address = file_pointer.Object;
+									read_kern_mem.type        = SYM_TYP_NULL;
+									read_kern_mem.dst_address = vad_usefull_entry->dll_name;
+									read_kern_mem.size        = file_pointer.Length;
+									read_kern_mem.src_address = file_pointer.Buffer;
 
-										if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
-											fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
-										else
-										{
-											if ( debug )
-												printf( " File Name: %S\n", vad_usefull_entry->dll_name );
-										}
+									if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
+										fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
+									else
+									{
+										if ( debug )
+											printf( " File Name: %S\n", vad_usefull_entry->dll_name ); 
 									}
 								}
 							}
@@ -303,12 +307,12 @@ VOID _CheckVAD2KXP( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_he
 							vad_usefull_entry->ending_vpn
 							); 
 
-					if ( control_area.FilePointer != NULL )
+					if ( control_area.FilePointer.pfile_obj != NULL )
 					{
 						read_kern_mem.type        = SYM_TYP_NULL;
 						read_kern_mem.dst_address = & file_pointer;
 						read_kern_mem.size        = sizeof( file_pointer );
-						read_kern_mem.src_address = (char *) & ((PFILE_OBJECT) control_area.FilePointer)->FileName;
+						read_kern_mem.src_address = (char *) & control_area.FilePointer.pfile_obj->FileName;
 
 						if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
 							fprintf( stderr, " Error: IOCTL CHANGE MODE\n" );
