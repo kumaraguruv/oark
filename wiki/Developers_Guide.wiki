@@ -86,7 +86,7 @@ You need configure the *"WinDDK Paths"* in the file with extension *".vsprops"*
     * *Name="WXPBASE", "WNETBASE"* etc..
     * *Value="C:\WinDDK_PATH\DDK_VERSION"*, you need add here the PATH of the WinDDK Path Version, you can find the version for build the driver in this wiki. *Example: Value="C:\WinDDK\6001.17121"*
 
-Compile *ALWAYS* in *WXP Free*
+Compile *ALWAYS* in *WXP Free* (UP in the Visal Studio Window)
 
 == Configuring the user mode project in Visual Studio ==
 
