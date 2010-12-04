@@ -185,8 +185,15 @@ VOID _CheckVADVista7( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_
 						InterlockedPushEntrySList
 							( vad_usefull_head, &( vad_usefull_entry->SingleListEntry ) );
 
-						control_area.FilePointer.fast_ref.Value >>= 3;
-						control_area.FilePointer.fast_ref.Value <<= 3;
+						if ( debug )
+							printf
+							( 
+								" RefCNT: 0x%X, FilePointer with RefCNT: 0x%X\n", 
+								control_area.FilePointer.fast_ref.RefCnt,
+								control_area.FilePointer.fast_ref.Value 
+							); 
+
+						control_area.FilePointer.fast_ref.Value ^= control_area.FilePointer.fast_ref.RefCnt;
 
 						* returnf = TRUE;
 						if ( debug )
@@ -195,7 +202,7 @@ VOID _CheckVADVista7( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_
 							" ------------------------\n"
 							" StartingVpn: 0x%08X\n"
 							" EndingVpn: 0x%08X\n"
-							" FilePointer: 0x%08X\n"
+							" FilePointer (RefCNT cleaned): 0x%08X\n"
 							, 
 							vad_usefull_entry->starting_vpn,
 							vad_usefull_entry->ending_vpn,
