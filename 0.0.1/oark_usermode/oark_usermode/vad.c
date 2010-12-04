@@ -187,6 +187,7 @@ VOID _CheckVADVista7( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_
 
 						control_area.FilePointer.fast_ref.Value >>= 3;
 						control_area.FilePointer.fast_ref.Value <<= 3;
+
 						* returnf = TRUE;
 						if ( debug )
 							printf
