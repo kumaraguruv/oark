@@ -182,16 +182,22 @@ VOID _CheckVADVista7( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_
 						vad_usefull_entry->starting_vpn = mmvad_rvad_node.StartingVpn << 12;
 						vad_usefull_entry->ending_vpn = ( mmvad_rvad_node.EndingVpn + 1 ) << 12; 
 
-						InterlockedPushEntrySList
-							( vad_usefull_head, &( vad_usefull_entry->SingleListEntry ) );
-
 						if ( debug )
 							printf
 							( 
-								" RefCNT: 0x%X, FilePointer with RefCNT: 0x%X\n", 
+								" ------------------------\n"
+								" StartingVpn: 0x%08X\n"
+								" EndingVpn: 0x%08X\n"
+								" RefCNT: 0x%X, FilePointer with RefCNT: 0x%X\n"
+								, 
+								vad_usefull_entry->starting_vpn,
+								vad_usefull_entry->ending_vpn,
 								control_area.FilePointer.fast_ref.RefCnt,
 								control_area.FilePointer.fast_ref.Value 
-							); 
+							);
+
+						InterlockedPushEntrySList
+							( vad_usefull_head, &( vad_usefull_entry->SingleListEntry ) );
 
 						if ( control_area.FilePointer.fast_ref.Value != 0 )
 						{
@@ -202,14 +208,9 @@ VOID _CheckVADVista7( HANDLE device, void * vad_node, PSLIST_HEADER vad_usefull_
 							if ( debug )
 								printf
 								( 
-								" ------------------------\n"
-								" StartingVpn: 0x%08X\n"
-								" EndingVpn: 0x%08X\n"
-								" FilePointer (RefCNT cleaned): 0x%08X\n"
-								, 
-								vad_usefull_entry->starting_vpn,
-								vad_usefull_entry->ending_vpn,
-								control_area.FilePointer.fast_ref.Value
+									" FilePointer (RefCNT cleaned): 0x%08X\n"
+									, 
+									control_area.FilePointer.fast_ref.Value
 								); 
 
 							read_kern_mem.type        = SYM_TYP_NULL;
