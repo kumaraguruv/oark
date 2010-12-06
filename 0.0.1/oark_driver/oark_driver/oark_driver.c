@@ -104,9 +104,17 @@ int WriteUserMode( void * address, DWORD size, void * data )
 					if( address ) 
 					{
 						returnf = 0;
-						memcpy( address, data, size );
+						try 
+						{     
+							memcpy( address, data, size );
+						}
+						except(EXCEPTION_EXECUTE_HANDLER) 
+						{
+							goto out_three;
+						}
 					}
 
+				out_three:
 					MmUnlockPages( mdl );
 					out_second:
 						IoFreeMdl( mdl );  
