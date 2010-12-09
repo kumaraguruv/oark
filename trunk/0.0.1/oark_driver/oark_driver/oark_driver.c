@@ -63,72 +63,73 @@ PDRIVER_OBJECT pdoGlobalDrvObj = 0;
 int WriteUserMode( void * address, DWORD size, void * data )
 {
     NTSTATUS Status;
-	PMDL mdl;
-	PMDL mdl_src;
-	int returnf;
+    PMDL mdl;
+    PMDL mdl_src;
+    int returnf;
 
-	returnf = -1;
+    returnf = -1;
 
-	if ( MmIsAddressValid( data ) && MmIsAddressValid( address ) )
-	{
-		mdl_src = IoAllocateMdl( data, size,  FALSE, FALSE, NULL );
-		if ( mdl_src )
-		{
-			returnf = 0;
-			try 
-			{     
-				MmProbeAndLockPages( mdl_src, KernelMode, IoReadAccess );
-			}
-			except(EXCEPTION_EXECUTE_HANDLER) 
-			{
-				goto out_first;
-			}
+    if ( MmIsAddressValid( data ) && MmIsAddressValid( address ) )
+    {
+        mdl_src = IoAllocateMdl( data, size,  FALSE, FALSE, NULL );
+        if ( mdl_src )
+        {
+            returnf = 0;
+            try 
+            {     
+                MmProbeAndLockPages( mdl_src, KernelMode, IoReadAccess );
+            }
+            except(EXCEPTION_EXECUTE_HANDLER) 
+            {
+                goto out_first;
+            }
 
-			data = MmGetSystemAddressForMdlSafe( mdl_src, NormalPagePriority );
+            data = MmGetSystemAddressForMdlSafe( mdl_src, NormalPagePriority );
 
-			if ( data )
-			{
-				mdl = IoAllocateMdl( address, size,  FALSE, FALSE, NULL );
-				if( mdl )
-				{         
-					try 
-					{     
-						MmProbeAndLockPages( mdl, UserMode, IoWriteAccess );
+            if ( data )
+            {
+                mdl = IoAllocateMdl( address, size,  FALSE, FALSE, NULL );
+                if( mdl )
+                {         
+                    try 
+                    {     
+                        MmProbeAndLockPages( mdl, UserMode, IoWriteAccess );
+                    }
+                    except(EXCEPTION_EXECUTE_HANDLER) 
+                    {
+                        goto out_second;
+                    }
+
+                    address = MmGetSystemAddressForMdlSafe( mdl, NormalPagePriority );
+
+                    if( address ) 
+                    {
+                        returnf = 0;
+                        try 
+                        {     
+                            memcpy( address, data, size );
+                        }
+                        except(EXCEPTION_EXECUTE_HANDLER) 
+                        {
+                            goto out_three;
+                        }
 					}
-					except(EXCEPTION_EXECUTE_HANDLER) 
-					{
-						goto out_second;
-					}
 
-					address = MmGetSystemAddressForMdlSafe( mdl, NormalPagePriority );
+                    out_three:
+                        MmUnlockPages( mdl );
+					
+                    out_second:
+                        IoFreeMdl( mdl );  
+                }
+            }
 
-					if( address ) 
-					{
-						returnf = 0;
-						try 
-						{     
-							memcpy( address, data, size );
-						}
-						except(EXCEPTION_EXECUTE_HANDLER) 
-						{
-							goto out_three;
-						}
-					}
+            MmUnlockPages( mdl_src );
+            out_first:
+                IoFreeMdl( mdl_src );
+        }
+    }
 
-				out_three:
-					MmUnlockPages( mdl );
-					out_second:
-						IoFreeMdl( mdl );  
-				}
-			}
-
-			MmUnlockPages( mdl_src );
-			out_first:
-				IoFreeMdl( mdl_src );
-		}
-	}
-
-	return returnf;
+    return returnf;
 }
 
 NTSTATUS OARKDRIVER_DispatchCreateClose(
