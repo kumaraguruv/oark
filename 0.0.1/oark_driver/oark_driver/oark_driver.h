@@ -1,5 +1,6 @@
 /*
 Copyright (c) <2010> <Dreg aka David Reguera Garcia, dreg@fr33project.org>
+Copyright (c) <2010> <0vercl0k aka Souchet Axel, 0vercl0k@tuxfamily.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +46,7 @@ THE SOFTWARE.
 #pragma once
 #endif
 
-
+#include <ntifs.h>
 #include "drvcommon.h"
 #include "drvversion.h"
 #include "common.h"
@@ -67,8 +68,9 @@ PRESET_UNICODE_STRING(usSymlinkName, SYMLINK_NAME);
 // FILE_ANY_ACCESS
 // FILE_READ_ACCESS
 // FILE_WRITE_ACCESS
-
+/*
 NTSTATUS PsLookupProcessByProcessId(IN HANDLE Pid, OUT PEPROCESS* Process);
-
+NTSTATUS PsLookupThreadByThreadId(IN HANDLE ThreadId, OUT PETHREAD *Thread);
+*/
 
 #endif // __OARKDRIVER_H_VERSION__

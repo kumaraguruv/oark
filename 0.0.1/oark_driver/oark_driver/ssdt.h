@@ -1,5 +1,4 @@
 /*
-Copyright (c) <2010> <Dreg aka David Reguera Garcia, dreg@fr33project.org>
 Copyright (c) <2010> <0vercl0k aka Souchet Axel, 0vercl0k@tuxfamily.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,56 +20,65 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef _DEBUG_H__
-#define _DEBUG_H__
+/**
+ * @file   ssdt.h
+ * @Author 0vercl0k@tuxfamily.org
+ * @date   November, 2010
+ * @brief  SSDT Hooking stuff.
+ */
 
-#include <windows.h>
-#include <stdio.h>
-#include "common.h"
+#ifndef _SSDT_H
+#define _SSDT_H
 
-extern BOOL debug;
+
+/*
+    Organization of Wdm.h, Ntddk.h, and Ntifs.h
+    http://msdn.microsoft.com/en-us/library/ff554739%28v=VS.85%29.aspx
+*/
+#include <wdm.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#pragma pack(1)
+    typedef struct
+    {
+        PULONG Base;
+        PULONG Count;
+        ULONG Limit;
+        PUCHAR Number;
+    } KSERVICE_TABLE_DESCRIPTOR, *PKSERVICE_TABLE_DESCRIPTOR;
+#pragma pack()
+
+/* 
+    /!\ This pointer isn't exported in x64 kernels
+    http://www.msuiche.net/papers/Windows_Vista_64bits_and_unexported_kernel_symbols.pdf
+*/
+__declspec(dllimport) KSERVICE_TABLE_DESCRIPTOR KeServiceDescriptorTable;
+
+
+
 
 /**
- * @name    DisplayErrorMsg
- * @brief   This routine displays error message.
+ * @name    GetSsdtSystemBaseAddress
+ * @brief   Retrieves SSDT System base address.
  *
- * This API displays information about an error.
+ * This API gives base address of SSDT System.
  *
- * @param [in] pMsg A message.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A pointer to a KSERVICE_TABLE_DESCRIPTOR structure.
  *
  * Example Usage:
  * @code
- *    DisplayErrorMsg("MemoryAllocationFail");
+ *    GetSsdtSystemBaseAddress();
  * @endcode
  */
-VOID DisplayErrorMsg(PCHAR pMsg);
+PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress();
 
-/**
- * @name    DisplayAllocationFailureMsg
- * @brief   This routine displays memory allocation error message.
- *
- * This API displays information about a memory allocation error.
- *
- * Example Usage:
- * @code
- *    DisplayAllocationFailureMsg();
- * @endcode
- */
-VOID DisplayAllocationFailureMsg();
+#ifdef __cplusplus
+}
+#endif
 
-/**
- * @name    DisplayIOCTLFailureMsg
- * @brief   This routine displays IOCTLReadKernMem error message.
- *
- * This API displays information about a IOCTLReadKernMem error.
- *
- * Example Usage:
- * @code
- *    DisplayIOCTLFailureMsg();
- * @endcode
- */
-VOID DisplayIOCTLFailureMsg();
-
-STATUS_t EnableDebugPrivilege( void );
-
-#endif /* _DEBUG_H__ */
+#endif

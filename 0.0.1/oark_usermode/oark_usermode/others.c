@@ -1,5 +1,6 @@
 /*
 Copyright (c) <2010> <Dreg aka David Reguera Garcia, dreg@fr33project.org>
+Copyright (c) <2010> <0vercl0k aka Souchet Axel, 0vercl0k@tuxfamily.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -222,7 +223,7 @@ STATUS_t Init( void )
 {
 	ZwQueryInformationProcess = (ZWQUERYINFORMATIONPROCESS_t) \
 		GetProcAddress( GetModuleHandleA( "ntdll.dll" ), "ZwQueryInformationProcess" );
-
+    
 	if ( ZwQueryInformationProcess == NULL )
 	{
 		fprintf( stderr, " Error: Getting ZwQueryInformationProcess from ntdll\n" );
@@ -232,8 +233,21 @@ STATUS_t Init( void )
 	{
 		if ( debug )
 			printf( " OK: Getting ZwQueryInformationProcess from ntdll\n" );
-		return ST_OK;
 	}
+
+    ZwQuerySystemInformation = (ZWQUERYSYSTEMINFORMATION_t) \
+        GetProcAddress(GetModuleHandleA("ntdll.dll"), "ZwQuerySystemInformation");
+    
+    if(ZwQuerySystemInformation == NULL)
+    {
+        fprintf(stderr, "Error: Getting ZwQuerySystemInformation from ntdll\n");
+        return ST_ERROR;
+    }
+
+    if(debug)
+        printf( " OK: Getting ZwQuerySystemInformation from ntdll\n");
+    
+    return ST_OK;
 };
 
 void CheckOSVersion( void )
@@ -261,6 +275,11 @@ void CheckOSVersion( void )
 			if ( debug )
 				printf( " INFO: OS=2000, XP, Server 2003\n" );
 			Offsets.VAD_ROOT = 0x11c;
+            Offsets.KTHREADWin32Thread = 0x130;
+            Offsets.KTHREADServiceTable = 0x0E0;
+
+            //XP ETHREAD.ThreadsProcess
+            Offsets.ETHREAD2Eprocess = 0x220;
 		break;
 
 		case 6:
@@ -270,12 +289,21 @@ void CheckOSVersion( void )
 					if ( debug )
 						printf( " INFO: OS=Vista, Server 2008\n" );
 					Offsets.VAD_ROOT = 0x238;
+                    Offsets.KTHREADWin32Thread = 0x170;
+                    Offsets.KTHREADServiceTable = 0x12C;
+                    
+                    Offsets.ETHREAD2Eprocess = 0x144;
 				break;
 
 				case 1:
 					if ( debug )
 						printf( " INFO: OS=7\n" );
 					Offsets.VAD_ROOT = 0x278;
+                    Offsets.KTHREADWin32Thread = 0x18C;
+                    Offsets.KTHREADServiceTable = 0x0BC;
+
+                    //7 KTHREAD.Process
+                    Offsets.ETHREAD2Eprocess = 0x150;
 				break;
 
 				default:
@@ -294,6 +322,11 @@ void CheckOSVersion( void )
 	if ( Offsets.isSupported )
 	{
 		if ( debug )
+        {
 			printf( " OK: VAD ROOT: 0x%X\n", Offsets.VAD_ROOT );
+            printf(" OK: KTHREAD Win32Thread: 0x%X\n", Offsets.KTHREADWin32Thread);
+            printf(" OK: KTHREAD ServiceTable: 0x%X\n", Offsets.KTHREADServiceTable);
+            printf(" OK: ETHREAD to EPROCESS: 0x%X\n", Offsets.ETHREAD2Eprocess);
+        }
 	}
 }

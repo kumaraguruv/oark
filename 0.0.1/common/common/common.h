@@ -1,5 +1,6 @@
 /*
 Copyright (c) <2010> <Dreg aka David Reguera Garcia, dreg@fr33project.org>
+Copyright (c) <2010> <0vercl0k aka Souchet Axel, 0vercl0k@tuxfamily.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +27,7 @@ THE SOFTWARE.
 #include <WinDef.h>
 
 #define OARK_VERSION "0.0.1"
+#define OARK_TAG 'oark'
 
 #define DEVICE_NAME			"\\Device\\OARK_DRIVER"
 #define SYMLINK_NAME		"\\DosDevices\\OARK_DRIVER"
@@ -48,7 +50,10 @@ typedef enum MEM_SYM_TYP_e
 	SYM_TYP_KPCR,
 	SYM_TYP_IDT,
 	SYM_TYP_GDT,
-	SYM_TYP_PSLOUPRBYID,
+    SYM_TYP_SSDT_SYSTEM, /*!< Obtain KeServiceDescriptorTable symbol */
+    SYM_TYP_PSLOUTHBYID, /*!< Perform a call to PsLookupThreadByThreadId, TID -> ETHREAD. */  
+	SYM_TYP_PSLOUPRBYID, /*!< Perform a call to PsLookupProcessByProcessId, PID -> EPROCESS */
+    SYM_TYP_READWITHSTACKATTACH, /*!< Perform a memory read after a KeStackAttachProcess */
 	SYM_TYP_OBDEREFOBJ
 
 } MEM_SYM_TYP_t;
@@ -59,7 +64,7 @@ typedef struct READ_KERN_MEM_s
 	DWORD            size;
 	MEM_SYM_TYP_t    type;
 	void           * dst_address;
-
+    void           * other_info;
 } READ_KERN_MEM_t;
 
 #pragma pack(1)

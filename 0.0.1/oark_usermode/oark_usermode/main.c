@@ -1,5 +1,6 @@
 /*
 Copyright (c) <2010> <Dreg aka David Reguera Garcia, dreg@fr33project.org>
+Copyright (c) <2010> <0vercl0k aka Souchet Axel, 0vercl0k@tuxfamily.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +27,7 @@ THE SOFTWARE.
 #include "common.h"
 #include "driverusr.h"
 #include "idt.h"
+#include "ssdt.h"
 #include "others.h"
 #include "pebhooking.h"
 
@@ -78,6 +80,9 @@ int main( void )
 						printf( " OK: Driver Loaded!\n" );
 
 					CheckOSVersion();
+
+                    printf(" INFO: Detecting SSDT Hooking:\n");
+                    CheckSSDTHooking(device);
 
 					printf( " INFO: Detecting PEB Hooking:\n" );
 					CheckPEBHooking( device );

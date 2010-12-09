@@ -1,5 +1,6 @@
 /*
 Copyright (c) <2010> <Dreg aka David Reguera Garcia, dreg@fr33project.org>
+Copyright (c) <2010> <0vercl0k aka Souchet Axel, 0vercl0k@tuxfamily.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +37,9 @@ typedef struct _OFFSETS
 	BOOLEAN isSupported;
 
 	DWORD VAD_ROOT;
-
+    DWORD KTHREADWin32Thread;
+    DWORD KTHREADServiceTable;
+    DWORD ETHREAD2Eprocess;
 } OFFSETS;
 
 OFFSETS Offsets;
@@ -207,6 +210,14 @@ typedef NTSTATUS
  PULONG
  ); 
 
+typedef NTSTATUS 
+(WINAPI *ZWQUERYSYSTEMINFORMATION_t)(
+    ULONG,
+    PVOID,
+    ULONG,
+    PULONG
+);
+
 typedef struct _PROCESS_BASIC_INFORMATION 
 {
 	PVOID Reserved1;
@@ -218,6 +229,7 @@ typedef struct _PROCESS_BASIC_INFORMATION
 } PROCESS_BASIC_INFORMATION;
 
 ZWQUERYINFORMATIONPROCESS_t ZwQueryInformationProcess;
+ZWQUERYSYSTEMINFORMATION_t ZwQuerySystemInformation;
 
 STATUS_t LockInstance( DWORD * );
 BOOLEAN DumpRSRC( char *, int, char * );
