@@ -46,7 +46,7 @@ int main( void )
 		" | Main Developers (Alphabetical order):                           |\n"
 		" |   - Dreg aka David Reguera Garcia - Dreg@fr33project.org        |\n"
 		" |                                                                 |\n"
-		" | Contributors (Alphabetical order):                              |\n"
+		" | Committers (Alphabetical order):                                |\n"
 		" |   - 0vercl0k aka Axel Souchet - 0vercl0k@tuxfamily.org          |\n"
 		" |                                                                 |\n"
 		" | Credits / Greetings (Alphabetical order):                       |\n"
