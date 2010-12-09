@@ -1,5 +1,6 @@
 /*
 Copyright (c) <2010> <Dreg aka David Reguera Garcia, dreg@fr33project.org>
+Copyright (c) <2010> <0vercl0k aka Souchet Axel, 0vercl0k@tuxfamily.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +43,6 @@ THE SOFTWARE.
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <ntddk.h>
 #include <string.h>
 #ifdef __cplusplus
 }; // extern "C"
@@ -50,6 +50,7 @@ extern "C" {
 
 #include "oark_driver.h"
 #include "common.h"
+#include "ssdt.h"
 
 #ifdef __cplusplus
 namespace { // anonymous namespace to limit the scope of this global variable!
@@ -154,8 +155,10 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
 	void               * ptrdat;
 	IDTR                 idtr;
 	PEPROCESS eprocess;
+    PETHREAD ethread;
 	NTSTATUS retf;
 	ULONG ret_len;
+    KAPC_STATE apcState = {0};
 	
     switch(irpSp->Parameters.DeviceIoControl.IoControlCode)
     {
@@ -212,11 +215,39 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
 						eprocess = NULL;
 				break;
 
+                case SYM_TYP_PSLOUTHBYID:
+                    retf = PsLookupThreadByThreadId((HANDLE)read_kern_mem.src_address, &ethread);
+                    ptrdat = &ethread;
+                    if(!NT_SUCCESS(retf))
+                        ethread = NULL;
+                    else
+                        ObDereferenceObject(ethread);
+                break;
+  
+                case SYM_TYP_READWITHSTACKATTACH:
+                    memset(&apcState, 0, sizeof(KAPC_STATE));
+                    ptrdat = ExAllocatePoolWithTag(NonPagedPool, read_kern_mem.size, OARK_TAG);
+                    if(ptrdat == NULL)
+                        break;
+
+                    KeStackAttachProcess((PRKPROCESS)read_kern_mem.other_info, &apcState);
+                    memcpy(ptrdat, read_kern_mem.src_address, read_kern_mem.size);
+                    KeUnstackDetachProcess(&apcState);
+
+                    WriteUserMode(read_kern_mem.dst_address, read_kern_mem.size, read_kern_mem.src_address);
+                    ExFreePoolWithTag(ptrdat, OARK_TAG);
+                    ptrdat = NULL;
+                break;
+
 				case SYM_TYP_OBDEREFOBJ:
 					ObDereferenceObject( read_kern_mem.src_address );
 
 					ptrdat = NULL;
 				break;
+
+                case SYM_TYP_SSDT_SYSTEM:
+                    ptrdat = GetSsdtSystemBaseAddress();
+                break;
 
 				default:
 					ptrdat = NULL;

@@ -2,6 +2,20 @@
 
 debug = TRUE;
 
+VOID DisplayErrorMsg(PCHAR pMsg)
+{
+   fprintf(stderr, "[ERROR] [%s():line %u] Error: '%s' -> GetLastError() = %d.\n", __FUNCTION__, __LINE__, pMsg, GetLastError()); 
+}
+
+VOID DisplayAllocationFailureMsg()
+{
+    DisplayErrorMsg("Memory allocation failed");
+}
+
+VOID DisplayIOCTLFailureMsg()
+{
+    DisplayErrorMsg("IOCTL_CHANGE_MODE, IOCTLReadKernMem failed");
+}
 
 STATUS_t EnableDebugPrivilege( void ) 
 { 
