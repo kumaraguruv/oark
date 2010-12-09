@@ -163,57 +163,54 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
     switch(irpSp->Parameters.DeviceIoControl.IoControlCode)
     {
         case OARK_IOCTL_CHANGE_MODE:
-		    DbgPrint( " IOCTL!\n" );
+            DbgPrint( " IOCTL!\n" );
             if( irpSp->Parameters.DeviceIoControl.InputBufferLength != sizeof( READ_KERN_MEM_t ) ) 
-				    break;
+                break;
 
-		    DbgPrint( " IN IOCTL!\n" );
-		    read_kern_mem =  * ( (READ_KERN_MEM_t *) Irp->AssociatedIrp.SystemBuffer );
+            DbgPrint( " IN IOCTL!\n" );
+            read_kern_mem =  * ( (READ_KERN_MEM_t *) Irp->AssociatedIrp.SystemBuffer );
 
-		    switch ( read_kern_mem.type )
-		    {
-			    case SYM_TYP_KPCR:
-			        /* 
-				        Comment by Dreg:
+            switch ( read_kern_mem.type )
+            {
+                case SYM_TYP_KPCR:
+                    /* 
+                        Comment by Dreg:
 
-				        FS points to KPCR:
+                        FS points to KPCR:
 
-				        1: kd> dt nt!_KPCR
-				           +0x000 NtTib            : _NT_TIB
-				           +0x01c SelfPcr          : Ptr32 _KPCR
-				           ..
+                        1: kd> dt nt!_KPCR
+                           +0x000 NtTib            : _NT_TIB
+                           +0x01c SelfPcr          : Ptr32 _KPCR
+                           ..
 
-				        Then FS:[0x1C] points to KPCR, then GDT[FS] (0x30) == FS:[0x1C]
-			        */
-			        __asm 
-			        { 
-				        MOV EAX, FS:[0x1C] 
-				        MOV ptrdat, EAX 
-			        }
+                        Then FS:[0x1C] points to KPCR, then GDT[FS] (0x30) == FS:[0x1C]
+                    */
+                    __asm 
+                    { 
+                        MOV EAX, FS:[0x1C] 
+                        MOV ptrdat, EAX 
+                    }
 
-				    DbgPrint( " FS0: 0x%08X\n", ptrdat );
-			    break;
+                    DbgPrint( " FS0: 0x%08X\n", ptrdat );
+                break;
 
-			    case SYM_TYP_IDT:
-			        __asm { sidt idtr }
+                case SYM_TYP_IDT:
+                    __asm { sidt idtr }
+                    ptrdat = & idtr;
+                    DbgPrint( " IDT 0x%08X\n", MAKEDWORD( idtr.baseAddressLow, idtr.baseAddressHi ) );
+                break;
+        
+                case SYM_TYP_NULL:
+                    ptrdat = read_kern_mem.src_address;
+                    DbgPrint( " Reading... 0x%08X\n", ptrdat );
+                break;
 
-			        ptrdat = & idtr;
-
-					
-			        DbgPrint( " IDT 0x%08X\n", MAKEDWORD( idtr.baseAddressLow, idtr.baseAddressHi ) );
-			    break;
-
-			    case SYM_TYP_NULL:
-				    ptrdat = read_kern_mem.src_address;
-				    DbgPrint( " Reading... 0x%08X\n", ptrdat );
-			    break;
-
-			    case SYM_TYP_PSLOUPRBYID:
-				     retf = PsLookupProcessByProcessId( (HANDLE) read_kern_mem.src_address, & eprocess );
-				     ptrdat = & eprocess;
-				     if( retf != STATUS_SUCCESS )
-					    eprocess = NULL;
-			    break;
+                case SYM_TYP_PSLOUPRBYID:
+                    retf = PsLookupProcessByProcessId( (HANDLE) read_kern_mem.src_address, & eprocess );
+                    ptrdat = & eprocess;
+                    if( retf != STATUS_SUCCESS )
+                        eprocess = NULL;
+                break;
 
                 case SYM_TYP_PSLOUTHBYID:
                     retf = PsLookupThreadByThreadId((HANDLE)read_kern_mem.src_address, &ethread);
@@ -239,25 +236,24 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
                     ptrdat = NULL;
                 break;
 
-			    case SYM_TYP_OBDEREFOBJ:
-				    ObDereferenceObject( read_kern_mem.src_address );
-
-				    ptrdat = NULL;
-			    break;
+                case SYM_TYP_OBDEREFOBJ:
+                    ObDereferenceObject( read_kern_mem.src_address );
+                    ptrdat = NULL;
+                break;
 
                 case SYM_TYP_SSDT_SYSTEM:
                     ptrdat = GetSsdtSystemBaseAddress();
                 break;
 
-			    default:
-				    ptrdat = NULL;
-			    break;
-			}
+                default:
+                    ptrdat = NULL;
+                break;
+            }
 
             if ( ptrdat != NULL )
-	            WriteUserMode( read_kern_mem.dst_address, read_kern_mem.size, ptrdat );
+                WriteUserMode( read_kern_mem.dst_address, read_kern_mem.size, ptrdat );
 		
-	        Irp->IoStatus.Status = STATUS_SUCCESS;
+            Irp->IoStatus.Status = STATUS_SUCCESS;
         break;
 
         default:
