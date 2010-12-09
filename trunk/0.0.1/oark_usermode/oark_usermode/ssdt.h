@@ -491,8 +491,4 @@ PDWORD GetGUIThread(HANDLE hDevice);
  */
 PDWORD Ethread2Eprocess(HANDLE hDevice, PDWORD pEthread);
 
-#define _EXCEPT_() {                                                                      \
-    fprintf(stderr, "[EXCEP] [%s():l%u] Exception catched.\n", __FUNCTION__, __LINE__);   \
-}
-
 #endif

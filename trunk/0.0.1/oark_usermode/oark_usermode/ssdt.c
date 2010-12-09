@@ -44,7 +44,7 @@ VOID CheckSSDTHooking(HANDLE hDevice)
     pListHead = SsdtSystemHookingDetection(hDevice);
     if(pListHead == NULL)
     {
-        DisplayErrorMsg("The list is empty");
+        OARK_ERROR("The list is empty");
         return;
     }
 
@@ -72,7 +72,7 @@ VOID CheckSSDTHooking(HANDLE hDevice)
     pListHead = SsdtShadowHookingDetection(hDevice);
     if(pListHead == NULL)
     {
-        DisplayErrorMsg("The list is empty");
+        OARK_ERROR("The list is empty");
         return;
     }
 
@@ -103,21 +103,21 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice)
         pWin32kInfo = GetWin32kModuleInformation();
         if(pWin32kInfo == NULL)
         {
-            DisplayErrorMsg("Couldn't retrieve win32k information");
+            OARK_ERROR("Couldn't retrieve win32k information");
             goto clean;
         }
 
         pShadowSSDT = GetSsdtShadowStructure(hDevice);
         if(pShadowSSDT == NULL)
         {
-            DisplayErrorMsg("Couldn't retrieve SSDT shadow base address");
+            OARK_ERROR("Couldn't retrieve SSDT shadow base address");
             goto clean;
         }
 
         pEthreadGui = GetGUIThread(hDevice);
         if(pEthreadGui == NULL)
         {
-            DisplayErrorMsg("Couldn't retrieve a GUI-thread");
+            OARK_ERROR("Couldn't retrieve a GUI-thread");
             goto clean;
         }
         
@@ -126,14 +126,14 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice)
         pEprocessWithGuiThread = Ethread2Eprocess(hDevice, pEthreadGui);
         if(pEprocessWithGuiThread == NULL)
         {
-            DisplayErrorMsg("Couldn't obtain eprocess pointer");
+            OARK_ERROR("Couldn't obtain eprocess pointer");
             goto clean;
         }
 
         pFunctShadowSSDT = (PDWORD)malloc(sizeof(DWORD) * pShadowSSDT->Limit);
         if(pFunctShadowSSDT == NULL)
         {
-            DisplayAllocationFailureMsg();
+            OARK_IOCTL_ERROR();
             goto clean;
         }
         
@@ -147,7 +147,7 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice)
 
         if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
         {
-            DisplayIOCTLFailureMsg();
+            OARK_IOCTL_ERROR();
             goto clean;
         }
 
@@ -164,7 +164,7 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice)
             free(pFunctShadowSSDT);
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
-        _EXCEPT_();
+        OARK_EXCEPTION();
 
     return pListHead;
 }
@@ -182,21 +182,21 @@ PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice)
         pKernInfo = GetKernelModuleInformation();
         if(pKernInfo == NULL)
         {
-            DisplayErrorMsg("Couldn't retrieve kernel information");
+            OARK_ERROR("Couldn't retrieve kernel information");
             goto clean;
         }
 
         pSystemSSDT = GetSsdtSystemStructure(hDevice);
         if(pSystemSSDT == NULL)
         {
-            DisplayErrorMsg("Couldn't retrieve SSDT System base address");
+            OARK_ERROR("Couldn't retrieve SSDT System base address");
             goto clean;
         }
 
         pFunctSystemSSDT = (PDWORD)malloc(sizeof(PDWORD) * pSystemSSDT->Limit);
         if(pFunctSystemSSDT == NULL)
         {
-            DisplayAllocationFailureMsg();
+            OARK_IOCTL_ERROR();
             goto clean;
         }
 
@@ -207,7 +207,7 @@ PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice)
 
         if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
         {
-            DisplayIOCTLFailureMsg();
+            OARK_IOCTL_ERROR();
             goto clean;
         }
 
@@ -224,7 +224,7 @@ PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice)
             free(pFunctSystemSSDT);
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
-        _EXCEPT_();
+        OARK_EXCEPTION();
 
     return pListHead;
 }
@@ -242,7 +242,7 @@ PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pS
         pListHead = (PSLIST_HEADER)malloc(sizeof(SLIST_HEADER));
         if(pListHead == NULL)
         {
-            DisplayAllocationFailureMsg();
+            OARK_IOCTL_ERROR();
             return NULL;
         }
         
@@ -255,7 +255,7 @@ PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pS
                 pHookInfo = malloc(sizeof(HOOK_INFORMATION));
                 if(pHookInfo == NULL)
                 {
-                    DisplayAllocationFailureMsg();
+                    OARK_IOCTL_ERROR();
                     
                     free(pListHead);
                     return NULL;
@@ -269,7 +269,7 @@ PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pS
         }    
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
-        _EXCEPT_();
+        OARK_EXCEPTION();
 
     return pListHead;
 }
@@ -301,7 +301,7 @@ PCHAR IsAddressInADriver(DWORD pFunct)
         pSysModulesInfos = GetModuleList();
         if(pSysModulesInfos == NULL)
         {
-            DisplayErrorMsg("Modules list is equal to NULL");
+            OARK_ERROR("Modules list is equal to NULL");
             return NULL;
         }
 
@@ -316,7 +316,7 @@ PCHAR IsAddressInADriver(DWORD pFunct)
                 pDriverName = (PCHAR)malloc(sizeStr);
                 if(pDriverName == NULL)
                 {
-                    DisplayAllocationFailureMsg();
+                    OARK_IOCTL_ERROR();
                     return NULL;
                 }
 
@@ -328,7 +328,7 @@ PCHAR IsAddressInADriver(DWORD pFunct)
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
-        _EXCEPT_();
+        OARK_EXCEPTION();
 
     free(pSysModulesInfos);
     return NULL;
@@ -344,20 +344,20 @@ PSYSTEM_MODULE GetKernelModuleInformation()
         pSysModuleList = GetModuleList();
         if(pSysModuleList == NULL)
         {
-            DisplayErrorMsg("Modules list is equal to NULL");
+            OARK_ERROR("Modules list is equal to NULL");
             goto clean;
         }
 
         if(pSysModuleList->ModulesCount == 0)
         {
-            DisplayErrorMsg("ModulesCount is equal to 0");
+            OARK_ERROR("ModulesCount is equal to 0");
             goto clean;
         }
 
         pSysModule = (PSYSTEM_MODULE)malloc(sizeof(SYSTEM_MODULE));
         if(pSysModule == NULL)
         {
-            DisplayAllocationFailureMsg();
+            OARK_IOCTL_ERROR();
             goto clean;
         }
 
@@ -369,7 +369,7 @@ PSYSTEM_MODULE GetKernelModuleInformation()
             free(pSysModuleList);
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
-        _EXCEPT_();
+        OARK_EXCEPTION();
 
     return pSysModule;
 }
@@ -383,12 +383,12 @@ PSYSTEM_MODULE GetWin32kModuleInformation()
         pSysModule = GetModuleInformation("win32k.sys");
         if(pSysModule == NULL)
         {
-            DisplayErrorMsg("Couldn't obtain your module information");
+            OARK_ERROR("Couldn't obtain your module information");
             return NULL;
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
-        _EXCEPT_();
+        OARK_EXCEPTION();
 
     return pSysModule;
 }
@@ -404,7 +404,7 @@ PSYSTEM_MODULE GetModuleInformation(PCHAR pModuleName)
         pSysModuleList = GetModuleList();
         if(pSysModuleList == NULL)
         {
-            DisplayErrorMsg("Modules list is equal to NULL");
+            OARK_ERROR("Modules list is equal to NULL");
             goto clean;
         }
 
@@ -419,14 +419,14 @@ PSYSTEM_MODULE GetModuleInformation(PCHAR pModuleName)
 
         if(pSysModuleFound == NULL)
         {
-            DisplayErrorMsg("Couldn't find your module");
+            OARK_ERROR("Couldn't find your module");
             goto clean;
         }
 
         pSysModule = (PSYSTEM_MODULE)malloc(sizeof(SYSTEM_MODULE));
         if(pSysModule == NULL)
         {
-            DisplayAllocationFailureMsg();
+            OARK_IOCTL_ERROR();
             goto clean;
         }
 
@@ -438,7 +438,7 @@ PSYSTEM_MODULE GetModuleInformation(PCHAR pModuleName)
             free(pSysModuleList);
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
-        _EXCEPT_();
+        OARK_EXCEPTION();
 
     return pSysModule;
 }
@@ -469,13 +469,13 @@ PSYSTEM_MODULE_INFORMATION GetModuleList()
 
         if(!NT_SUCCESS(status))
         {
-            DisplayErrorMsg("ZwQuerySystemInformation failed");
+            OARK_ERROR("ZwQuerySystemInformation failed");
             free(pModuleList);
             return NULL;
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
-        _EXCEPT_();
+        OARK_EXCEPTION();
 
     return pModuleList;
 }
@@ -488,7 +488,7 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemStructure(HANDLE hDevice)
     pSsdtSystem = (PKSERVICE_TABLE_DESCRIPTOR)malloc(sizeof(KSERVICE_TABLE_DESCRIPTOR));
     if(pSsdtSystem == NULL)
     {
-        DisplayAllocationFailureMsg();
+        OARK_IOCTL_ERROR();
         return NULL;
     }
 
@@ -498,7 +498,7 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemStructure(HANDLE hDevice)
     
     if(IOCTLReadKernMem(hDevice, &read_kern_mem) == NULL)
     {
-        DisplayIOCTLFailureMsg();
+        OARK_IOCTL_ERROR();
         free(pSsdtSystem);
         return NULL;
     }
@@ -523,20 +523,20 @@ PSYSTEM_PROCESS_INFORMATION GetProcessList()
         pProcessInfo = (PSYSTEM_PROCESS_INFORMATION)malloc(size);
         if(pProcessInfo == NULL)
         {
-            DisplayAllocationFailureMsg();
+            OARK_IOCTL_ERROR();
             return NULL;
         }
 
         state = ZwQuerySystemInformation(SystemProcessInformation , pProcessInfo , size , &size);
         if(!NT_SUCCESS(state))
         {
-            DisplayErrorMsg("ZwQuerySystemInformation failed");
+            OARK_ERROR("ZwQuerySystemInformation failed");
             free(pProcessInfo);
             return NULL;
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
-        _EXCEPT_();
+        OARK_EXCEPTION();
 
     return pProcessInfo;
 }
@@ -554,14 +554,14 @@ PDWORD GetGUIThread(HANDLE hDevice)
     {
         if(Offsets.isSupported == FALSE)
         {
-            DisplayErrorMsg("This function requires offsets support");
+            OARK_ERROR("This function requires offsets support");
             return NULL;
         }
 
         pProcessInfos = GetProcessList();
         if(pProcessInfos == NULL)
         {
-            DisplayErrorMsg("GetProcessList failed");
+            OARK_ERROR("GetProcessList failed");
             return NULL;
         }
 
@@ -576,7 +576,7 @@ PDWORD GetGUIThread(HANDLE hDevice)
                     pEthread = GetETHREADStructureByTid(hDevice, (DWORD)(pProcessInfos->Threads[i].ClientId.UniqueThread));
                     if(pEthread == NULL)
                     {
-                        DisplayErrorMsg("GetETHREADStructureByTid failed");
+                        OARK_ERROR("GetETHREADStructureByTid failed");
                         free(pProcessInformation);
                         return NULL;
                     }
@@ -589,7 +589,7 @@ PDWORD GetGUIThread(HANDLE hDevice)
                     if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
                     {
                         free(pProcessInformation);
-                        DisplayIOCTLFailureMsg();
+                        OARK_IOCTL_ERROR();
                         return NULL;
                     }
 
@@ -610,7 +610,7 @@ PDWORD GetGUIThread(HANDLE hDevice)
         free(pProcessInformation);
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
-        _EXCEPT_();
+        OARK_EXCEPTION();
 
     return pEthreadGuiThread;
 }
@@ -631,7 +631,7 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowStructure(HANDLE hDevice)
         pGuiEthread = GetGUIThread(hDevice);
         if(pGuiEthread == NULL)
         {
-            DisplayErrorMsg("GetGUIThread failed");
+            OARK_ERROR("GetGUIThread failed");
             return NULL;
         }
 
@@ -642,7 +642,7 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowStructure(HANDLE hDevice)
         
         if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
         {
-            DisplayIOCTLFailureMsg();
+            OARK_IOCTL_ERROR();
             return NULL;
         }
 
@@ -650,7 +650,7 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowStructure(HANDLE hDevice)
         pSsdtShadow = (PKSERVICE_TABLE_DESCRIPTOR)malloc(sizeof(KSERVICE_TABLE_DESCRIPTOR));
         if(pSsdtShadow == NULL)
         {
-            DisplayAllocationFailureMsg();
+            OARK_IOCTL_ERROR();
             return NULL;
         }
 
@@ -661,13 +661,13 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowStructure(HANDLE hDevice)
 
         if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
         {
-            DisplayIOCTLFailureMsg();
+            OARK_IOCTL_ERROR();
             free(pSsdtShadow);
             return NULL;
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
-        _EXCEPT_();
+        OARK_EXCEPTION();
     
     return pSsdtShadow;
 }
@@ -684,7 +684,7 @@ PDWORD GetETHREADStructureByTid(HANDLE hDevice, DWORD threadID)
 
     if(IOCTLReadKernMem(hDevice, &read_kern_mem) == NULL)
     {
-        DisplayIOCTLFailureMsg();
+        OARK_IOCTL_ERROR();
         return NULL;
     }
 
@@ -700,7 +700,7 @@ PDWORD Ethread2Eprocess(HANDLE hDevice, PDWORD pEthread)
     {
         if(Offsets.isSupported == FALSE)
         {
-            DisplayErrorMsg("This function requires offset support");
+            OARK_ERROR("This function requires offset support");
             return NULL;
         }
 
@@ -711,12 +711,12 @@ PDWORD Ethread2Eprocess(HANDLE hDevice, PDWORD pEthread)
 
         if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
         {
-            DisplayIOCTLFailureMsg();
+            OARK_IOCTL_ERROR();
             return NULL;
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
-        _EXCEPT_();
+        OARK_EXCEPTION();
 
     return pEprocess;
 }
