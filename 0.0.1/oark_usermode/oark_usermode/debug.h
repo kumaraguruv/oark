@@ -30,6 +30,22 @@ THE SOFTWARE.
 
 extern BOOL debug;
 
+#define OARK_EXCEPTION(){                                \
+    DisplayExceptionMsg(__FUNCTION__, __LINE__);         \
+}
+
+#define OARK_ERROR(x) {                                  \
+    DisplayErrorMsg(x, __FUNCTION__, __LINE__);          \
+}
+
+#define OARK_ALLOCATION_ERROR() {                        \
+    DisplayAllocationFailureMsg(__FUNCTION__, __LINE__); \
+}
+
+#define OARK_IOCTL_ERROR() {                             \
+    DisplayIOCTLFailureMsg(__FUNCTION__, __LINE__);      \
+}
+
 /**
  * @name    DisplayErrorMsg
  * @brief   This routine displays error message.
@@ -37,13 +53,15 @@ extern BOOL debug;
  * This API displays information about an error.
  *
  * @param [in] pMsg A message.
+ * @param [in] pFunctName Function Name.
+ * @param [in] line Line number.
  *
  * Example Usage:
  * @code
- *    DisplayErrorMsg("MemoryAllocationFail");
+ *    DisplayErrorMsg("MemoryAllocationFail", "test", 1337);
  * @endcode
  */
-VOID DisplayErrorMsg(PCHAR pMsg);
+VOID DisplayErrorMsg(PCHAR pMsg, PCHAR pFunctName, DWORD line);
 
 /**
  * @name    DisplayAllocationFailureMsg
@@ -51,12 +69,15 @@ VOID DisplayErrorMsg(PCHAR pMsg);
  *
  * This API displays information about a memory allocation error.
  *
+ * @param [in] pFunctName Function Name.
+ * @param [in] line Line number.
+ *
  * Example Usage:
  * @code
- *    DisplayAllocationFailureMsg();
+ *    DisplayAllocationFailureMsg("test", 1337);
  * @endcode
  */
-VOID DisplayAllocationFailureMsg();
+VOID DisplayAllocationFailureMsg(PCHAR pFunctName, DWORD line);
 
 /**
  * @name    DisplayIOCTLFailureMsg
@@ -64,12 +85,31 @@ VOID DisplayAllocationFailureMsg();
  *
  * This API displays information about a IOCTLReadKernMem error.
  *
+ * @param [in] pFunctName Function Name.
+ * @param [in] line Line number.
+ *
  * Example Usage:
  * @code
- *    DisplayIOCTLFailureMsg();
+ *    DisplayIOCTLFailureMsg("test", 1337);
  * @endcode
  */
-VOID DisplayIOCTLFailureMsg();
+VOID DisplayIOCTLFailureMsg(PCHAR pFunctName, DWORD line);
+
+/**
+ * @name    DisplayExceptionMsg
+ * @brief   This routine displays an error message when exception is catched.
+ *
+ * This API displays information when an exception is catched.
+ *
+ * @param [in] pFunctName Function Name.
+ * @param [in] line Line number.
+ *
+ * Example Usage:
+ * @code
+ *    DisplayExceptionMsg("test", 1337);
+ * @endcode
+ */
+VOID DisplayExceptionMsg(PCHAR pFunctName, DWORD line);
 
 STATUS_t EnableDebugPrivilege( void );
 

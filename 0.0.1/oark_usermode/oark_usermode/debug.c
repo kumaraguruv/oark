@@ -2,19 +2,24 @@
 
 debug = TRUE;
 
-VOID DisplayErrorMsg(PCHAR pMsg)
+VOID DisplayErrorMsg(PCHAR pMsg, PCHAR pFunctName, DWORD line)
 {
-   fprintf(stderr, "[ERROR] [%s():line %u] Error: '%s' -> GetLastError() = %d.\n", __FUNCTION__, __LINE__, pMsg, GetLastError()); 
+   fprintf(stderr, "[ERROR] [%s():line %u] Error: '%s' -> GetLastError() = %d.\n", pFunctName, __LINE__, line, GetLastError()); 
 }
 
-VOID DisplayAllocationFailureMsg()
+VOID DisplayAllocationFailureMsg(PCHAR pFunctName, DWORD line)
 {
-    DisplayErrorMsg("Memory allocation failed");
+    DisplayErrorMsg("Memory allocation failed", pFunctName, line);
 }
 
-VOID DisplayIOCTLFailureMsg()
+VOID DisplayIOCTLFailureMsg(PCHAR pFunctName, DWORD line)
 {
-    DisplayErrorMsg("IOCTL_CHANGE_MODE, IOCTLReadKernMem failed");
+    DisplayErrorMsg("IOCTL_CHANGE_MODE, IOCTLReadKernMem failed", pFunctName, line);
+}
+
+VOID DisplayExceptionMsg(PCHAR pFunctName, DWORD line)
+{
+    DisplayErrorMsg("An exception was catched", pFunctName, line);
 }
 
 STATUS_t EnableDebugPrivilege( void ) 
