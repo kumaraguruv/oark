@@ -289,6 +289,7 @@ PHOOK_INFORMATION PopHookInformationEntry(PSLIST_HEADER pListHead)
     
     return CONTAINING_RECORD(pListEntry, HOOK_INFORMATION, SListEntry);
 }
+
 PCHAR IsAddressInADriver(DWORD pFunct)
 {
     PCHAR pDriverName = NULL;
@@ -539,6 +540,7 @@ PSYSTEM_PROCESS_INFORMATION GetProcessList()
 
     return pProcessInfo;
 }
+
 PDWORD GetGUIThread(HANDLE hDevice)
 {
     PSYSTEM_PROCESS_INFORMATION pProcessInfos = NULL, pProcessInformation = NULL;
