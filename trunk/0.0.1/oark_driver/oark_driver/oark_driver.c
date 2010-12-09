@@ -62,7 +62,7 @@ PDRIVER_OBJECT pdoGlobalDrvObj = 0;
 
 int WriteUserMode( void * address, DWORD size, void * data )
 {
-	NTSTATUS Status;
+    NTSTATUS Status;
 	PMDL mdl;
 	PMDL mdl_src;
 	int returnf;
@@ -151,69 +151,69 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
 {
     NTSTATUS status = STATUS_SUCCESS;
     PIO_STACK_LOCATION irpSp = IoGetCurrentIrpStackLocation(Irp);
-	READ_KERN_MEM_t      read_kern_mem;
-	void               * ptrdat;
-	IDTR                 idtr;
-	PEPROCESS eprocess;
+    READ_KERN_MEM_t      read_kern_mem;
+    void               * ptrdat;
+    IDTR                 idtr;
+    PEPROCESS eprocess;
     PETHREAD ethread;
-	NTSTATUS retf;
-	ULONG ret_len;
+    NTSTATUS retf;
+    ULONG ret_len;
     KAPC_STATE apcState = {0};
 	
     switch(irpSp->Parameters.DeviceIoControl.IoControlCode)
     {
-    case OARK_IOCTL_CHANGE_MODE:
-		DbgPrint( " IOCTL!\n" );
-        if( irpSp->Parameters.DeviceIoControl.InputBufferLength != sizeof( READ_KERN_MEM_t ) ) 
-				break;
+        case OARK_IOCTL_CHANGE_MODE:
+		    DbgPrint( " IOCTL!\n" );
+            if( irpSp->Parameters.DeviceIoControl.InputBufferLength != sizeof( READ_KERN_MEM_t ) ) 
+				    break;
 
-		DbgPrint( " IN IOCTL!\n" );
-		read_kern_mem =  * ( (READ_KERN_MEM_t *) Irp->AssociatedIrp.SystemBuffer );
+		    DbgPrint( " IN IOCTL!\n" );
+		    read_kern_mem =  * ( (READ_KERN_MEM_t *) Irp->AssociatedIrp.SystemBuffer );
 
-		switch ( read_kern_mem.type )
-		{
-				case SYM_TYP_KPCR:
-					/* 
-						Comment by Dreg:
+		    switch ( read_kern_mem.type )
+		    {
+			    case SYM_TYP_KPCR:
+			        /* 
+				        Comment by Dreg:
 
-						FS points to KPCR:
+				        FS points to KPCR:
 
-						1: kd> dt nt!_KPCR
-						   +0x000 NtTib            : _NT_TIB
-						   +0x01c SelfPcr          : Ptr32 _KPCR
-						   ..
+				        1: kd> dt nt!_KPCR
+				           +0x000 NtTib            : _NT_TIB
+				           +0x01c SelfPcr          : Ptr32 _KPCR
+				           ..
 
-						Then FS:[0x1C] points to KPCR, then GDT[FS] (0x30) == FS:[0x1C]
-					*/
-					__asm 
-					{ 
-						MOV EAX, FS:[0x1C] 
-						MOV ptrdat, EAX 
-					}
+				        Then FS:[0x1C] points to KPCR, then GDT[FS] (0x30) == FS:[0x1C]
+			        */
+			        __asm 
+			        { 
+				        MOV EAX, FS:[0x1C] 
+				        MOV ptrdat, EAX 
+			        }
 
-					DbgPrint( " FS0: 0x%08X\n", ptrdat );
-				break;
+				    DbgPrint( " FS0: 0x%08X\n", ptrdat );
+			    break;
 
-				case SYM_TYP_IDT:
-					__asm { sidt idtr }
+			    case SYM_TYP_IDT:
+			        __asm { sidt idtr }
 
-					ptrdat = & idtr;
+			        ptrdat = & idtr;
 
 					
-					DbgPrint( " IDT 0x%08X\n", MAKEDWORD( idtr.baseAddressLow, idtr.baseAddressHi ) );
-				break;
+			        DbgPrint( " IDT 0x%08X\n", MAKEDWORD( idtr.baseAddressLow, idtr.baseAddressHi ) );
+			    break;
 
-				case SYM_TYP_NULL:
-					ptrdat = read_kern_mem.src_address;
-					DbgPrint( " Reading... 0x%08X\n", ptrdat );
-				break;
+			    case SYM_TYP_NULL:
+				    ptrdat = read_kern_mem.src_address;
+				    DbgPrint( " Reading... 0x%08X\n", ptrdat );
+			    break;
 
-				case SYM_TYP_PSLOUPRBYID:
-					 retf = PsLookupProcessByProcessId( (HANDLE) read_kern_mem.src_address, & eprocess );
-					 ptrdat = & eprocess;
-					 if( retf != STATUS_SUCCESS )
-						eprocess = NULL;
-				break;
+			    case SYM_TYP_PSLOUPRBYID:
+				     retf = PsLookupProcessByProcessId( (HANDLE) read_kern_mem.src_address, & eprocess );
+				     ptrdat = & eprocess;
+				     if( retf != STATUS_SUCCESS )
+					    eprocess = NULL;
+			    break;
 
                 case SYM_TYP_PSLOUTHBYID:
                     retf = PsLookupThreadByThreadId((HANDLE)read_kern_mem.src_address, &ethread);
@@ -223,7 +223,7 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
                     else
                         ObDereferenceObject(ethread);
                 break;
-  
+      
                 case SYM_TYP_READWITHSTACKATTACH:
                     memset(&apcState, 0, sizeof(KAPC_STATE));
                     ptrdat = ExAllocatePoolWithTag(NonPagedPool, read_kern_mem.size, OARK_TAG);
@@ -239,30 +239,30 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
                     ptrdat = NULL;
                 break;
 
-				case SYM_TYP_OBDEREFOBJ:
-					ObDereferenceObject( read_kern_mem.src_address );
+			    case SYM_TYP_OBDEREFOBJ:
+				    ObDereferenceObject( read_kern_mem.src_address );
 
-					ptrdat = NULL;
-				break;
+				    ptrdat = NULL;
+			    break;
 
                 case SYM_TYP_SSDT_SYSTEM:
                     ptrdat = GetSsdtSystemBaseAddress();
                 break;
 
-				default:
-					ptrdat = NULL;
-				break;
+			    default:
+				    ptrdat = NULL;
+			    break;
 			}
 
-			if ( ptrdat != NULL )
-				WriteUserMode( read_kern_mem.dst_address, read_kern_mem.size, ptrdat );
-			
-			Irp->IoStatus.Status = STATUS_SUCCESS;
-
+            if ( ptrdat != NULL )
+	            WriteUserMode( read_kern_mem.dst_address, read_kern_mem.size, ptrdat );
+		
+	        Irp->IoStatus.Status = STATUS_SUCCESS;
         break;
-    default:
-        Irp->IoStatus.Status = STATUS_INVALID_DEVICE_REQUEST;
-        Irp->IoStatus.Information = 0;
+
+        default:
+            Irp->IoStatus.Status = STATUS_INVALID_DEVICE_REQUEST;
+            Irp->IoStatus.Information = 0;
         break;
     }
 
@@ -286,7 +286,7 @@ VOID OARKDRIVER_DriverUnload(
         IoDeleteDevice(pdoThisDeviceObj);
     }
 
-	DbgPrint( " drv unloaded!\n" );
+    DbgPrint( " drv unloaded!\n" );
 }
 
 #ifdef __cplusplus
@@ -301,7 +301,7 @@ NTSTATUS DriverEntry(
     NTSTATUS status = STATUS_UNSUCCESSFUL;
     pdoGlobalDrvObj = DriverObject;
 
-	DbgPrint( " drv entry!\n" );
+    DbgPrint( " drv entry!\n" );
 
     // Create the device object.
     if(!NT_SUCCESS(status = IoCreateDevice(
@@ -336,7 +336,7 @@ NTSTATUS DriverEntry(
     DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = OARKDRIVER_DispatchDeviceControl;
     DriverObject->DriverUnload = OARKDRIVER_DriverUnload;
 
-	DbgPrint( " drv loaded!\n" );
+    DbgPrint( " drv loaded!\n" );
 
     return STATUS_SUCCESS;
 }
