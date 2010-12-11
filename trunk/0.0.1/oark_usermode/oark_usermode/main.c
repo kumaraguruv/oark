@@ -84,11 +84,11 @@ int main( void )
                     printf(" INFO: Detecting SSDT Hooking:\n");
                     CheckSSDTHooking(device);
 
-					//printf( " INFO: Detecting PEB Hooking:\n" );
-					//CheckPEBHooking( device );
+					printf( " INFO: Detecting PEB Hooking:\n" );
+					CheckPEBHooking( device );
 
-					//printf( " INFO: Showing IDT Info:\n" );
-					//idt( device );
+					printf( " INFO: Showing IDT Info:\n" );
+					idt( device );
 
 					if ( UnloadDriver( & device ) )
 					{
