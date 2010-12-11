@@ -155,6 +155,7 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
     READ_KERN_MEM_t      read_kern_mem;
     void               * ptrdat;
     IDTR                 idtr;
+    PKSERVICE_TABLE_DESCRIPTOR pSsdtSystem = NULL;
     PEPROCESS eprocess;
     PETHREAD ethread;
     NTSTATUS retf;
@@ -243,7 +244,8 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
                 break;
 
                 case SYM_TYP_SSDT_SYSTEM:
-                    ptrdat = GetSsdtSystemBaseAddress();
+                    pSsdtSystem = GetSsdtSystemBaseAddress();
+                    ptrdat = &pSsdtSystem;
                 break;
 
                 default:
