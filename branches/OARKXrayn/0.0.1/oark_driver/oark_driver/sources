@@ -1,0 +1,19 @@
+# $Id$
+TARGETNAME=oark_driver
+TARGETPATH=obj
+TARGETTYPE=DRIVER
+INCLUDES =..\..\common\common
+
+# Use additional include file
+NTTARGETFILES=makefile.inc
+
+# Create browse info
+#BROWSER_INFO=1
+#BROWSERFILE=<some path>
+
+# Additional defines for the C/C++ preprocessor
+C_DEFINES=$(C_DEFINES)
+
+SOURCES=oark_driver.cpp \
+		ssdt.c          \
+        drvversion.rc
