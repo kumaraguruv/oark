@@ -71,6 +71,24 @@ typedef struct
 VOID CheckSSDTHooking(HANDLE hDevice);
 
 /**
+ * @name    GetSsdtSystemBaseAddress
+ * @brief   Retrieves SSDT System base address.
+ *
+ * This API gives the SSDT System base address.
+ *
+ * @param [in] hDevice Handle of the OARK kernelmode driver.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A pointer to a KSERVICE_TABLE_DESCRIPTOR structure.
+ *
+ * Example Usage:
+ * @code
+ *    GetSsdtSystemBaseAddress(hDevice);
+ * @endcode
+ */
+PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress(HANDLE hDevice);
+
+/**
  * @name    GetSsdtSystemStructure
  * @brief   Retrieves SSDT System structure.
  *
@@ -87,6 +105,24 @@ VOID CheckSSDTHooking(HANDLE hDevice);
  * @endcode
  */
 PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemStructure(HANDLE hDevice);
+
+/**
+ * @name    GetSsdtShadowBaseAddress
+ * @brief   Retrieves SSDT Shadow base address.
+ *
+ * This API gives the SSDT Shadow base address.
+ *
+ * @param [in] hDevice Handle of the OARK kernelmode driver.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A pointer to a KSERVICE_TABLE_DESCRIPTOR structure.
+ *
+ * Example Usage:
+ * @code
+ *    GetSsdtShadowBaseAddress(hDevice);
+ * @endcode
+ */
+PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress(HANDLE hDevice);
 
 /**
  * @name    GetSsdtShadowStructure

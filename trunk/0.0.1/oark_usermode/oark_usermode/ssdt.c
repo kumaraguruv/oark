@@ -42,7 +42,6 @@ VOID CheckSSDTHooking(HANDLE hDevice)
 {
     PSLIST_HEADER pListHead = NULL;
     PHOOK_INFORMATION pHookInfo = NULL;
-    PKSERVICE_TABLE_DESCRIPTOR pSsdt = NULL;
 
     pListHead = SsdtSystemHookingDetection(hDevice);
     if(pListHead == NULL)
@@ -51,12 +50,7 @@ VOID CheckSSDTHooking(HANDLE hDevice)
         return;
     }
 
-    pSsdt = GetSsdtSystemStructure(hDevice);
-    if(pSsdt == NULL)
-        return;
-
-    printf(" INFO: SSDT System Hook Information (0x%.8x):\n", pSsdt->Base);
-    free(pSsdt);
+    printf(" INFO: SSDT System Hook Information (0x%.8x):\n", GetSsdtSystemBaseAddress(hDevice));
 
     while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
     {
@@ -68,10 +62,6 @@ VOID CheckSSDTHooking(HANDLE hDevice)
     printf("\n\n");
     free(pListHead);
 
-    pSsdt = GetSsdtShadowStructure(hDevice);
-    if(pSsdt == NULL)
-        return;
-
     pListHead = SsdtShadowHookingDetection(hDevice);
     if(pListHead == NULL)
     {
@@ -79,8 +69,7 @@ VOID CheckSSDTHooking(HANDLE hDevice)
         return;
     }
 
-    printf(" INFO: SSDT Shadow functions are at 0x%.8X\n", pSsdt->Base);
-    free(pSsdt);
+    printf(" INFO: SSDT Shadow Hook Information (0x%.8x):\n", GetSsdtShadowBaseAddress(hDevice));
     while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
     {
         printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n Hooker driver: %s", pHookInfo->idSyscall, pHookInfo->functionHook, pHookInfo->nameOfHooker);
@@ -295,60 +284,55 @@ PHOOK_INFORMATION PopHookInformationEntry(PSLIST_HEADER pListHead)
 
 PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemStructure(HANDLE hDevice)
 {
-    PKSERVICE_TABLE_DESCRIPTOR pSsdtSystem = NULL;
+    PKSERVICE_TABLE_DESCRIPTOR pSsdtSystem = NULL, pSsdtSystemBaseAddress = NULL;
     READ_KERN_MEM_t read_kern_mem = {0};
     
-    pSsdtSystem = (PKSERVICE_TABLE_DESCRIPTOR)malloc(sizeof(KSERVICE_TABLE_DESCRIPTOR));
-    if(pSsdtSystem == NULL)
+    __try
     {
-        OARK_IOCTL_ERROR();
-        return NULL;
-    }
+        pSsdtSystem = (PKSERVICE_TABLE_DESCRIPTOR)malloc(sizeof(KSERVICE_TABLE_DESCRIPTOR));
+        if(pSsdtSystem == NULL)
+        {
+            OARK_IOCTL_ERROR();
+            return NULL;
+        }
+        
+        pSsdtSystemBaseAddress = GetSsdtSystemBaseAddress(hDevice);
+        if(pSsdtSystemBaseAddress == NULL)
+        {
+            OARK_ERROR("GetSsdtSystemBaseAddress failed");
+            return NULL;
+        }
 
-    read_kern_mem.type = SYM_TYP_SSDT_SYSTEM;
-    read_kern_mem.dst_address = pSsdtSystem;
-    read_kern_mem.size = sizeof(KSERVICE_TABLE_DESCRIPTOR);
-    
-    if(IOCTLReadKernMem(hDevice, &read_kern_mem) == NULL)
-    {
-        OARK_IOCTL_ERROR();
-        free(pSsdtSystem);
-        return NULL;
+        read_kern_mem.type = SYM_TYP_NULL;
+        read_kern_mem.src_address = pSsdtSystemBaseAddress;
+        read_kern_mem.dst_address = pSsdtSystem;
+        read_kern_mem.size = sizeof(KSERVICE_TABLE_DESCRIPTOR);
+
+        if(IOCTLReadKernMem(hDevice, &read_kern_mem) == NULL)
+        {
+            OARK_IOCTL_ERROR();
+            free(pSsdtSystem);
+            pSsdtSystem = NULL;
+        }
     }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
 
     return pSsdtSystem;
 }
 
-
-
 PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowStructure(HANDLE hDevice)
 {
     PKSERVICE_TABLE_DESCRIPTOR pSsdtShadow = NULL, pSsdtShadowAddr = NULL;
-    PDWORD pGuiEthread = NULL;
     READ_KERN_MEM_t read_kern_m = {0};
     
     __try
     {
-        /* 
-           Technic : 
-            -> Find a GUI-thread
-            -> ETHREAD.KTHREAD.ServiceTable will point on KeServiceDescriptorShadowTable
-        */
-        pGuiEthread = GetGUIThread(hDevice);
-        if(pGuiEthread == NULL)
-        {
-            OARK_ERROR("GetGUIThread failed");
-            return NULL;
-        }
-
-        read_kern_m.dst_address = &pSsdtShadowAddr;
-        read_kern_m.src_address = (PVOID)((DWORD)pGuiEthread + Offsets.KTHREADServiceTable);
-        read_kern_m.size = sizeof(DWORD);
-        read_kern_m.type = SYM_TYP_NULL;
         
-        if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
+        pSsdtShadowAddr = GetSsdtShadowBaseAddress(hDevice);
+        if(pSsdtShadowAddr == NULL)
         {
-            OARK_IOCTL_ERROR();
+            OARK_ERROR("GetSsdtShadowBaseAddress failed");
             return NULL;
         }
 
@@ -378,3 +362,63 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowStructure(HANDLE hDevice)
     return pSsdtShadow;
 }
 
+PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress(HANDLE hDevice)
+{
+    PKSERVICE_TABLE_DESCRIPTOR pSsdtSystem = NULL;
+    READ_KERN_MEM_t read_kern_m = {0};
+
+    __try
+    {
+        read_kern_m.dst_address = &pSsdtSystem;
+        read_kern_m.size = sizeof(PKSERVICE_TABLE_DESCRIPTOR);
+        read_kern_m.type = SYM_TYP_SSDT_SYSTEM;
+
+        if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
+            OARK_IOCTL_ERROR();
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return pSsdtSystem;
+}
+
+PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress(HANDLE hDevice)
+{
+    PKSERVICE_TABLE_DESCRIPTOR pSsdtShadow = NULL;
+    PDWORD pGuiEthread = NULL;
+    READ_KERN_MEM_t read_kern_m = {0};
+
+    __try
+    {
+        /* 
+           Technic : 
+            -> Find a GUI-thread
+            -> ETHREAD.KTHREAD.ServiceTable will point on KeServiceDescriptorShadowTable
+        */
+
+        if(Offsets.isSupported == FALSE)
+        {
+            OARK_ERROR("This function needs offset support");
+            return NULL;
+        }
+
+        pGuiEthread = GetGUIThread(hDevice);
+        if(pGuiEthread == NULL)
+        {
+            OARK_ERROR("GetGUIThread failed");
+            return NULL;
+        }
+
+        read_kern_m.dst_address = &pSsdtShadow;
+        read_kern_m.src_address = (PVOID)((DWORD)pGuiEthread + Offsets.KTHREADServiceTable);
+        read_kern_m.size = sizeof(DWORD);
+        read_kern_m.type = SYM_TYP_NULL;
+        
+        if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
+            OARK_IOCTL_ERROR();
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return pSsdtShadow;
+}
