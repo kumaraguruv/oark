@@ -30,7 +30,7 @@ THE SOFTWARE.
 #include "debug.h"
 
 #define STATUS_SUCCESS ((NTSTATUS)0x00000000L) 
-
+#define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 
 typedef struct _OFFSETS
 {
@@ -198,7 +198,27 @@ typedef struct _PEB
 
 typedef LONG 	NTSTATUS;
 
-typedef enum _PROCESSINFOCLASS { ProcessBasicInformation } PROCESSINFOCLASS;
+typedef enum  _SYSTEM_INFORMATION_CLASS
+{
+    SystemBasicInformation,
+    SystemProcessorInformation,
+    SystemPerformanceInformation,
+    SystemTimeOfDayInformation,
+    SystemPathInformation,
+    SystemProcessInformation,
+    SystemCallCountInformation,
+    SystemDeviceInformation,
+    SystemProcessorPerformanceInformation,
+    SystemFlagsInformation,
+    SystemCallTimeInformation,
+    SystemModuleInformation
+    /* [...] */
+} SYSTEM_INFORMATION_CLASS, *PSYSTEM_INFORMATION_CLASS;
+
+typedef enum _PROCESSINFOCLASS 
+{ 
+    ProcessBasicInformation 
+} PROCESSINFOCLASS;
 
 typedef NTSTATUS 
 (WINAPI * ZWQUERYINFORMATIONPROCESS_t)
