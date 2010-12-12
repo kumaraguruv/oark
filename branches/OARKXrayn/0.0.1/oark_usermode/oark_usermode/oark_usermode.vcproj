@@ -40,6 +40,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/D _CRT_SECURE_NO_WARNINGS"
 				Optimization="0"
 				AdditionalIncludeDirectories="C:\Users\0vercl0k\Desktop\OARK\0.0.1\common\common"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
@@ -190,6 +191,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\list.c"
+				>
+			</File>
+			<File
 				RelativePath=".\main.c"
 				>
 			</File>
@@ -199,6 +204,10 @@
 			</File>
 			<File
 				RelativePath=".\others.c"
+				>
+			</File>
+			<File
+				RelativePath=".\pe.c"
 				>
 			</File>
 			<File
@@ -236,11 +245,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\list.h"
+				>
+			</File>
+			<File
 				RelativePath=".\modules.h"
 				>
 			</File>
 			<File
 				RelativePath=".\others.h"
+				>
+			</File>
+			<File
+				RelativePath=".\pe.h"
 				>
 			</File>
 			<File

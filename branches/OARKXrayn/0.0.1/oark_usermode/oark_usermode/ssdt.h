@@ -47,14 +47,6 @@ typedef struct
 } KSERVICE_TABLE_DESCRIPTOR, *PKSERVICE_TABLE_DESCRIPTOR;
 #pragma pack()
 
-typedef struct
-{
-    SLIST_ENTRY SListEntry;
-    DWORD idSyscall;
-    DWORD functionHook;
-    PCHAR nameOfHooker;
-}HOOK_INFORMATION, *PHOOK_INFORMATION;
-
 /**
  * @name    CheckSSDTHooking
  * @brief   Check SSDTs structures.
@@ -71,12 +63,28 @@ typedef struct
 VOID CheckSSDTHooking(HANDLE hDevice);
 
 /**
+ * @name    CheckXraynPoc
+ * @brief   Check Xrayn PoC.
+ *
+ * This API searchs and displays potential hook in KTHREAD.ServiceTable field.
+ *
+ * @param [in] hDevice Handle of the OARK kernelmode driver.
+ *
+ * @retval NULL An error occured.
+ *         other A pointer to a SLIST_HEADER.
+ *
+ * Example Usage:
+ * @code
+ *    CheckXraynPoc(hDevice);
+ * @endcode
+ */
+PSLIST_HEADER CheckXraynPoc(HANDLE hDevice);
+
+/**
  * @name    GetSsdtSystemBaseAddress
  * @brief   Retrieves SSDT System base address.
  *
  * This API gives the SSDT System base address.
- *
- * @param [in] hDevice Handle of the OARK kernelmode driver.
  *
  * @retval NULL  An error occured.
  * @retval other  A pointer to a KSERVICE_TABLE_DESCRIPTOR structure.
@@ -86,7 +94,7 @@ VOID CheckSSDTHooking(HANDLE hDevice);
  *    GetSsdtSystemBaseAddress(hDevice);
  * @endcode
  */
-PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress(HANDLE hDevice);
+PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress();
 
 /**
  * @name    GetSsdtSystemStructure
@@ -205,40 +213,5 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice);
  * @endcode
  */
 PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, DWORD modBase, DWORD modSize);
-
-/**
- * @name    PushHookInformationEntry
- * @brief   This routine allows you to push an HOOK_INFORMATION structure from a list.
- *
- * This API pops a structure HOOK_INFORMATION from the single linked list.
- *
- * @param [in] pListHead  A pointer to a SLIST_ENTRY which is the single linked list's head.
- * @param [in] entry  A pointer to a HOOK_INFORMATION structure.
- *
- * Example Usage:
- * @code
- *    PushHookInformationEntry(pListHead, pHookInfo); 
- * @endcode
- */
-VOID PushHookInformationEntry(PSLIST_HEADER pListHead, PHOOK_INFORMATION entry);
-
-/**
- * @name    PopHookInformationEntry
- * @brief   This routine allows you to pop an HOOK_INFORMATION structure from a list.
- *
- * This API pops a structure HOOK_INFORMATION from the single linked list.
- *
- * @param [in] pListHead  A pointer to a SLIST_ENTRY which is the single linked list's head.
- *
- * @retval NULL  The list is empty.
- * @retval other  A pointer to the driver name.
- *
- * Example Usage:
- * @code
- *    PHOOK_INFORMATION pHook = PopHookInformationEntry(pListHead); 
- *    // /!\ Never forgotten to free the pointer and the 'name' field.
- * @endcode
- */
-PHOOK_INFORMATION PopHookInformationEntry(PSLIST_HEADER pListHead);
 
 #endif

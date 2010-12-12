@@ -34,15 +34,19 @@ THE SOFTWARE.
 #include "debug.h"
 #include "modules.h"
 #include "process.h"
+#include "list.h"
+#include "pe.h"
 
 #include <stdlib.h>
 #include <string.h>
 
 VOID CheckSSDTHooking(HANDLE hDevice)
 {
-    PSLIST_HEADER pListHead = NULL;
     PHOOK_INFORMATION pHookInfo = NULL;
+    PSLIST_HEADER pListHead = NULL;
 
+    printf(" INFO: SSDT System Hook Information (0x%.8x):\n", GetSsdtSystemBaseAddress());
+    /*
     pListHead = SsdtSystemHookingDetection(hDevice);
     if(pListHead == NULL)
     {
@@ -54,9 +58,9 @@ VOID CheckSSDTHooking(HANDLE hDevice)
 
     while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
     {
-        printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n Hooker driver: %s", pHookInfo->idSyscall, pHookInfo->functionHook, pHookInfo->nameOfHooker);
-        if(pHookInfo->nameOfHooker != NULL)
-            free(pHookInfo->nameOfHooker);
+        printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n Hooker driver: %s", pHookInfo->id, pHookInfo->addr, pHookInfo->name);
+        if(pHookInfo->name != NULL)
+            free(pHookInfo->name);
         free(pHookInfo);
     }
     printf("\n\n");
@@ -72,24 +76,144 @@ VOID CheckSSDTHooking(HANDLE hDevice)
     printf(" INFO: SSDT Shadow Hook Information (0x%.8x):\n", GetSsdtShadowBaseAddress(hDevice));
     while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
     {
-        printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n Hooker driver: %s", pHookInfo->idSyscall, pHookInfo->functionHook, pHookInfo->nameOfHooker);
-        if(pHookInfo->nameOfHooker != NULL)
-            free(pHookInfo->nameOfHooker);
+        printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n Hooker driver: %s", pHookInfo->id, pHookInfo->addr, pHookInfo->name);
+        if(pHookInfo->name != NULL)
+            free(pHookInfo->name);
         free(pHookInfo);
     }
     printf("\n\n");
     free(pListHead);
+
+    pListHead = CheckXraynPoc(hDevice);
+    printf(" INFO: Xrayn PoC Hook Information:\n");
+    while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
+    {
+        printf(" \n----\n Process Id: 0x%.4x\n ServiceTable: 0x%.8x in '%s'\n", pHookInfo->id, pHookInfo->addr, pHookInfo->name);
+        if(pHookInfo->name != NULL)
+            free(pHookInfo->name);
+        free(pHookInfo);
+    }
+    printf("\n\n");
+    free(pListHead);
+    */
 }
 
+PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
+{
+    PSYSTEM_PROCESS_INFORMATION pProcessInfos = NULL, pProcessInformation = NULL;
+    PKSERVICE_TABLE_DESCRIPTOR pSsdtSystem = NULL, pSsdtShadow = NULL;
+    PHOOK_INFORMATION pHookInfo = NULL;
+    READ_KERN_MEM_t read_kern_m = {0};
+    PSYSTEM_THREAD pThread = NULL;
+    PSLIST_HEADER pListHead = NULL;
+    NTSTATUS ntState = 0;
+    PDWORD pEthread = NULL, pServiceTable = NULL;    
+    DWORD i = 0;
+
+    __try
+    {
+        printf(" INFO: Checking Xrayn PoC\n");
+        if(Offsets.isSupported == FALSE)
+        {
+            OARK_ERROR("This function requires offsets support");
+            goto clean;
+        }
+
+        pSsdtShadow = (PKSERVICE_TABLE_DESCRIPTOR)GetSsdtShadowBaseAddress(hDevice);
+        pSsdtSystem = GetSsdtSystemBaseAddress(hDevice);
+
+        if(pSsdtSystem == NULL || pSsdtShadow == NULL)
+        {
+            OARK_ERROR("GetSsdt[Shadow|System]BaseAddress failed");
+            goto clean;
+        }
+
+        pProcessInfos = GetProcessList();
+        if(pProcessInfos == NULL)
+        {
+            OARK_ERROR("GetProcessList failed");
+            goto clean;
+        }
+
+        pListHead = (PSLIST_HEADER)malloc(sizeof(SLIST_HEADER));
+        if(pListHead == NULL)
+        {
+            OARK_ALLOCATION_ERROR();
+            goto clean;
+        }
+
+        pProcessInformation = pProcessInfos;
+        InitializeSListHead(pListHead);
+
+        while(pProcessInfos->NextEntryOffset != 0)
+        {
+            if(pProcessInfos->ImageName.Buffer != NULL)
+            {
+                for(i = 0; i < pProcessInfos->NumberOfThreads; ++i) 
+                {     
+                    pEthread = GetETHREADStructureByTid(hDevice, (DWORD)(pProcessInfos->Threads[i].ClientId.UniqueThread));
+                    if(pEthread == NULL)
+                    {
+                        OARK_ERROR("GetETHREADStructureByTid failed");
+                        CleanHookInfoList(pListHead);
+                        free(pListHead);
+                        goto clean;
+                    }
+
+                    read_kern_m.dst_address = &pServiceTable;
+                    read_kern_m.src_address = (PVOID)((DWORD)pEthread + Offsets.KTHREADServiceTable);
+                    read_kern_m.size = sizeof(DWORD);
+                    read_kern_m.type = SYM_TYP_NULL;
+
+                    if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
+                    {
+                        OARK_IOCTL_ERROR();
+                        CleanHookInfoList(pListHead);
+                        free(pListHead);
+                        goto clean;
+                    }
+                    
+                    if(pServiceTable != (PDWORD)pSsdtSystem && pServiceTable != (PDWORD)pSsdtShadow)
+                    {
+                        pHookInfo = (PHOOK_INFORMATION)malloc(sizeof(HOOK_INFORMATION));
+                        if(pHookInfo == NULL)
+                        {
+                            CleanHookInfoList(pListHead);
+                            free(pListHead);
+                            pListHead = NULL;
+                            goto clean;
+                        }
+
+                        ZeroMemory(pHookInfo, sizeof(HOOK_INFORMATION));
+                        pHookInfo->addr = (DWORD)pServiceTable;
+                        pHookInfo->id = (DWORD)pProcessInfos->ProcessId;
+                        PushHookInformationEntry(pListHead, pHookInfo);
+                        break;
+                    }
+                }
+            }
+
+            pProcessInfos = (PSYSTEM_PROCESS_INFORMATION)((((DWORD)pProcessInfos) + pProcessInfos->NextEntryOffset));
+        }
+
+        clean:
+        if(pProcessInformation != NULL)
+            free(pProcessInformation);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return pListHead;
+}
 
 PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice)
 {
-    PSLIST_HEADER pListHead = NULL;
-    PSYSTEM_MODULE pWin32kInfo = NULL;
     PKSERVICE_TABLE_DESCRIPTOR pShadowSSDT = NULL;
-    PDWORD pEprocessWithGuiThread = NULL, pEthreadGui = NULL, pFunctShadowSSDT = NULL;
     READ_KERN_MEM_t read_kern_m = {0};
-
+    PSYSTEM_MODULE pWin32kInfo = NULL;
+    PSLIST_HEADER pListHead = NULL;
+    PDWORD pEprocessWithGuiThread = NULL, pEthreadGui = NULL, pFunctShadowSSDT = NULL;
+    
     __try
     {
         pWin32kInfo = GetWin32kModuleInformation();
@@ -163,11 +287,11 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice)
 
 PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice)
 {
-    PSLIST_HEADER pListHead = NULL;
-    PSYSTEM_MODULE pKernInfo = NULL;
     PKSERVICE_TABLE_DESCRIPTOR pSystemSSDT = NULL;
-    PDWORD pFunctSystemSSDT = NULL;
     READ_KERN_MEM_t read_kern_m = {0};
+    PSYSTEM_MODULE pKernInfo = NULL;
+    PSLIST_HEADER pListHead = NULL;   
+    PDWORD pFunctSystemSSDT = NULL;
 
     __try
     {
@@ -223,11 +347,11 @@ PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice)
 
 PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, DWORD modBase, DWORD modSize)
 {
+    PHOOK_INFORMATION pHookInfo = NULL;
+    READ_KERN_MEM_t read_kern_mem = {0};
     PSLIST_HEADER pListHead = NULL;
     PSLIST_ENTRY pListEntry = NULL;
-    PHOOK_INFORMATION pHookInfo = NULL;
     DWORD i = 0, mobEnd = modBase + modSize;
-    READ_KERN_MEM_t read_kern_mem = {0};
 
     __try
     {
@@ -249,13 +373,14 @@ PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pS
                 {
                     OARK_IOCTL_ERROR();
                     
+                    CleanHookInfoList(pListHead);
                     free(pListHead);
                     return NULL;
                 }
 
-                pHookInfo->functionHook = pFunctSsdt[i];
-                pHookInfo->idSyscall = i;
-                pHookInfo->nameOfHooker = IsAddressInADriver(pFunctSsdt[i]);
+                pHookInfo->addr = pFunctSsdt[i];
+                pHookInfo->id = i;
+                pHookInfo->name = IsAddressInADriver(pFunctSsdt[i]);
                 PushHookInformationEntry(pListHead, pHookInfo);
             }
         }    
@@ -264,22 +389,6 @@ PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pS
         OARK_EXCEPTION();
 
     return pListHead;
-}
-
-VOID PushHookInformationEntry(PSLIST_HEADER pListHead, PHOOK_INFORMATION entry)
-{
-    InterlockedPushEntrySList(pListHead, &(entry->SListEntry));
-}
-
-PHOOK_INFORMATION PopHookInformationEntry(PSLIST_HEADER pListHead)
-{
-    PSLIST_ENTRY pListEntry = NULL;
-
-    pListEntry = InterlockedPopEntrySList(pListHead);
-    if(pListEntry == NULL)
-        return NULL;
-    
-    return CONTAINING_RECORD(pListEntry, HOOK_INFORMATION, SListEntry);
 }
 
 PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemStructure(HANDLE hDevice)
@@ -362,19 +471,57 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowStructure(HANDLE hDevice)
     return pSsdtShadow;
 }
 
-PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress(HANDLE hDevice)
+PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress()
 {
     PKSERVICE_TABLE_DESCRIPTOR pSsdtSystem = NULL;
-    READ_KERN_MEM_t read_kern_m = {0};
+    PIMAGE_EXPORT_DIRECTORY pImgExpDir = NULL;
+    PIMAGE_DOS_HEADER pImgDosHead = NULL;
+    PSYSTEM_MODULE pKernInfo = NULL;
+    HMODULE pKern = NULL;
+    PDWORD pAddrExportFunct, pExportNames = NULL;
+    PSHORT pAddrNamesOrd = NULL;
+    PCHAR pNameExport = NULL;
+    DWORD i = 0;
 
     __try
     {
-        read_kern_m.dst_address = &pSsdtSystem;
-        read_kern_m.size = sizeof(PKSERVICE_TABLE_DESCRIPTOR);
-        read_kern_m.type = SYM_TYP_SSDT_SYSTEM;
+        pKernInfo = GetKernelModuleInformation();
+        if(pKernInfo == NULL)
+        {
+            OARK_ERROR("GetKernelModuleInformation failed");
+            goto clean;
+        }
+        
+        pKern = LoadLibraryA(pKernInfo->Name + pKernInfo->NameOffset);
+        if(pKern == NULL)
+        {
+            OARK_ERROR("LoadLibraryEx failed");
+            goto clean;
+        }
+        
+        pImgExpDir = GetExportTableDirectory(pKern);
+        pImgDosHead = GetDosHeader(pKern);
 
-        if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
-            OARK_IOCTL_ERROR();
+        pExportNames = (PDWORD)((DWORD)pImgDosHead + pImgExpDir->AddressOfNames);
+        pAddrExportFunct = (PDWORD)((DWORD)pImgDosHead + pImgExpDir->AddressOfFunctions);
+        pAddrNamesOrd = (PSHORT)((DWORD)pImgDosHead + pImgExpDir->AddressOfNameOrdinals);
+
+        for(; i < pImgExpDir->NumberOfFunctions; ++i)
+        {
+            pNameExport = (PCHAR)((DWORD)pImgDosHead + pExportNames[i]);
+            if(strcmp(pNameExport, "KeServiceDescriptorTable") == 0)
+                pSsdtSystem = (PKSERVICE_TABLE_DESCRIPTOR)(pAddrExportFunct[pAddrNamesOrd[i]]);
+        }
+
+        if(pSsdtSystem != NULL)
+            (DWORD)pSsdtSystem += (DWORD)pKernInfo->ImageBaseAddress;
+
+        clean:
+        if(pKernInfo != NULL)
+            free(pKernInfo);
+
+        if(pKern != NULL)
+            FreeLibrary(pKern);
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
         OARK_EXCEPTION();
@@ -385,8 +532,8 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress(HANDLE hDevice)
 PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress(HANDLE hDevice)
 {
     PKSERVICE_TABLE_DESCRIPTOR pSsdtShadow = NULL;
-    PDWORD pGuiEthread = NULL;
     READ_KERN_MEM_t read_kern_m = {0};
+    PDWORD pGuiEthread = NULL;
 
     __try
     {
@@ -408,7 +555,7 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress(HANDLE hDevice)
             OARK_ERROR("GetGUIThread failed");
             return NULL;
         }
-
+    
         read_kern_m.dst_address = &pSsdtShadow;
         read_kern_m.src_address = (PVOID)((DWORD)pGuiEthread + Offsets.KTHREADServiceTable);
         read_kern_m.size = sizeof(DWORD);

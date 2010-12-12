@@ -68,11 +68,11 @@ PSYSTEM_PROCESS_INFORMATION GetProcessList()
 PDWORD GetGUIThread(HANDLE hDevice)
 {
     PSYSTEM_PROCESS_INFORMATION pProcessInfos = NULL, pProcessInformation = NULL;
+    READ_KERN_MEM_t read_kern_m = {0};
     PSYSTEM_THREAD pThread = NULL;
     NTSTATUS ntState = 0;
-    DWORD i = 0;
-    READ_KERN_MEM_t read_kern_m = {0};
     PDWORD pEprocess = NULL, pEthreadGuiThread = NULL, pEthread = NULL, pSsdtSystem = NULL, pWin32Thread = NULL;    
+    DWORD i = 0;
 
     __try
     {
@@ -141,8 +141,8 @@ PDWORD GetGUIThread(HANDLE hDevice)
 
 PDWORD GetETHREADStructureByTid(HANDLE hDevice, DWORD threadID)
 {
-    PDWORD pEthread = NULL;
     READ_KERN_MEM_t read_kern_mem = {0};
+    PDWORD pEthread = NULL;
 
     read_kern_mem.type = SYM_TYP_PSLOUTHBYID;
     read_kern_mem.src_address = (PVOID)threadID;
@@ -181,6 +181,26 @@ PDWORD Ethread2Eprocess(HANDLE hDevice, PDWORD pEthread)
             OARK_IOCTL_ERROR();
             return NULL;
         }
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return pEprocess;
+}
+
+PDWORD PID2Eprocess(HANDLE hDevice, DWORD pid)
+{
+    READ_KERN_MEM_t read_kern_m = {0};
+    PDWORD pEprocess = NULL;
+
+    __try
+    {
+        read_kern_m.dst_address = &pEprocess;
+        read_kern_m.size = sizeof(DWORD);
+        read_kern_m.type = SYM_TYP_PSLOUPRBYID;
+
+        if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
+            OARK_IOCTL_ERROR();
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
         OARK_EXCEPTION();
