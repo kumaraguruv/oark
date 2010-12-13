@@ -91,7 +91,7 @@ PSLIST_HEADER CheckXraynPoc(HANDLE hDevice);
  *
  * Example Usage:
  * @code
- *    GetSsdtSystemBaseAddress(hDevice);
+ *    GetSsdtSystemBaseAddress();
  * @endcode
  */
 PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress();
@@ -120,8 +120,6 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemStructure(HANDLE hDevice);
  *
  * This API gives the SSDT Shadow base address.
  *
- * @param [in] hDevice Handle of the OARK kernelmode driver.
- *
  * @retval NULL  An error occured.
  * @retval other  A pointer to a KSERVICE_TABLE_DESCRIPTOR structure.
  *
@@ -130,7 +128,7 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemStructure(HANDLE hDevice);
  *    GetSsdtShadowBaseAddress(hDevice);
  * @endcode
  */
-PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress(HANDLE hDevice);
+PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress();
 
 /**
  * @name    GetSsdtShadowStructure

@@ -218,3 +218,34 @@ PSYSTEM_MODULE_INFORMATION GetModuleList()
 
     return pModuleList;
 }
+
+HANDLE LoadKernInAddrSpace()
+{
+    PSYSTEM_MODULE pKernInfo = NULL;
+    HANDLE hKern = NULL;
+
+    __try
+    {
+        pKernInfo = GetKernelModuleInformation();
+        if(pKernInfo == NULL)
+        {
+            OARK_ERROR("GetKernelModuleInformation failed");
+            goto clean;
+        }
+
+        hKern = LoadLibraryA(pKernInfo->Name + pKernInfo->NameOffset);
+        if(hKern == NULL)
+        {
+            OARK_ERROR("LoadLibraryEx failed");
+            goto clean;
+        }
+
+        clean:
+        if(pKernInfo != NULL)
+            free(pKernInfo);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return hKern;
+}

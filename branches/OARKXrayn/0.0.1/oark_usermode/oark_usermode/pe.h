@@ -32,8 +32,77 @@ THE SOFTWARE.
 
 #include <windows.h>
 
+/**
+ * @name    GetDosHeader
+ * @brief   Retrieves DOS Header.
+ *
+ * This API gives DOS Header structure.
+ *
+ * @param [in] hBin Pointer of the binary in memory.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A pointer to a IMAGE_DOS_HEADER structure.
+ *
+ * Example Usage:
+ * @code
+ *    GetDosHeader(hBin);
+ * @endcode
+ */
 PIMAGE_DOS_HEADER GetDosHeader(HANDLE hBin);
+
+/**
+ * @name    GetNtHeaders
+ * @brief   Retrieves NT Headers.
+ *
+ * This API gives NT Headers structure.
+ *
+ * @param [in] hBin Pointer of the binary in memory.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A pointer to a IMAGE_NT_HEADERS structure.
+ *
+ * Example Usage:
+ * @code
+ *    GetNtHeaders(hBin);
+ * @endcode
+ */
 PIMAGE_NT_HEADERS GetNtHeaders(HANDLE hBin);
+
+/**
+ * @name    GetExportTableDirectory
+ * @brief   Retrieves the EAT.
+ *
+ * This API gives EAT structure.
+ *
+ * @param [in] hBin Pointer of the binary in memory.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A pointer to a IMAGE_EXPORT_DIRECTORY structure.
+ *
+ * Example Usage:
+ * @code
+ *    GetExportTableDirectory(hBin);
+ * @endcode
+ */
 PIMAGE_EXPORT_DIRECTORY GetExportTableDirectory(HANDLE hBin);
+
+/**
+ * @name    GetExportedSymbol
+ * @brief   Retrieves exported symbol RVA.
+ *
+ * This API gives the RVA of an exported symbol.
+ *
+ * @param [in] hBin Pointer of the binary in memory.
+ * @param [in] pNameSymbol Name of the exported symbol.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A RVA to the symbol pNameSymbol exported.
+ *
+ * Example Usage:
+ * @code
+ *    GetExportedSymbol(hBin, "smth");
+ * @endcode
+ */
+PDWORD GetExportedSymbol(HANDLE hBin, PCHAR pNameSymbol);
 
 #endif

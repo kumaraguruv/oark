@@ -46,6 +46,7 @@ VOID CheckSSDTHooking(HANDLE hDevice)
     PSLIST_HEADER pListHead = NULL;
 
     printf(" INFO: SSDT System Hook Information (0x%.8x):\n", GetSsdtSystemBaseAddress());
+    printf(" INFO: SSDT Shadow Hook Information (0x%.8x):\n", GetSsdtShadowBaseAddress());
     /*
     pListHead = SsdtSystemHookingDetection(hDevice);
     if(pListHead == NULL)
@@ -474,54 +475,39 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowStructure(HANDLE hDevice)
 PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress()
 {
     PKSERVICE_TABLE_DESCRIPTOR pSsdtSystem = NULL;
-    PIMAGE_EXPORT_DIRECTORY pImgExpDir = NULL;
-    PIMAGE_DOS_HEADER pImgDosHead = NULL;
     PSYSTEM_MODULE pKernInfo = NULL;
     HMODULE pKern = NULL;
-    PDWORD pAddrExportFunct, pExportNames = NULL;
-    PSHORT pAddrNamesOrd = NULL;
     PCHAR pNameExport = NULL;
     DWORD i = 0;
 
     __try
     {
+        pKern = LoadKernInAddrSpace();
+        if(pKern == NULL)
+        {
+            OARK_ERROR("LoadKernInAddrSpace failed");
+            goto clean;
+        }
+        
         pKernInfo = GetKernelModuleInformation();
         if(pKernInfo == NULL)
         {
             OARK_ERROR("GetKernelModuleInformation failed");
             goto clean;
         }
-        
-        pKern = LoadLibraryA(pKernInfo->Name + pKernInfo->NameOffset);
-        if(pKern == NULL)
-        {
-            OARK_ERROR("LoadLibraryEx failed");
+
+        pSsdtSystem = (PKSERVICE_TABLE_DESCRIPTOR)GetExportedSymbol(pKern, "KeServiceDescriptorTable");
+        if(pSsdtSystem == NULL)
             goto clean;
-        }
-        
-        pImgExpDir = GetExportTableDirectory(pKern);
-        pImgDosHead = GetDosHeader(pKern);
 
-        pExportNames = (PDWORD)((DWORD)pImgDosHead + pImgExpDir->AddressOfNames);
-        pAddrExportFunct = (PDWORD)((DWORD)pImgDosHead + pImgExpDir->AddressOfFunctions);
-        pAddrNamesOrd = (PSHORT)((DWORD)pImgDosHead + pImgExpDir->AddressOfNameOrdinals);
-
-        for(; i < pImgExpDir->NumberOfFunctions; ++i)
-        {
-            pNameExport = (PCHAR)((DWORD)pImgDosHead + pExportNames[i]);
-            if(strcmp(pNameExport, "KeServiceDescriptorTable") == 0)
-                pSsdtSystem = (PKSERVICE_TABLE_DESCRIPTOR)(pAddrExportFunct[pAddrNamesOrd[i]]);
-        }
-
-        if(pSsdtSystem != NULL)
-            (DWORD)pSsdtSystem += (DWORD)pKernInfo->ImageBaseAddress;
+        (DWORD)pSsdtSystem += (DWORD)pKernInfo->ImageBaseAddress;
 
         clean:
-        if(pKernInfo != NULL)
-            free(pKernInfo);
-
         if(pKern != NULL)
             FreeLibrary(pKern);
+
+        if(pKernInfo != NULL)
+            free(pKernInfo);
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
         OARK_EXCEPTION();
@@ -529,40 +515,78 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress()
     return pSsdtSystem;
 }
 
-PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress(HANDLE hDevice)
+PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress()
 {
     PKSERVICE_TABLE_DESCRIPTOR pSsdtShadow = NULL;
+    PSYSTEM_MODULE pKernInfo = NULL;
     READ_KERN_MEM_t read_kern_m = {0};
+    HANDLE pKern = NULL;
     PDWORD pGuiEthread = NULL;
+    PUCHAR pKeAddSystemServTab = NULL;
+    DWORD i = 0;
 
     __try
     {
-        /* 
-           Technic : 
-            -> Find a GUI-thread
-            -> ETHREAD.KTHREAD.ServiceTable will point on KeServiceDescriptorShadowTable
-        */
 
-        if(Offsets.isSupported == FALSE)
+        pKern = LoadKernInAddrSpace();
+        if(pKern == NULL)
         {
-            OARK_ERROR("This function needs offset support");
-            return NULL;
+            OARK_ERROR("LoadKernInAddrSpace failed");
+            goto clean;
         }
 
-        pGuiEthread = GetGUIThread(hDevice);
-        if(pGuiEthread == NULL)
+        pKernInfo = GetKernelModuleInformation();
+        if(pKernInfo == NULL)
         {
-            OARK_ERROR("GetGUIThread failed");
-            return NULL;
+            OARK_ERROR("GetWin32kModuleInformation failed");
+            goto clean;
         }
-    
-        read_kern_m.dst_address = &pSsdtShadow;
-        read_kern_m.src_address = (PVOID)((DWORD)pGuiEthread + Offsets.KTHREADServiceTable);
-        read_kern_m.size = sizeof(DWORD);
-        read_kern_m.type = SYM_TYP_NULL;
-        
-        if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
-            OARK_IOCTL_ERROR();
+
+        pKeAddSystemServTab = (PUCHAR)GetExportedSymbol(pKern, "KeAddSystemServiceTable");
+        if(pKeAddSystemServTab == NULL)
+        {
+            OARK_ERROR("GetExportedSymbol failed");
+            goto clean;
+        }
+
+        pKeAddSystemServTab += (DWORD)pKern;
+
+        for(; i < 100; ++i)
+        {
+            /*
+                lkd> u KeAddSystemServiceTable l 40
+                nt!KeAddSystemServiceTable:
+                805ba589 8bff             mov     edi,edi
+                805ba58b 55               push     ebp
+                805ba58c 8bec             mov     ebp,esp
+                805ba58e 837d1803         cmp     dword ptr [ebp+18h],3
+                805ba592 774e             ja       nt!KeAddSystemServiceTable+0x6b (805ba5e2)
+                805ba594 8b4518           mov     eax,dword ptr [ebp+18h]
+                805ba597 c1e004           shl     eax,4
+                805ba59a 83b880a6558000   cmp     dword ptr nt!KeServiceDescriptorTable (8055a680)[eax],0
+                805ba5a1 753f             jne     nt!KeAddSystemServiceTable+0x6b (805ba5e2)
+                805ba5a3 8d8840a65580     lea     ecx,nt!KeServiceDescriptorTableShadow (8055a640)[eax]
+            */
+            printf("0x%x, ", pKeAddSystemServTab[i]);
+            if(i % 2 == 0)
+                printf("\n");
+
+            if(pKeAddSystemServTab[i] == 0x8d && pKeAddSystemServTab[i+1] == 0x88)
+            {
+                printf("Kern loaded @0x%x, KeAddSystemServTab @0x%x\n", pKern, pKeAddSystemServTab);
+                pSsdtShadow = (PKSERVICE_TABLE_DESCRIPTOR)*(PDWORD)(pKeAddSystemServTab+2);
+                //(DWORD)pSsdtShadow -= (DWORD)pKern;
+                //(DWORD)pSsdtShadow += (DWORD)pKernInfo->ImageBaseAddress;
+                break;
+            }
+        }
+
+        clean:
+        if(pKernInfo != NULL)
+            free(pKernInfo);
+
+        if(pKern != NULL)
+            FreeLibrary(pKern);
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
         OARK_EXCEPTION();

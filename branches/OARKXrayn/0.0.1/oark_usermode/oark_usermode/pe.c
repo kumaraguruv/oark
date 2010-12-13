@@ -77,3 +77,34 @@ PIMAGE_EXPORT_DIRECTORY GetExportTableDirectory(HANDLE hBin)
 
     return pImgExportDir;
 }
+
+PDWORD GetExportedSymbol(HANDLE hBin, PCHAR pNameSymbol)
+{
+    PIMAGE_EXPORT_DIRECTORY pImgExpDir = NULL;
+    PIMAGE_DOS_HEADER pImgDosHead = NULL;
+    PDWORD pAddrExportFunct, pExportNames = NULL, pAddrExportedSym = NULL;
+    PSHORT pAddrNamesOrd = NULL;
+    PCHAR pNameExport = NULL;
+    DWORD i = 0;
+
+    __try
+    {
+        pImgExpDir = GetExportTableDirectory(hBin);
+        pImgDosHead = GetDosHeader(hBin);
+
+        pExportNames = (PDWORD)((DWORD)pImgDosHead + pImgExpDir->AddressOfNames);
+        pAddrExportFunct = (PDWORD)((DWORD)pImgDosHead + pImgExpDir->AddressOfFunctions);
+        pAddrNamesOrd = (PSHORT)((DWORD)pImgDosHead + pImgExpDir->AddressOfNameOrdinals);
+
+        for(; i < pImgExpDir->NumberOfFunctions; ++i)
+        {
+            pNameExport = (PCHAR)((DWORD)pImgDosHead + pExportNames[i]);
+            if(strcmp(pNameExport, pNameSymbol) == 0)
+                pAddrExportedSym = (PDWORD)(pAddrExportFunct[pAddrNamesOrd[i]]);
+        }
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return pAddrExportedSym;
+}
