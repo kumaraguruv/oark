@@ -30,6 +30,7 @@ THE SOFTWARE.
 #include "ssdt.h"
 #include "others.h"
 #include "pebhooking.h"
+#include "call_gates.h"
 
 int main( void )
 {
@@ -81,6 +82,10 @@ int main( void )
 
 					CheckOSVersion();
 
+                    printf( " INFO: Check Call Gates and LDT Forward attack:\n" );
+                    CheckCallGatesAndLDTFW( device );
+
+                    /*
                     printf(" INFO: Detecting SSDT Hooking:\n");
                     CheckSSDTHooking(device);
 
@@ -89,6 +94,7 @@ int main( void )
 
 					printf( " INFO: Showing IDT Info:\n" );
 					idt( device );
+                    */
 
 					if ( UnloadDriver( & device ) )
 					{

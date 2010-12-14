@@ -165,7 +165,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine=""
+				CommandLine="del /Q C:\Users\Dreg\Desktop\share&#x0D;&#x0A;copy $(OutDir)\oark.exe C:\Users\Dreg\Desktop\share&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -177,6 +177,10 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath=".\call_gates.c"
+				>
+			</File>
 			<File
 				RelativePath=".\debug.c"
 				>
@@ -223,6 +227,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\call_gates.h"
+				>
+			</File>
 			<File
 				RelativePath=".\debug.h"
 				>
@@ -301,6 +309,14 @@
 		<File
 			RelativePath=".\oark_driver.sys"
 			>
+			<FileConfiguration
+				Name="Release|Win32"
+				ExcludedFromBuild="true"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+				/>
+			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>

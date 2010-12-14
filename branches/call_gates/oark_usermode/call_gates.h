@@ -20,14 +20,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef _IDT_H__
-#define _IDT_H__
+
+#ifndef _CALL_GATES_H__
+#define _CALL_GATES_H__
 
 #include <windows.h>
-#include <stdio.h>
 #include "common.h"
+#include "others.h"
 #include "driverusr.h"
+#include "debug.h"
 
-int idt( HANDLE );
+#define CALL_GATE_32_TYPE 0x1C
+#define LDT_TYPE 0x12
 
-#endif /* _IDT_H__ */
+void CheckCallGatesAndLDTFW( HANDLE );
+void GetBaseAndLimit( PSEG_DESCRIPTOR, DWORD *, DWORD * );
+void CheckDesc( PSEG_DESCRIPTOR, DWORD, DWORD, HANDLE );
+
+#endif /* _CALL_GATES_H__ */

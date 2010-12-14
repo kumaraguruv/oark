@@ -1,6 +1,6 @@
 #include "debug.h"
 
-debug = TRUE;
+debug = FALSE;
 
 VOID DisplayErrorMsg(PCHAR pMsg, PCHAR pFunctName, DWORD line)
 {
