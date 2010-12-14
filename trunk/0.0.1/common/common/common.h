@@ -54,7 +54,8 @@ typedef enum MEM_SYM_TYP_e
     SYM_TYP_PSLOUTHBYID, /*!< Perform a call to PsLookupThreadByThreadId, TID -> ETHREAD. */  
 	SYM_TYP_PSLOUPRBYID, /*!< Perform a call to PsLookupProcessByProcessId, PID -> EPROCESS */
     SYM_TYP_READWITHSTACKATTACH, /*!< Perform a memory read after a KeStackAttachProcess */
-	SYM_TYP_OBDEREFOBJ
+	SYM_TYP_OBDEREFOBJ,
+    SYM_TYP_MM_USR_PRB_ADDR
 
 } MEM_SYM_TYP_t;
 
@@ -88,9 +89,45 @@ typedef struct _IDTR
 	WORD baseAddressHi;
 } IDTR;
 
+typedef struct _GDTR
+{
+    WORD  nBytes;
+    DWORD baseAddress;
+} GDTR, *PGDTR;
+
+typedef struct _SEG_DESCRIPTOR
+{
+    WORD size_00_15; 
+    WORD baseAddress_00_15; 
+    WORD baseAddress_16_23:8;
+    WORD type:4;
+    WORD sFlag:1;
+    WORD dpl:2;
+    WORD pFlag:1;
+    WORD size_16_19:4;
+    WORD notUsed:1;
+    WORD lFlag:1;
+    WORD DB:1;
+    WORD gFlag:1;
+    WORD baseAddress_24_31:8;
+} SEG_DESCRIPTOR, *PSEG_DESCRIPTOR;
+
+typedef struct _CALL_GATE_DESCRIPTOR
+{
+    WORD offset_00_15;
+    WORD selector;
+    WORD argCount:5;
+    WORD zeroes:3;
+    WORD type:4;
+    WORD sFlag:1;
+    WORD dpl:2;
+    WORD pFlag:1; 
+    WORD offset_16_31;
+} CALL_GATE_DESCRIPTOR, *PCALL_GATE_DESCRIPTOR;
 #pragma pack()
 
 #define IDT_HARDCODE_SIZE 0x7FF
+#define GDT_HARDCODE_SIZE 0x3FF
 
 #define MAKEDWORD(a, b)      ((unsigned int)(((WORD)(a)) | ((WORD)((WORD)(b))) << 16))  
 
