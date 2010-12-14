@@ -155,6 +155,7 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
     READ_KERN_MEM_t      read_kern_mem;
     void               * ptrdat;
     IDTR                 idtr;
+    GDTR                 gdtr;
     PKSERVICE_TABLE_DESCRIPTOR pSsdtSystem = NULL;
     PEPROCESS eprocess;
     PETHREAD ethread;
@@ -201,7 +202,18 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
                     ptrdat = & idtr;
                     DbgPrint( " IDT 0x%08X\n", MAKEDWORD( idtr.baseAddressLow, idtr.baseAddressHi ) );
                 break;
-        
+
+                case SYM_TYP_GDT:
+                    __asm { sgdt gdtr }
+                    ptrdat = & gdtr;
+                    DbgPrint( " GDT 0x%08X\n", gdtr.baseAddress );
+                break;
+
+                case SYM_TYP_MM_USR_PRB_ADDR:
+                    ptrdat = & MmUserProbeAddress;
+                    DbgPrint( " MmUserProbeAddress 0x%08X\n", MmUserProbeAddress  );
+                break;
+
                 case SYM_TYP_NULL:
                     ptrdat = read_kern_mem.src_address;
                     DbgPrint( " Reading... 0x%08X\n", ptrdat );
