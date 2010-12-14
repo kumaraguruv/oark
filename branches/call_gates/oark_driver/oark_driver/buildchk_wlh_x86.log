@@ -1,0 +1,15 @@
+BUILD: Examining c:\winddk\6001~1.171\src\oark\oark_d~1\oark_d~1 directory for files to compile.
+skipping post pass 0 command
+warnings in directory c:\winddk\6001~1.171\src\oark\oark_d~1\oark_d~1
+oark_driver.cpp does not exist
+Compiling c:\winddk\6001~1.171\src\oark\oark_d~1\oark_d~1 *************
+'nmake.exe /nologo BUILDMSG=Stop. -i BUILD_PASS=PASS1 NOLINK=1 MAKEDIR_RELATIVE_TO_BASEDIR=src\oark\oark_d~1\oark_d~1'
+c:\winddk\6001~1.171\src\oark\oark_d~1\oark_d~1: TARGETPATH is obj
+ rc -l 409 -DSXS_PROCESSOR_ARCHITECTURE="""x86"""  -DSXS_TARGET="""oark_driver.sys"""   -DSYSTEM_COMPATIBLE_ASSEMBLY_NAME="""Microsoft.Windows.SystemCompatible"""  -DLSYSTEM_COMPATIBLE_ASSEMBLY_NAME=L"""Microsoft.Windows.SystemCompatible"""   -DSXS_ASSEMBLY_VERSION=""""""  /r /fo c:\winddk\6001~1.171\src\oark\oark_d~1\oark_d~1\objchk_wlh_x86\i386\drvversion.res /D_X86_=1 /Di386=1  /DSTD_CALL /DCONDITION_HANDLING=1   /DNT_INST=0 /DWIN32=100 /D_NT1X_=100 /DWINNT=1 /D_WIN32_WINNT=0x0600 /DWINVER=0x0600 /D_WIN32_IE=0x0700    /DWIN32_LEAN_AND_MEAN=1  /DDEVL=1 /DDBG=1 /D__BUILDMACHINE__=WinDDK /DFPO=0   /D_DLL=1 /DNDEBUG  /DDEPRECATE_DDK_FUNCTIONS=1 /DMSC_NOOPT /DNTDDI_VERSION=0x06000100   /I..\..\common\common /Ic:\winddk\6001~1.171\src\oark\oark_d~1\oark_d~1\objchk_wlh_x86\i386 /IC:\WinDDK\6001~1.171\inc\api /IC:\WinDDK\6001~1.171\inc\api /IC:\WinDDK\6001~1.171\inc\ddk /IC:\WinDDK\6001~1.171\inc\ddk /IC:\WinDDK\6001~1.171\inc\crt .\drvversion.rc
+Microsoft (R) Windows (R) Resource Compiler Version 6.0.5724.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+ cl.exe @c:\winddk\6001~1.171\src\oark\oark_d~1\oark_d~1\objchk_wlh_x86\i386\cl.rsp
+Linking for c:\winddk\6001~1.171\src\oark\oark_d~1\oark_d~1 *************
+'nmake.exe /nologo BUILDMSG=Stop. -i BUILD_PASS=PASS2 LINKONLY=1 NOPASS0=1 MAKEDIR_RELATIVE_TO_BASEDIR=src\oark\oark_d~1\oark_d~1'
+c:\winddk\6001~1.171\src\oark\oark_d~1\oark_d~1: TARGETPATH is obj
+ link.exe /out:c:\winddk\6001~1.171\src\oark\oark_d~1\oark_d~1\objchk_wlh_x86\i386\oark_driver.sys /machine:ix86 @c:\winddk\6001~1.171\src\oark\oark_d~1\oark_d~1\objchk_wlh_x86\i386\lnk.rsp

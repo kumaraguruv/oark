@@ -1,0 +1,19 @@
+
+
+386_OBJECTS=\
+ $(OBJ_PATH)\$O\ssdt.obj \
+ $(OBJ_PATH)\$O\oark_driver.obj \
+
+
+_RES_FILE=$(OBJ_PATH)\$O\drvversion.res
+
+
+
+# lowercased
+BASEDIR=c:\winddk\6001~1.171
+OBJECT_ROOT=c:\winddk\6001~1.171
+MAKEDIR_LOWERCASE=c:\winddk\6001~1.171\src\oark\oark_d~1\oark_d~1
+MAKEDIR_RELATIVE_TO_BASEDIR=src\oark\oark_d~1\oark_d~1
+OBJ_PATH=c:\winddk\6001~1.171\src\oark\oark_d~1\oark_d~1
+CONCURRENT_MIDL=0
+CONCURRENT_MANIFEST_BUILD=0
