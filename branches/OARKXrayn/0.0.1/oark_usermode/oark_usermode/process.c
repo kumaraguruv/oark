@@ -42,21 +42,26 @@ PSYSTEM_PROCESS_INFORMATION GetProcessList()
             NULL,
             0,
             &size
-            );
+        );
 
         pProcessInfo = (PSYSTEM_PROCESS_INFORMATION)malloc(size);
         if(pProcessInfo == NULL)
         {
-            OARK_IOCTL_ERROR();
+            OARK_ALLOCATION_ERROR();
             return NULL;
         }
 
-        state = ZwQuerySystemInformation(SystemProcessInformation , pProcessInfo , size , &size);
+        state = ZwQuerySystemInformation(SystemProcessInformation,
+            pProcessInfo,
+            size,
+            &size
+        );
+
         if(!NT_SUCCESS(state))
         {
             OARK_ERROR("ZwQuerySystemInformation failed");
             free(pProcessInfo);
-            return NULL;
+            pProcessInfo = NULL;
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
@@ -112,8 +117,8 @@ PDWORD GetGUIThread(HANDLE hDevice)
 
                     if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
                     {
-                        free(pProcessInformation);
                         OARK_IOCTL_ERROR();
+                        free(pProcessInformation);
                         return NULL;
                     }
 
@@ -144,17 +149,22 @@ PDWORD GetETHREADStructureByTid(HANDLE hDevice, DWORD threadID)
     READ_KERN_MEM_t read_kern_mem = {0};
     PDWORD pEthread = NULL;
 
-    read_kern_mem.type = SYM_TYP_PSLOUTHBYID;
-    read_kern_mem.src_address = (PVOID)threadID;
-    read_kern_mem.dst_address = &pEthread;
-    read_kern_mem.size = sizeof(PDWORD);
-
-    if(IOCTLReadKernMem(hDevice, &read_kern_mem) == NULL)
+    __try
     {
-        OARK_IOCTL_ERROR();
-        return NULL;
-    }
+        read_kern_mem.type = SYM_TYP_PSLOUTHBYID;
+        read_kern_mem.src_address = (PVOID)threadID;
+        read_kern_mem.dst_address = &pEthread;
+        read_kern_mem.size = sizeof(PDWORD);
 
+        if(IOCTLReadKernMem(hDevice, &read_kern_mem) == NULL)
+        {
+            OARK_IOCTL_ERROR();
+            return NULL;
+        }
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+    
     return pEthread;
 }
 

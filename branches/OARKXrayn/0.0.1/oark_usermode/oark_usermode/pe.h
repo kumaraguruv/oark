@@ -32,6 +32,28 @@ THE SOFTWARE.
 
 #include <windows.h>
 
+#define OptHdrMinSize(field) ((INT)(&pImgNtHeads->OptionalHeader.##field) + sizeof(pImgNtHeads->OptionalHeader.##field) - (INT)(&pImgNtHeads->OptionalHeader))
+#define IsFieldPresent(field) (sizeOpt >= (OptHdrMinSize(field)))
+
+typedef enum FIELD_PE
+{
+    MACHINE = 0,
+    NMB_OF_SECTIONS,
+    CHARACTERISTICS,
+    MAJ_LINKER_V,
+    MIN_LINKER_V,
+    SIZE_OF_CODE,
+    SIZE_OF_INITIALIZED_DATA,
+    SIZE_OF_UNINITIALIZED_DATA,
+    ADDR_OF_EP,
+    BASE_OF_CODE,
+    BASE_OF_DATA,
+    IMAGE_BASE,
+    SECTION_ALIGNMENT,
+    FILE_ALIGNMENT
+    /* [...] */
+} FIELD_PE;
+
 /**
  * @name    GetDosHeader
  * @brief   Retrieves DOS Header.
@@ -90,7 +112,27 @@ PIMAGE_EXPORT_DIRECTORY GetExportTableDirectory(HANDLE hBin);
  * @name    GetExportedSymbol
  * @brief   Retrieves exported symbol RVA.
  *
- * This API gives the RVA of an exported symbol.
+ * This API gives the (R)VA of an exported symbol.
+ *
+ * @param [in] hBin Pointer of the binary in memory.
+ * @param [in] pNameSymbol Name of the exported symbol.
+ * @param [in] TRUE if you want a VA, FALSE if you do not want.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A (R)VA to the symbol pNameSymbol exported.
+ *
+ * Example Usage:
+ * @code
+ *    GetExportedSymbol(hBin, "smth", TRUE);
+ * @endcode
+ */
+PDWORD GetExportedSymbol(HANDLE hBin, PCHAR pNameSymbol, BOOL rva);
+
+/**
+ * @name    GetPEField
+ * @brief   Retrieves a PE field.
+ *
+ * This API gives a PE field.
  *
  * @param [in] hBin Pointer of the binary in memory.
  * @param [in] pNameSymbol Name of the exported symbol.
@@ -100,9 +142,9 @@ PIMAGE_EXPORT_DIRECTORY GetExportTableDirectory(HANDLE hBin);
  *
  * Example Usage:
  * @code
- *    GetExportedSymbol(hBin, "smth");
+ *    GetPEField(hBin, IMAGE_BASE);
  * @endcode
  */
-PDWORD GetExportedSymbol(HANDLE hBin, PCHAR pNameSymbol);
+PVOID GetPEField(HANDLE hBin, FIELD_PE field);
 
 #endif

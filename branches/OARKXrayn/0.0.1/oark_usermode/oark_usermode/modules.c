@@ -31,10 +31,10 @@ THE SOFTWARE.
 
 PCHAR IsAddressInADriver(DWORD pFunct)
 {
+    PSYSTEM_MODULE_INFORMATION pSysModulesInfos = NULL;
     PCHAR pDriverName = NULL;
     DWORD i = 0, imageBase = 0, imageEnd = 0, sizeStr = 0;
-    PSYSTEM_MODULE_INFORMATION pSysModulesInfos = NULL;
-
+    
     __try
     {
         pSysModulesInfos = GetModuleList();
@@ -55,7 +55,7 @@ PCHAR IsAddressInADriver(DWORD pFunct)
                 pDriverName = (PCHAR)malloc(sizeStr);
                 if(pDriverName == NULL)
                 {
-                    OARK_IOCTL_ERROR();
+                    OARK_ALLOCATION_ERROR();
                     return NULL;
                 }
 
@@ -96,7 +96,7 @@ PSYSTEM_MODULE GetKernelModuleInformation()
         pSysModule = (PSYSTEM_MODULE)malloc(sizeof(SYSTEM_MODULE));
         if(pSysModule == NULL)
         {
-            OARK_IOCTL_ERROR();
+            OARK_ALLOCATION_ERROR();
             goto clean;
         }
 
@@ -122,7 +122,7 @@ PSYSTEM_MODULE GetWin32kModuleInformation()
         pSysModule = GetModuleInformation("win32k.sys");
         if(pSysModule == NULL)
         {
-            OARK_ERROR("Couldn't obtain your module information");
+            OARK_ERROR("GetModuleInformation failed");
             return NULL;
         }
     }
@@ -143,7 +143,7 @@ PSYSTEM_MODULE GetModuleInformation(PCHAR pModuleName)
         pSysModuleList = GetModuleList();
         if(pSysModuleList == NULL)
         {
-            OARK_ERROR("Modules list is equal to NULL");
+            OARK_ERROR("GetModuleList failed");
             goto clean;
         }
 
@@ -165,7 +165,7 @@ PSYSTEM_MODULE GetModuleInformation(PCHAR pModuleName)
         pSysModule = (PSYSTEM_MODULE)malloc(sizeof(SYSTEM_MODULE));
         if(pSysModule == NULL)
         {
-            OARK_IOCTL_ERROR();
+            OARK_ALLOCATION_ERROR();
             goto clean;
         }
 
@@ -184,9 +184,9 @@ PSYSTEM_MODULE GetModuleInformation(PCHAR pModuleName)
 
 PSYSTEM_MODULE_INFORMATION GetModuleList()
 {
+    PSYSTEM_MODULE_INFORMATION pModuleList = NULL;
     NTSTATUS status = STATUS_SUCCESS;
     ULONG neededSize = 0;
-    PSYSTEM_MODULE_INFORMATION pModuleList = NULL;
 
     __try
     {
@@ -198,19 +198,22 @@ PSYSTEM_MODULE_INFORMATION GetModuleList()
 
         pModuleList = (PSYSTEM_MODULE_INFORMATION)malloc(neededSize);
         if(pModuleList == NULL)
-            return pModuleList;
+        {
+            OARK_ALLOCATION_ERROR();
+            return NULL;
+        }
 
         status = ZwQuerySystemInformation(SystemModuleInformation,
             pModuleList,
             neededSize,
             0
-            );
+        );
 
         if(!NT_SUCCESS(status))
         {
             OARK_ERROR("ZwQuerySystemInformation failed");
             free(pModuleList);
-            return NULL;
+            pModuleList = NULL;
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)

@@ -78,7 +78,7 @@ PIMAGE_EXPORT_DIRECTORY GetExportTableDirectory(HANDLE hBin)
     return pImgExportDir;
 }
 
-PDWORD GetExportedSymbol(HANDLE hBin, PCHAR pNameSymbol)
+PDWORD GetExportedSymbol(HANDLE hBin, PCHAR pNameSymbol, BOOL rva)
 {
     PIMAGE_EXPORT_DIRECTORY pImgExpDir = NULL;
     PIMAGE_DOS_HEADER pImgDosHead = NULL;
@@ -100,11 +100,104 @@ PDWORD GetExportedSymbol(HANDLE hBin, PCHAR pNameSymbol)
         {
             pNameExport = (PCHAR)((DWORD)pImgDosHead + pExportNames[i]);
             if(strcmp(pNameExport, pNameSymbol) == 0)
+            {
                 pAddrExportedSym = (PDWORD)(pAddrExportFunct[pAddrNamesOrd[i]]);
+                if(rva == TRUE)
+                    (DWORD)pAddrExportedSym += (DWORD)pImgDosHead;
+            }
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
         OARK_EXCEPTION();
 
     return pAddrExportedSym;
+}
+
+PVOID GetPEField(HANDLE hBin, FIELD_PE fieldPe)
+{
+    PIMAGE_NT_HEADERS pImgNtHeads = NULL;
+    PIMAGE_DOS_HEADER pImgDosHead = NULL;
+    PVOID field = 0;
+    DWORD sizeOpt = 0;
+
+    __try
+    {
+        pImgNtHeads = GetNtHeaders(hBin);
+        pImgDosHead = GetDosHeader(hBin);
+        sizeOpt = pImgNtHeads->FileHeader.SizeOfOptionalHeader;
+
+        switch(fieldPe)
+        {
+            case MACHINE:
+                field = (PVOID)pImgNtHeads->FileHeader.Machine;
+            break;
+
+            case NMB_OF_SECTIONS:
+                field = (PVOID)pImgNtHeads->FileHeader.NumberOfSections;
+            break;
+
+            case CHARACTERISTICS:
+                field = (PVOID)pImgNtHeads->FileHeader.Characteristics;
+            break;
+
+            case MAJ_LINKER_V:
+                if(IsFieldPresent(MajorLinkerVersion))
+                    field = (PVOID)pImgNtHeads->OptionalHeader.MajorLinkerVersion;
+            break;
+
+            case MIN_LINKER_V:
+                if(IsFieldPresent(MinorLinkerVersion))
+                    field = (PVOID)pImgNtHeads->OptionalHeader.MinorLinkerVersion;
+            break;
+
+            case SIZE_OF_CODE:
+                if(IsFieldPresent(SizeOfCode))
+                    field = (PVOID)pImgNtHeads->OptionalHeader.SizeOfCode;
+            break;
+
+            case SIZE_OF_INITIALIZED_DATA:
+                if(IsFieldPresent(SizeOfInitializedData))
+                    field = (PVOID)pImgNtHeads->OptionalHeader.SizeOfInitializedData;
+            break;
+
+            case SIZE_OF_UNINITIALIZED_DATA:
+                if(IsFieldPresent(SizeOfUninitializedData))
+                    field = (PVOID)pImgNtHeads->OptionalHeader.SizeOfUninitializedData;
+            break;
+
+            case ADDR_OF_EP:
+                if(IsFieldPresent(AddressOfEntryPoint))
+                    field = (PVOID)pImgNtHeads->OptionalHeader.AddressOfEntryPoint;
+            break;
+
+            case BASE_OF_CODE:
+                if(IsFieldPresent(BaseOfCode))
+                    field = (PVOID)pImgNtHeads->OptionalHeader.BaseOfCode;
+            break;
+
+            case BASE_OF_DATA:
+                if(IsFieldPresent(BaseOfData))
+                    field = (PVOID)pImgNtHeads->OptionalHeader.BaseOfData;
+            break;
+
+            case IMAGE_BASE:
+                if(IsFieldPresent(ImageBase))
+                    field = (PVOID)pImgNtHeads->OptionalHeader.ImageBase;
+            break;
+
+            case SECTION_ALIGNMENT:
+                if(IsFieldPresent(SectionAlignment))
+                    field = (PVOID)pImgNtHeads->OptionalHeader.SectionAlignment;
+            break;
+
+            case FILE_ALIGNMENT:
+                if(IsFieldPresent(FileAlignment))
+                    field = (PVOID)pImgNtHeads->OptionalHeader.FileAlignment;
+            break;
+        }
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return field;
 }

@@ -37,6 +37,7 @@ THE SOFTWARE.
 #include "list.h"
 #include "pe.h"
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -45,9 +46,6 @@ VOID CheckSSDTHooking(HANDLE hDevice)
     PHOOK_INFORMATION pHookInfo = NULL;
     PSLIST_HEADER pListHead = NULL;
 
-    printf(" INFO: SSDT System Hook Information (0x%.8x):\n", GetSsdtSystemBaseAddress());
-    printf(" INFO: SSDT Shadow Hook Information (0x%.8x):\n", GetSsdtShadowBaseAddress());
-    /*
     pListHead = SsdtSystemHookingDetection(hDevice);
     if(pListHead == NULL)
     {
@@ -96,7 +94,6 @@ VOID CheckSSDTHooking(HANDLE hDevice)
     }
     printf("\n\n");
     free(pListHead);
-    */
 }
 
 PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
@@ -179,6 +176,7 @@ PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
                         pHookInfo = (PHOOK_INFORMATION)malloc(sizeof(HOOK_INFORMATION));
                         if(pHookInfo == NULL)
                         {
+                            OARK_ALLOCATION_ERROR();
                             CleanHookInfoList(pListHead);
                             free(pListHead);
                             pListHead = NULL;
@@ -188,6 +186,7 @@ PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
                         ZeroMemory(pHookInfo, sizeof(HOOK_INFORMATION));
                         pHookInfo->addr = (DWORD)pServiceTable;
                         pHookInfo->id = (DWORD)pProcessInfos->ProcessId;
+                        pHookInfo->name = IsAddressInADriver((DWORD)pServiceTable);
                         PushHookInformationEntry(pListHead, pHookInfo);
                         break;
                     }
@@ -402,7 +401,7 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemStructure(HANDLE hDevice)
         pSsdtSystem = (PKSERVICE_TABLE_DESCRIPTOR)malloc(sizeof(KSERVICE_TABLE_DESCRIPTOR));
         if(pSsdtSystem == NULL)
         {
-            OARK_IOCTL_ERROR();
+            OARK_ALLOCATION_ERROR();
             return NULL;
         }
         
@@ -450,7 +449,7 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowStructure(HANDLE hDevice)
         pSsdtShadow = (PKSERVICE_TABLE_DESCRIPTOR)malloc(sizeof(KSERVICE_TABLE_DESCRIPTOR));
         if(pSsdtShadow == NULL)
         {
-            OARK_IOCTL_ERROR();
+            OARK_ALLOCATION_ERROR();
             return NULL;
         }
 
@@ -496,9 +495,12 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress()
             goto clean;
         }
 
-        pSsdtSystem = (PKSERVICE_TABLE_DESCRIPTOR)GetExportedSymbol(pKern, "KeServiceDescriptorTable");
+        pSsdtSystem = (PKSERVICE_TABLE_DESCRIPTOR)GetExportedSymbol(pKern, "KeServiceDescriptorTable", FALSE);
         if(pSsdtSystem == NULL)
+        {
+            OARK_ERROR("GetExportedSymbol failed");
             goto clean;
+        }
 
         (DWORD)pSsdtSystem += (DWORD)pKernInfo->ImageBaseAddress;
 
@@ -523,11 +525,10 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress()
     HANDLE pKern = NULL;
     PDWORD pGuiEthread = NULL;
     PUCHAR pKeAddSystemServTab = NULL;
-    DWORD i = 0;
+    DWORD i = 0, imgBaseKern = 0;
 
     __try
     {
-
         pKern = LoadKernInAddrSpace();
         if(pKern == NULL)
         {
@@ -538,45 +539,48 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress()
         pKernInfo = GetKernelModuleInformation();
         if(pKernInfo == NULL)
         {
-            OARK_ERROR("GetWin32kModuleInformation failed");
+            OARK_ERROR("GetKernelModuleInformation failed");
             goto clean;
         }
 
-        pKeAddSystemServTab = (PUCHAR)GetExportedSymbol(pKern, "KeAddSystemServiceTable");
+        pKeAddSystemServTab = (PUCHAR)GetExportedSymbol(pKern, "KeAddSystemServiceTable", TRUE);
         if(pKeAddSystemServTab == NULL)
         {
             OARK_ERROR("GetExportedSymbol failed");
             goto clean;
         }
 
-        pKeAddSystemServTab += (DWORD)pKern;
+        imgBaseKern = (DWORD)GetPEField(pKern, IMAGE_BASE);
 
         for(; i < 100; ++i)
         {
             /*
-                lkd> u KeAddSystemServiceTable l 40
+                kd> u nt!KeAddSystemServiceTable l 40
                 nt!KeAddSystemServiceTable:
-                805ba589 8bff             mov     edi,edi
-                805ba58b 55               push     ebp
-                805ba58c 8bec             mov     ebp,esp
-                805ba58e 837d1803         cmp     dword ptr [ebp+18h],3
-                805ba592 774e             ja       nt!KeAddSystemServiceTable+0x6b (805ba5e2)
-                805ba594 8b4518           mov     eax,dword ptr [ebp+18h]
-                805ba597 c1e004           shl     eax,4
-                805ba59a 83b880a6558000   cmp     dword ptr nt!KeServiceDescriptorTable (8055a680)[eax],0
-                805ba5a1 753f             jne     nt!KeAddSystemServiceTable+0x6b (805ba5e2)
-                805ba5a3 8d8840a65580     lea     ecx,nt!KeServiceDescriptorTableShadow (8055a640)[eax]
+                80595542 8bff            mov     edi,edi
+                80595544 55              push    ebp
+                80595545 8bec            mov     ebp,esp
+                80595547 837d1803        cmp     dword ptr [ebp+18h],3
+                8059554b 7760            ja      nt!KeAddSystemServiceTable+0x6b (805955ad)
+                8059554d 8b4518          mov     eax,dword ptr [ebp+18h]
+                80595550 c1e004          shl     eax,4
+                80595553 83b88021558000  cmp     dword ptr nt!KeServiceDescriptorTable (80552180)[eax],0
+                8059555a 7551            jne     nt!KeAddSystemServiceTable+0x6b (805955ad)
+                8059555c 8d8840215580    lea     ecx,nt!KeServiceDescriptorTableShadow (80552140)[eax]
             */
-            printf("0x%x, ", pKeAddSystemServTab[i]);
-            if(i % 2 == 0)
-                printf("\n");
 
             if(pKeAddSystemServTab[i] == 0x8d && pKeAddSystemServTab[i+1] == 0x88)
             {
-                printf("Kern loaded @0x%x, KeAddSystemServTab @0x%x\n", pKern, pKeAddSystemServTab);
-                pSsdtShadow = (PKSERVICE_TABLE_DESCRIPTOR)*(PDWORD)(pKeAddSystemServTab+2);
-                //(DWORD)pSsdtShadow -= (DWORD)pKern;
-                //(DWORD)pSsdtShadow += (DWORD)pKernInfo->ImageBaseAddress;
+                pSsdtShadow = (PKSERVICE_TABLE_DESCRIPTOR)*(PDWORD)(pKeAddSystemServTab+i+2);
+                
+                //Get offset relative to imgBase
+                (DWORD)pSsdtShadow -= (DWORD)pKern;
+                
+                //Remove reloc
+                (INT)pSsdtShadow -= ((INT)imgBaseKern - (INT)pKern);
+
+                //Final addr
+                (DWORD)pSsdtShadow += (DWORD)pKernInfo->ImageBaseAddress;
                 break;
             }
         }
