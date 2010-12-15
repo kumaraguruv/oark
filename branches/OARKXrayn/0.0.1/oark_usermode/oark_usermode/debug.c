@@ -19,7 +19,8 @@ VOID DisplayIOCTLFailureMsg(PCHAR pFunctName, DWORD line)
 
 VOID DisplayExceptionMsg(PCHAR pFunctName, DWORD line)
 {
-    fprintf(stderr, "[EXCEP] [%s():line %u] Exception catched, terminating process..\n", pFunctName, line);
+    fprintf(stderr, "[EXCEP] [%s():line %u] Exception catched, terminating process..\nPlease hit the keyboard to exit process..", pFunctName, line);
+    getchar();
     ExitProcess(0);
 }
 

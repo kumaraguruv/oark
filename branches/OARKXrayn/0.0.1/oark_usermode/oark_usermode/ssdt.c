@@ -40,60 +40,66 @@ THE SOFTWARE.
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <tchar.h>
 
 VOID CheckSSDTHooking(HANDLE hDevice)
 {
     PHOOK_INFORMATION pHookInfo = NULL;
     PSLIST_HEADER pListHead = NULL;
 
-    pListHead = SsdtSystemHookingDetection(hDevice);
-    if(pListHead == NULL)
+    __try
     {
-        OARK_ERROR("The list is empty");
-        return;
-    }
+        pListHead = SsdtSystemHookingDetection(hDevice);
+        if(pListHead == NULL)
+        {
+            OARK_ERROR("The list is empty");
+            return;
+        }
 
-    printf(" INFO: SSDT System Hook Information (0x%.8x):\n", GetSsdtSystemBaseAddress(hDevice));
+        printf(" INFO: SSDT System Hook Information (0x%.8x):\n", GetSsdtSystemBaseAddress(hDevice));
 
-    while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
-    {
-        printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n Hooker driver: %s", pHookInfo->id, pHookInfo->addr, pHookInfo->name);
-        if(pHookInfo->name != NULL)
-            free(pHookInfo->name);
-        free(pHookInfo);
-    }
-    printf("\n\n");
-    free(pListHead);
+        while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
+        {
+            printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n Hooker driver: %s", pHookInfo->id, pHookInfo->addr, pHookInfo->name);
+            if(pHookInfo->name != NULL)
+                free(pHookInfo->name);
+            free(pHookInfo);
+        }
+        printf("\n\n");
+        free(pListHead);
 
-    pListHead = SsdtShadowHookingDetection(hDevice);
-    if(pListHead == NULL)
-    {
-        OARK_ERROR("The list is empty");
-        return;
-    }
+        pListHead = SsdtShadowHookingDetection(hDevice);
+        if(pListHead == NULL)
+        {
+            OARK_ERROR("The list is empty");
+            return;
+        }
 
-    printf(" INFO: SSDT Shadow Hook Information (0x%.8x):\n", GetSsdtShadowBaseAddress(hDevice));
-    while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
-    {
-        printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n Hooker driver: %s", pHookInfo->id, pHookInfo->addr, pHookInfo->name);
-        if(pHookInfo->name != NULL)
-            free(pHookInfo->name);
-        free(pHookInfo);
-    }
-    printf("\n\n");
-    free(pListHead);
+        printf(" INFO: SSDT Shadow Hook Information (0x%.8x):\n", GetSsdtShadowBaseAddress(hDevice));
+        while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
+        {
+            printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n Hooker driver: %s", pHookInfo->id, pHookInfo->addr, pHookInfo->name);
+            if(pHookInfo->name != NULL)
+                free(pHookInfo->name);
+            free(pHookInfo);
+        }
+        printf("\n\n");
+        free(pListHead);
 
-    pListHead = CheckXraynPoc(hDevice);
-    printf(" INFO: Xrayn PoC Hook Information:\n");
-    while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
-    {
-        printf(" \n----\n Process Id: 0x%.4x\n ServiceTable: 0x%.8x in '%s'\n", pHookInfo->id, pHookInfo->addr, pHookInfo->name);
-        if(pHookInfo->name != NULL)
-            free(pHookInfo->name);
-        free(pHookInfo);
+        pListHead = CheckXraynPoc(hDevice);
+        printf(" INFO: Xrayn PoC Hook Information:\n");
+        while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
+        {
+            printf(" \n----\n Process Id: 0x%.4x - %s\n ServiceTable: 0x%.8x\n", pHookInfo->id, pHookInfo->name, pHookInfo->addr);
+            if(pHookInfo->name != NULL)
+                free(pHookInfo->name);
+            free(pHookInfo);
+        }
+        printf("\n\n");
+        free(pListHead);
     }
-    printf("\n\n");
-    free(pListHead);
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
 }
 
 PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
@@ -186,7 +192,7 @@ PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
                         ZeroMemory(pHookInfo, sizeof(HOOK_INFORMATION));
                         pHookInfo->addr = (DWORD)pServiceTable;
                         pHookInfo->id = (DWORD)pProcessInfos->ProcessId;
-                        pHookInfo->name = IsAddressInADriver((DWORD)pServiceTable);
+                        pHookInfo->name = PID2ProcessName(pHookInfo->id);
                         PushHookInformationEntry(pListHead, pHookInfo);
                         break;
                     }
@@ -380,7 +386,7 @@ PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pS
 
                 pHookInfo->addr = pFunctSsdt[i];
                 pHookInfo->id = i;
-                pHookInfo->name = IsAddressInADriver(pFunctSsdt[i]);
+                pHookInfo->name = PID2ProcessName(pFunctSsdt[i]);
                 PushHookInformationEntry(pListHead, pHookInfo);
             }
         }    

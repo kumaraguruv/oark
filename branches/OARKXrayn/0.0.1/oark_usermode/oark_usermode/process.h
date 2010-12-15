@@ -214,4 +214,22 @@ PDWORD Ethread2Eprocess(HANDLE hDevice, PDWORD pEthread);
  */
 PDWORD PID2Eprocess(HANDLE hDevice, DWORD pid);
 
+/**
+ * @name    PID2ProcessName
+ * @brief   This routine returns the name of process identified by its PID.
+ *
+ * This API gives you the name of a process based on its PID.
+ *
+ * @param [in] pid Process-Ident.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A string.
+ *
+ * Example Usage:
+ * @code
+ *    PID2ProcessName(42); //Never forgotten to free pointer !
+ * @endcode
+ */
+PCHAR PID2ProcessName(DWORD pid);
+
 #endif

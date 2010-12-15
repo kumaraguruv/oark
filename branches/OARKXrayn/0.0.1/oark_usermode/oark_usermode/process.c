@@ -29,6 +29,8 @@ THE SOFTWARE.
  */
 #include "process.h"
 #include "driverusr.h"
+#include <string.h>
+#include <tchar.h>
 
 PSYSTEM_PROCESS_INFORMATION GetProcessList()
 {
@@ -216,4 +218,39 @@ PDWORD PID2Eprocess(HANDLE hDevice, DWORD pid)
         OARK_EXCEPTION();
 
     return pEprocess;
+}
+
+PCHAR PID2ProcessName(DWORD pid)
+{
+    PSYSTEM_PROCESS_INFORMATION pProcInfo = NULL, pProc = NULL;
+    PCHAR pName = NULL;
+    DWORD sizeStr = 0;
+
+    __try
+    {
+        pProcInfo = (pProc = GetProcessList());
+        if(pProcInfo == NULL)
+        {
+            OARK_ERROR("GetProcessList failed");
+            goto clean;
+        }
+
+        while(pProc->NextEntryOffset)
+        {
+            if((DWORD)pProc->ProcessId == pid)
+            {
+                //pName = UnicodeToAnsi(pProc->ImageName.Buffer);
+                break;
+            }
+            pProc = (PSYSTEM_PROCESS_INFORMATION)((DWORD)pProcInfo + pProcInfo->NextEntryOffset);
+        }
+
+        clean:
+        if(pProcInfo != NULL)
+            free(pProcInfo);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return pName;
 }
