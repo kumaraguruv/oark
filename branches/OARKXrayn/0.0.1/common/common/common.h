@@ -50,12 +50,10 @@ typedef enum MEM_SYM_TYP_e
 	SYM_TYP_KPCR,
 	SYM_TYP_IDT,
 	SYM_TYP_GDT,
-    SYM_TYP_SSDT_SYSTEM, /*!< Obtain KeServiceDescriptorTable symbol */
     SYM_TYP_PSLOUTHBYID, /*!< Perform a call to PsLookupThreadByThreadId, TID -> ETHREAD. */  
 	SYM_TYP_PSLOUPRBYID, /*!< Perform a call to PsLookupProcessByProcessId, PID -> EPROCESS */
     SYM_TYP_READWITHSTACKATTACH, /*!< Perform a memory read after a KeStackAttachProcess */
 	SYM_TYP_OBDEREFOBJ
-
 } MEM_SYM_TYP_t;
 
 typedef struct READ_KERN_MEM_s

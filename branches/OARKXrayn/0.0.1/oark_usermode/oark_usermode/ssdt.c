@@ -27,7 +27,6 @@ THE SOFTWARE.
  * @brief  SSDT Hooking stuff.
  *
  */
-
 #include "ssdt.h"
 #include "common.h"
 #include "driverusr.h"
@@ -36,11 +35,11 @@ THE SOFTWARE.
 #include "process.h"
 #include "list.h"
 #include "pe.h"
+#include "unicode.h"
 
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <tchar.h>
 
 VOID CheckSSDTHooking(HANDLE hDevice)
 {
@@ -192,7 +191,7 @@ PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
                         ZeroMemory(pHookInfo, sizeof(HOOK_INFORMATION));
                         pHookInfo->addr = (DWORD)pServiceTable;
                         pHookInfo->id = (DWORD)pProcessInfos->ProcessId;
-                        pHookInfo->name = PID2ProcessName(pHookInfo->id);
+                        pHookInfo->name = UnicodeToAnsi(pProcessInfos->ImageName.Buffer);
                         PushHookInformationEntry(pListHead, pHookInfo);
                         break;
                     }

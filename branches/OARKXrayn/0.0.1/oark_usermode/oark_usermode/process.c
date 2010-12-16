@@ -29,6 +29,8 @@ THE SOFTWARE.
  */
 #include "process.h"
 #include "driverusr.h"
+#include "unicode.h"
+
 #include <string.h>
 #include <tchar.h>
 
@@ -239,10 +241,10 @@ PCHAR PID2ProcessName(DWORD pid)
         {
             if((DWORD)pProc->ProcessId == pid)
             {
-                //pName = UnicodeToAnsi(pProc->ImageName.Buffer);
+                pName = UnicodeToAnsi(pProc->ImageName.Buffer);
                 break;
             }
-            pProc = (PSYSTEM_PROCESS_INFORMATION)((DWORD)pProcInfo + pProcInfo->NextEntryOffset);
+            pProc = (PSYSTEM_PROCESS_INFORMATION)((DWORD)pProc + pProc->NextEntryOffset);
         }
 
         clean:

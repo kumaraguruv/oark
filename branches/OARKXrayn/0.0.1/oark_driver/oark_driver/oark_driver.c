@@ -50,7 +50,6 @@ extern "C" {
 
 #include "oark_driver.h"
 #include "common.h"
-#include "ssdt.h"
 
 #ifdef __cplusplus
 namespace { // anonymous namespace to limit the scope of this global variable!
@@ -155,7 +154,6 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
     READ_KERN_MEM_t      read_kern_mem;
     void               * ptrdat;
     IDTR                 idtr;
-    PKSERVICE_TABLE_DESCRIPTOR pSsdtSystem = NULL;
     PEPROCESS eprocess;
     PETHREAD ethread;
     NTSTATUS retf;
@@ -241,11 +239,6 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
                 case SYM_TYP_OBDEREFOBJ:
                     ObDereferenceObject( read_kern_mem.src_address );
                     ptrdat = NULL;
-                break;
-
-                case SYM_TYP_SSDT_SYSTEM:
-                    pSsdtSystem = GetSsdtSystemBaseAddress();
-                    ptrdat = &pSsdtSystem;
                 break;
 
                 default:
