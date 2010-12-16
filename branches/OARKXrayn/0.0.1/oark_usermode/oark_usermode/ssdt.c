@@ -385,7 +385,7 @@ PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pS
 
                 pHookInfo->addr = pFunctSsdt[i];
                 pHookInfo->id = i;
-                pHookInfo->name = PID2ProcessName(pFunctSsdt[i]);
+                pHookInfo->name = IsAddressInADriver(pFunctSsdt[i]);
                 PushHookInformationEntry(pListHead, pHookInfo);
             }
         }    
