@@ -89,7 +89,7 @@ VOID CheckSSDTHooking(HANDLE hDevice)
         printf(" INFO: Xrayn PoC Hook Information:\n");
         while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
         {
-            printf(" \n----\n Process Id: 0x%.4x - %s\n ServiceTable: 0x%.8x\n", pHookInfo->id, pHookInfo->name, pHookInfo->addr);
+            printf(" \n----\n Process Id: 0x%.4x - %s (TID: 0x%.3x)\n ETHREAD Pointer: 0x%.8x\n ServiceTable: 0x%.8x\n", pHookInfo->id, pHookInfo->name, pHookInfo->other[1], pHookInfo->other[0], pHookInfo->addr);
             if(pHookInfo->name != NULL)
                 free(pHookInfo->name);
             free(pHookInfo);
@@ -122,7 +122,7 @@ PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
             goto clean;
         }
 
-        pSsdtShadow = (PKSERVICE_TABLE_DESCRIPTOR)GetSsdtShadowBaseAddress(hDevice);
+        pSsdtShadow = GetSsdtShadowBaseAddress(hDevice);
         pSsdtSystem = GetSsdtSystemBaseAddress(hDevice);
 
         if(pSsdtSystem == NULL || pSsdtShadow == NULL)
@@ -175,7 +175,7 @@ PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
                         free(pListHead);
                         goto clean;
                     }
-                    
+
                     if(pServiceTable != (PDWORD)pSsdtSystem && pServiceTable != (PDWORD)pSsdtShadow)
                     {
                         pHookInfo = (PHOOK_INFORMATION)malloc(sizeof(HOOK_INFORMATION));
@@ -192,6 +192,8 @@ PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
                         pHookInfo->addr = (DWORD)pServiceTable;
                         pHookInfo->id = (DWORD)pProcessInfos->ProcessId;
                         pHookInfo->name = UnicodeToAnsi(pProcessInfos->ImageName.Buffer);
+                        pHookInfo->other[0] = (PVOID)pEthread;
+                        pHookInfo->other[1] = (PVOID)pProcessInfos->Threads[i].ClientId.UniqueThread;
                         PushHookInformationEntry(pListHead, pHookInfo);
                         break;
                     }

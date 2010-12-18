@@ -38,6 +38,7 @@ typedef struct
     DWORD id;
     DWORD addr;
     PCHAR name;
+    PVOID other[2];
 }HOOK_INFORMATION, *PHOOK_INFORMATION;
 
 /**
