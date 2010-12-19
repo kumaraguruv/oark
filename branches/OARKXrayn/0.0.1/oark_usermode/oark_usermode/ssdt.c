@@ -45,34 +45,48 @@ VOID CheckSSDTHooking(HANDLE hDevice)
 {
     PHOOK_INFORMATION pHookInfo = NULL;
     PSLIST_HEADER pListHead = NULL;
+    PCHAR* pTable = NULL;
+    DWORD nbEntry = 0;
+    BOOL ret = FALSE;
 
     __try
-    {
-        pListHead = SsdtSystemHookingDetection(hDevice);
-        if(pListHead == NULL)
+    {       
+        pListHead = SsdtSystemHookingDetection(hDevice, &nbEntry);
+        pTable = (PCHAR*)malloc(sizeof(PCHAR) * nbEntry);
+        if(pTable == NULL)
         {
-            OARK_ERROR("The list is empty");
+            OARK_ALLOCATION_ERROR();
+
+            CleanHookInfoList(pListHead);
+            free(pListHead);
             return;
         }
+        memset(pTable, 0, sizeof(PCHAR) * nbEntry);
 
+        ret = BuildNativeApiNameTable(pTable, nbEntry);
+        if(ret == FALSE)
+        {
+            OARK_ERROR("BuildNativeApiNameTable failed");
+            
+            CleanHookInfoList(pListHead);
+            free(pTable);
+            free(pListHead);
+            return;
+        }
+        
         printf(" INFO: SSDT System Hook Information (0x%.8x):\n", GetSsdtSystemBaseAddress(hDevice));
-
         while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
         {
-            printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n Hooker driver: %s", pHookInfo->id, pHookInfo->addr, pHookInfo->name);
+            printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n API Name: %s\n Hooker driver: %s", pHookInfo->id, pHookInfo->addr, pTable[pHookInfo->id], pHookInfo->name);
             if(pHookInfo->name != NULL)
                 free(pHookInfo->name);
             free(pHookInfo);
         }
         printf("\n\n");
         free(pListHead);
+        free(pTable);
 
-        pListHead = SsdtShadowHookingDetection(hDevice);
-        if(pListHead == NULL)
-        {
-            OARK_ERROR("The list is empty");
-            return;
-        }
+        pListHead = SsdtShadowHookingDetection(hDevice, NULL);
 
         printf(" INFO: SSDT Shadow Hook Information (0x%.8x):\n", GetSsdtShadowBaseAddress(hDevice));
         while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
@@ -213,7 +227,7 @@ PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
     return pListHead;
 }
 
-PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice)
+PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice, PDWORD nbEntry)
 {
     PKSERVICE_TABLE_DESCRIPTOR pShadowSSDT = NULL;
     READ_KERN_MEM_t read_kern_m = {0};
@@ -274,7 +288,7 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice)
             goto clean;
         }
 
-        pListHead = SsdtHookingDetection(hDevice, pShadowSSDT, pFunctShadowSSDT, (DWORD)pWin32kInfo->ImageBaseAddress, (DWORD)pWin32kInfo->ImageSize);
+        pListHead = SsdtHookingDetection(hDevice, pShadowSSDT, pFunctShadowSSDT, (DWORD)pWin32kInfo->ImageBaseAddress, (DWORD)pWin32kInfo->ImageSize, nbEntry);
   
         clean:
         if(pShadowSSDT != NULL)
@@ -285,6 +299,7 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice)
 
         if(pFunctShadowSSDT != NULL)
             free(pFunctShadowSSDT);
+        
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
         OARK_EXCEPTION();
@@ -292,7 +307,7 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice)
     return pListHead;
 }
 
-PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice)
+PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice, PDWORD nbEntry)
 {
     PKSERVICE_TABLE_DESCRIPTOR pSystemSSDT = NULL;
     READ_KERN_MEM_t read_kern_m = {0};
@@ -334,7 +349,7 @@ PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice)
             goto clean;
         }
 
-        pListHead = SsdtHookingDetection(hDevice, pSystemSSDT, pFunctSystemSSDT, (DWORD)pKernInfo->ImageBaseAddress, (DWORD)pKernInfo->ImageSize);
+        pListHead = SsdtHookingDetection(hDevice, pSystemSSDT, pFunctSystemSSDT, (DWORD)pKernInfo->ImageBaseAddress, (DWORD)pKernInfo->ImageSize, nbEntry);
         
         clean:
         if(pKernInfo != NULL)
@@ -352,7 +367,7 @@ PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice)
     return pListHead;
 }
 
-PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, DWORD modBase, DWORD modSize)
+PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, DWORD modBase, DWORD modSize, PDWORD nbEntry)
 {
     PHOOK_INFORMATION pHookInfo = NULL;
     READ_KERN_MEM_t read_kern_mem = {0};
@@ -370,6 +385,8 @@ PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pS
         }
         
         InitializeSListHead(pListHead);
+        if(nbEntry != NULL)
+            *nbEntry = pSsdt->Limit;
 
         for(; i < pSsdt->Limit; ++i)
         {
@@ -603,4 +620,65 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress()
         OARK_EXCEPTION();
 
     return pSsdtShadow;
+}
+BOOL BuildApiNameTable(PCHAR* pTable, HANDLE pMod DWORD nb)
+{
+    PIMAGE_EXPORT_DIRECTORY pImgExportDir = NULL;
+    PIMAGE_DOS_HEADER pImgDosHead = NULL;
+    HMODULE pNtdll = NULL;
+    PDWORD pAddrExportFunct, pExportNames = NULL;
+    PSHORT pAddrNamesOrd = NULL;
+    PUCHAR pAddrExportedSym = NULL;
+    PCHAR pNameExport = NULL;
+    DWORD i = 0, j = 0, id = 0;
+   
+    __try
+    {   
+        pImgExportDir = GetExportTableDirectory(pNtdll);
+        pImgDosHead = GetDosHeader(pNtdll);
+
+        pExportNames = (PDWORD)((DWORD)pImgDosHead + pImgExportDir->AddressOfNames);
+        pAddrExportFunct = (PDWORD)((DWORD)pImgDosHead + pImgExportDir->AddressOfFunctions);
+        pAddrNamesOrd = (PSHORT)((DWORD)pImgDosHead + pImgExportDir->AddressOfNameOrdinals);
+        
+        for(; i < pImgExportDir->NumberOfFunctions && j < nb; ++i)
+        {
+            pNameExport = (PCHAR)((DWORD)pImgDosHead + pExportNames[i]);
+            pAddrExportedSym = (PUCHAR)((DWORD)pImgDosHead + pAddrExportFunct[pAddrNamesOrd[i]]);
+        
+            if(*pAddrExportedSym == 0xB8 && 
+               *(pAddrExportedSym+5) == 0xBA &&
+               *(PDWORD)(pAddrExportedSym+6) == 0x7FFE0300)
+            {
+                id = *(PDWORD)(pAddrExportedSym+1);
+                pTable[id] = pNameExport;
+                ++j;
+            }
+        }
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+    
+    return TRUE;
+}
+BOOL BuildSystemApiNameTable(PCHAR* pTable, DWORD nb)
+{
+    HANDLE pNtdll = NULL;
+    BOOL ret = FALSE;
+
+    __try
+    {
+        pNtdll = GetModuleHandleA("ntdll.dll");
+        if(pNtdll == NULL)
+        {
+            OARK_ERROR("GetModuleHandleA failed");
+            return FALSE;
+        }
+
+        ret = BuildApiNameTable(pTable, pNtdll, nb);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return ret;
 }

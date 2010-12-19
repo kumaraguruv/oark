@@ -156,17 +156,18 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowStructure(HANDLE hDevice);
  * NB : To manipulate SLIST_ENTRY use PopHookInformationList/PushHookInformationList
  *
  * @param [in] hDevice Handle of the OARK kernelmode driver.
+ * @param [out] nbEntry Number of entries in SSDT.
  *
  * @retval NULL  An error occured.
  * @retval other  A pointer to SLIST_HEADER structure, the head of the single linked list.
  *
  * Example Usage:
  * @code
- *    SsdtSystemHookingDetection(hDevice); 
+ *    SsdtSystemHookingDetection(hDevice, &entry); 
  *    // /!\ Never forgotten to clean the list with PopInformationHookList and free for the 'name' field.
  * @endcode
  */
-PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice);
+PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice, PDWORD nbEntry);
 
 /**
  * @name    SsdtShadowHookingDetection
@@ -176,17 +177,18 @@ PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice);
  * NB : To manipulate SLIST_ENTRY use PopHookInformationList/PushHookInformationList
  *
  * @param [in] hDevice Handle of the OARK kernelmode driver.
+ * @param [out] nbEntry Number of entries in SSDT.
  *
  * @retval NULL  An error occured.
  * @retval other  A pointer to SLIST_HEADER structure, the head of the single linked list.
  *
  * Example Usage:
  * @code
- *    SsdtShadowHookingDetection(hDevice); 
+ *    SsdtShadowHookingDetection(hDevice, NULL); 
  *    // /!\ Never forgotten to clean the list with PopInformationHookList and free for the 'name' field.
  * @endcode
  */
-PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice);
+PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice, PDWORD nbEntry);
 
 /**
  * @name    SsdtHookingDetection
@@ -200,16 +202,19 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice);
  * @param [in] pFunctSsdt  A pointer to an array of SSDT entries.
  * @param [in] modBase The base address of module which exported functions contained in pSsdt.
  * @param [in] modSize The image size o this module.
+ * @param [out] nbEntry Number of entries in SSDT.
  *
  * @retval NULL  An error occured.
  * @retval other  A pointer to SLIST_HEADER structure, the head of the single linked list.
  *
  * Example Usage:
  * @code
- *    SsdtHookingDetection(hdevice, pSsdtAddress, pSsdtAddress->modBase, pSsdtAddress->modSize); 
+ *    SsdtHookingDetection(hdevice, pSsdtAddress, pSsdtAddress->modBase, pSsdtAddress->modSize, NULL); 
  *    // /!\ Never forgotten to clean the list with PopInformationHookList and free for the 'name' field.
  * @endcode
  */
-PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, DWORD modBase, DWORD modSize);
+PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, DWORD modBase, DWORD modSize, PDWORD nbEntry);
+
+BOOL BuildSyscallNameTable(PCHAR* pTable, DWORD nb);
 
 #endif
