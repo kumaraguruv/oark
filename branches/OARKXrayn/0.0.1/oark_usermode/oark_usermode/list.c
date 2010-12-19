@@ -47,6 +47,9 @@ PHOOK_INFORMATION PopHookInformationEntry(PSLIST_HEADER pListHead)
 
     __try
     {
+        if(pListHead == NULL)
+            return NULL;
+
         pListEntry = InterlockedPopEntrySList(pListHead);
         if(pListEntry == NULL)
             return NULL;

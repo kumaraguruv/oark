@@ -36,7 +36,7 @@ THE SOFTWARE.
 
 PSYSTEM_PROCESS_INFORMATION GetProcessList()
 {
-    PSYSTEM_PROCESS_INFORMATION pProcessInfo = NULL, firstValue = NULL;
+    PSYSTEM_PROCESS_INFORMATION pProcessInfo = NULL;
     NTSTATUS state = 0;
     DWORD size = 0;
 
@@ -80,7 +80,7 @@ PDWORD GetGUIThread(HANDLE hDevice)
     READ_KERN_MEM_t read_kern_m = {0};
     PSYSTEM_THREAD pThread = NULL;
     NTSTATUS ntState = 0;
-    PDWORD pEprocess = NULL, pEthreadGuiThread = NULL, pEthread = NULL, pSsdtSystem = NULL, pWin32Thread = NULL;    
+    PDWORD pEthreadGuiThread = NULL, pEthread = NULL, pSsdtSystem = NULL, pWin32Thread = NULL;    
     DWORD i = 0;
 
     __try

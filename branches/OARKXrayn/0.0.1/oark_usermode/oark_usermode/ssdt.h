@@ -197,7 +197,6 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice, PDWORD nbEntry);
  * This API gives informations relative to hooked SSDT entries.
  * NB : To manipulate SLIST_HEADER use PopHookInformationList/PushHookInformationList
  *
- * @param [in] hDevice Handle of the OARK kernelmode driver.
  * @param [in] pSsdt A pointer to an KSERVICE_TABLE_DESCRIPTOR.
  * @param [in] pFunctSsdt  A pointer to an array of SSDT entries.
  * @param [in] modBase The base address of module which exported functions contained in pSsdt.
@@ -209,12 +208,29 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice, PDWORD nbEntry);
  *
  * Example Usage:
  * @code
- *    SsdtHookingDetection(hdevice, pSsdtAddress, pSsdtAddress->modBase, pSsdtAddress->modSize, NULL); 
+ *    SsdtHookingDetection(pSsdtAddress, pSsdtAddress->modBase, pSsdtAddress->modSize, NULL); 
  *    // /!\ Never forgotten to clean the list with PopInformationHookList and free for the 'name' field.
  * @endcode
  */
-PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, DWORD modBase, DWORD modSize, PDWORD nbEntry);
+PSLIST_HEADER SsdtHookingDetection(PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, DWORD modBase, DWORD modSize, PDWORD nbEntry);
 
-BOOL BuildSyscallNameTable(PCHAR* pTable, DWORD nb);
+/**
+ * @name    BuildSystemApiNameTable
+ * @brief   This routine returns a table which contained Syscall Name.
+ *
+ * This API gives System Syscall Name into a string table.
+ *
+ * @param [in] pTable Pointer on the table.
+ * @param [in] nb Number of SSDT System entries.
+ *
+ * @retval FALSE  An error occured.
+ * @retval TRUE  Function succeed.
+ *
+ * Example Usage:
+ * @code
+ *    BuildSystemApiNameTable(pTable, nb); 
+ * @endcode
+ */
+BOOL BuildSystemApiNameTable(PCHAR* pTable, DWORD nb);
 
 #endif

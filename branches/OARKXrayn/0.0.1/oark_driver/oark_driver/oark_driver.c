@@ -215,6 +215,7 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
                 case SYM_TYP_PSLOUTHBYID:
                     retf = PsLookupThreadByThreadId((HANDLE)read_kern_mem.src_address, &ethread);
                     ptrdat = &ethread;
+
                     if(!NT_SUCCESS(retf))
                         ethread = NULL;
                     else
@@ -293,6 +294,7 @@ NTSTATUS DriverEntry(
     NTSTATUS status = STATUS_UNSUCCESSFUL;
     pdoGlobalDrvObj = DriverObject;
 
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "SUCEBATARD");
     DbgPrint( " drv entry!\n" );
 
     // Create the device object.

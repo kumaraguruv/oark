@@ -282,6 +282,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\syscalltable.h"
+				>
+			</File>
+			<File
 				RelativePath=".\unicode.h"
 				>
 			</File>

@@ -63,7 +63,7 @@ VOID CheckSSDTHooking(HANDLE hDevice)
         }
         memset(pTable, 0, sizeof(PCHAR) * nbEntry);
 
-        ret = BuildNativeApiNameTable(pTable, nbEntry);
+        ret = BuildSystemApiNameTable(pTable, nbEntry);
         if(ret == FALSE)
         {
             OARK_ERROR("BuildNativeApiNameTable failed");
@@ -91,7 +91,7 @@ VOID CheckSSDTHooking(HANDLE hDevice)
         printf(" INFO: SSDT Shadow Hook Information (0x%.8x):\n", GetSsdtShadowBaseAddress(hDevice));
         while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
         {
-            printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n Hooker driver: %s", pHookInfo->id, pHookInfo->addr, pHookInfo->name);
+            printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n API Name: %s\n Hooker driver: %s", pHookInfo->id, pHookInfo->addr, Offsets.pGuiSyscallName[pHookInfo->id], pHookInfo->name);
             if(pHookInfo->name != NULL)
                 free(pHookInfo->name);
             free(pHookInfo);
@@ -121,9 +121,7 @@ PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
     PKSERVICE_TABLE_DESCRIPTOR pSsdtSystem = NULL, pSsdtShadow = NULL;
     PHOOK_INFORMATION pHookInfo = NULL;
     READ_KERN_MEM_t read_kern_m = {0};
-    PSYSTEM_THREAD pThread = NULL;
     PSLIST_HEADER pListHead = NULL;
-    NTSTATUS ntState = 0;
     PDWORD pEthread = NULL, pServiceTable = NULL;    
     DWORD i = 0;
 
@@ -170,12 +168,7 @@ PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
                 {     
                     pEthread = GetETHREADStructureByTid(hDevice, (DWORD)(pProcessInfos->Threads[i].ClientId.UniqueThread));
                     if(pEthread == NULL)
-                    {
-                        OARK_ERROR("GetETHREADStructureByTid failed");
-                        CleanHookInfoList(pListHead);
-                        free(pListHead);
-                        goto clean;
-                    }
+                        continue;
 
                     read_kern_m.dst_address = &pServiceTable;
                     read_kern_m.src_address = (PVOID)((DWORD)pEthread + Offsets.KTHREADServiceTable);
@@ -187,6 +180,7 @@ PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
                         OARK_IOCTL_ERROR();
                         CleanHookInfoList(pListHead);
                         free(pListHead);
+                        pListHead = NULL;
                         goto clean;
                     }
 
@@ -288,7 +282,7 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice, PDWORD nbEntry)
             goto clean;
         }
 
-        pListHead = SsdtHookingDetection(hDevice, pShadowSSDT, pFunctShadowSSDT, (DWORD)pWin32kInfo->ImageBaseAddress, (DWORD)pWin32kInfo->ImageSize, nbEntry);
+        pListHead = SsdtHookingDetection(pShadowSSDT, pFunctShadowSSDT, (DWORD)pWin32kInfo->ImageBaseAddress, (DWORD)pWin32kInfo->ImageSize, nbEntry);
   
         clean:
         if(pShadowSSDT != NULL)
@@ -349,7 +343,7 @@ PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice, PDWORD nbEntry)
             goto clean;
         }
 
-        pListHead = SsdtHookingDetection(hDevice, pSystemSSDT, pFunctSystemSSDT, (DWORD)pKernInfo->ImageBaseAddress, (DWORD)pKernInfo->ImageSize, nbEntry);
+        pListHead = SsdtHookingDetection(pSystemSSDT, pFunctSystemSSDT, (DWORD)pKernInfo->ImageBaseAddress, (DWORD)pKernInfo->ImageSize, nbEntry);
         
         clean:
         if(pKernInfo != NULL)
@@ -367,12 +361,10 @@ PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice, PDWORD nbEntry)
     return pListHead;
 }
 
-PSLIST_HEADER SsdtHookingDetection(HANDLE hDevice, PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, DWORD modBase, DWORD modSize, PDWORD nbEntry)
+PSLIST_HEADER SsdtHookingDetection(PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, DWORD modBase, DWORD modSize, PDWORD nbEntry)
 {
     PHOOK_INFORMATION pHookInfo = NULL;
-    READ_KERN_MEM_t read_kern_mem = {0};
     PSLIST_HEADER pListHead = NULL;
-    PSLIST_ENTRY pListEntry = NULL;
     DWORD i = 0, mobEnd = modBase + modSize;
 
     __try
@@ -500,8 +492,6 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress()
     PKSERVICE_TABLE_DESCRIPTOR pSsdtSystem = NULL;
     PSYSTEM_MODULE pKernInfo = NULL;
     HMODULE pKern = NULL;
-    PCHAR pNameExport = NULL;
-    DWORD i = 0;
 
     __try
     {
@@ -547,7 +537,6 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress()
     PSYSTEM_MODULE pKernInfo = NULL;
     READ_KERN_MEM_t read_kern_m = {0};
     HANDLE pKern = NULL;
-    PDWORD pGuiEthread = NULL;
     PUCHAR pKeAddSystemServTab = NULL;
     DWORD i = 0, imgBaseKern = 0;
 
@@ -621,7 +610,8 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress()
 
     return pSsdtShadow;
 }
-BOOL BuildApiNameTable(PCHAR* pTable, HANDLE pMod DWORD nb)
+
+BOOL BuildSystemApiNameTable(PCHAR* pTable, DWORD nb)
 {
     PIMAGE_EXPORT_DIRECTORY pImgExportDir = NULL;
     PIMAGE_DOS_HEADER pImgDosHead = NULL;
@@ -633,7 +623,14 @@ BOOL BuildApiNameTable(PCHAR* pTable, HANDLE pMod DWORD nb)
     DWORD i = 0, j = 0, id = 0;
    
     __try
-    {   
+    {
+        pNtdll = GetModuleHandleA("ntdll.dll");
+        if(pNtdll == NULL)
+        {
+            OARK_ERROR("GetModuleHandleA failed");
+            return FALSE;
+        }
+
         pImgExportDir = GetExportTableDirectory(pNtdll);
         pImgDosHead = GetDosHeader(pNtdll);
 
@@ -660,25 +657,4 @@ BOOL BuildApiNameTable(PCHAR* pTable, HANDLE pMod DWORD nb)
         OARK_EXCEPTION();
     
     return TRUE;
-}
-BOOL BuildSystemApiNameTable(PCHAR* pTable, DWORD nb)
-{
-    HANDLE pNtdll = NULL;
-    BOOL ret = FALSE;
-
-    __try
-    {
-        pNtdll = GetModuleHandleA("ntdll.dll");
-        if(pNtdll == NULL)
-        {
-            OARK_ERROR("GetModuleHandleA failed");
-            return FALSE;
-        }
-
-        ret = BuildApiNameTable(pTable, pNtdll, nb);
-    }
-    __except(EXCEPTION_EXECUTE_HANDLER)
-        OARK_EXCEPTION();
-
-    return ret;
 }
