@@ -138,4 +138,20 @@ PSYSTEM_MODULE GetModuleInformation(PCHAR pModuleName);
  */
 PSYSTEM_MODULE_INFORMATION GetModuleList();
 
+/**
+ * @name    LoadKernInAddrSpace
+ * @brief   This routine loads kernel in virtual-address-space of caller.
+ *
+ * This API loads kernel image in process context.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A pointer to the binary in memory.
+ *
+ * Example Usage:
+ * @code
+ *    LoadKernInAddrSpace(); // Never forgotten to FreeLibrary the pointer !
+ * @endcode
+ */
+HANDLE LoadKernInAddrSpace();
+
 #endif

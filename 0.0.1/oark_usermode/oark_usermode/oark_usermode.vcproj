@@ -40,6 +40,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/D _CRT_SECURE_NO_WARNINGS"
 				Optimization="0"
 				AdditionalIncludeDirectories="C:\Users\0vercl0k\Desktop\OARK\0.0.1\common\common"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
@@ -117,6 +118,7 @@
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="..\..\common\common"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
+				ExceptionHandling="1"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -190,6 +192,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\list.c"
+				>
+			</File>
+			<File
 				RelativePath=".\main.c"
 				>
 			</File>
@@ -202,6 +208,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\pe.c"
+				>
+			</File>
+			<File
 				RelativePath=".\pebhooking.c"
 				>
 			</File>
@@ -211,6 +221,10 @@
 			</File>
 			<File
 				RelativePath=".\ssdt.c"
+				>
+			</File>
+			<File
+				RelativePath=".\unicode.c"
 				>
 			</File>
 			<File
@@ -236,11 +250,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\list.h"
+				>
+			</File>
+			<File
 				RelativePath=".\modules.h"
 				>
 			</File>
 			<File
 				RelativePath=".\others.h"
+				>
+			</File>
+			<File
+				RelativePath=".\pe.h"
 				>
 			</File>
 			<File
@@ -257,6 +279,14 @@
 			</File>
 			<File
 				RelativePath=".\ssdt.h"
+				>
+			</File>
+			<File
+				RelativePath=".\syscalltable.h"
+				>
+			</File>
+			<File
+				RelativePath=".\unicode.h"
 				>
 			</File>
 			<File

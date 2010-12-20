@@ -22,6 +22,7 @@ THE SOFTWARE.
 */
 
 #include "others.h"
+#include "syscalltable.h"
 
 STATUS_t LockInstance( DWORD * other_pid )
 {
@@ -280,6 +281,7 @@ void CheckOSVersion( void )
 
             //XP ETHREAD.ThreadsProcess
             Offsets.ETHREAD2Eprocess = 0x220;
+            Offsets.pGuiSyscallName = tableXp;
 		break;
 
 		case 6:
@@ -293,6 +295,7 @@ void CheckOSVersion( void )
                     Offsets.KTHREADServiceTable = 0x12C;
                     
                     Offsets.ETHREAD2Eprocess = 0x144;
+                    Offsets.pGuiSyscallName = tableVista;
 				break;
 
 				case 1:
@@ -304,6 +307,7 @@ void CheckOSVersion( void )
 
                     //7 KTHREAD.Process
                     Offsets.ETHREAD2Eprocess = 0x150;
+                    Offsets.pGuiSyscallName = table7;
 				break;
 
 				default:

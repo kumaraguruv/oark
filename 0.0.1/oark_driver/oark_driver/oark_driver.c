@@ -50,7 +50,6 @@ extern "C" {
 
 #include "oark_driver.h"
 #include "common.h"
-#include "ssdt.h"
 
 #ifdef __cplusplus
 namespace { // anonymous namespace to limit the scope of this global variable!
@@ -156,7 +155,6 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
     void               * ptrdat;
     IDTR                 idtr;
     GDTR                 gdtr;
-    PKSERVICE_TABLE_DESCRIPTOR pSsdtSystem = NULL;
     PEPROCESS eprocess;
     PETHREAD ethread;
     NTSTATUS retf;
@@ -229,6 +227,7 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
                 case SYM_TYP_PSLOUTHBYID:
                     retf = PsLookupThreadByThreadId((HANDLE)read_kern_mem.src_address, &ethread);
                     ptrdat = &ethread;
+
                     if(!NT_SUCCESS(retf))
                         ethread = NULL;
                     else
@@ -253,11 +252,6 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
                 case SYM_TYP_OBDEREFOBJ:
                     ObDereferenceObject( read_kern_mem.src_address );
                     ptrdat = NULL;
-                break;
-
-                case SYM_TYP_SSDT_SYSTEM:
-                    pSsdtSystem = GetSsdtSystemBaseAddress();
-                    ptrdat = &pSsdtSystem;
                 break;
 
                 default:
@@ -312,6 +306,7 @@ NTSTATUS DriverEntry(
     NTSTATUS status = STATUS_UNSUCCESSFUL;
     pdoGlobalDrvObj = DriverObject;
 
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "SUCEBATARD");
     DbgPrint( " drv entry!\n" );
 
     // Create the device object.

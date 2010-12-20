@@ -4,7 +4,7 @@ debug = TRUE;
 
 VOID DisplayErrorMsg(PCHAR pMsg, PCHAR pFunctName, DWORD line)
 {
-   fprintf(stderr, "[ERROR] [%s():line %u] Error: '%s' -> GetLastError() = %d.\n", pFunctName, __LINE__, line, GetLastError()); 
+   fprintf(stderr, "[ERROR] [%s():line %u] Error: '%s' -> GetLastError() = %d.\n", pFunctName, line, pMsg, GetLastError()); 
 }
 
 VOID DisplayAllocationFailureMsg(PCHAR pFunctName, DWORD line)
@@ -19,7 +19,9 @@ VOID DisplayIOCTLFailureMsg(PCHAR pFunctName, DWORD line)
 
 VOID DisplayExceptionMsg(PCHAR pFunctName, DWORD line)
 {
-    DisplayErrorMsg("An exception was catched", pFunctName, line);
+    fprintf(stderr, "[EXCEP] [%s():line %u] Exception catched, terminating process..\nPlease hit the keyboard to exit process..", pFunctName, line);
+    getchar();
+    ExitProcess(0);
 }
 
 STATUS_t EnableDebugPrivilege( void ) 

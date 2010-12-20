@@ -73,4 +73,6 @@ NTSTATUS PsLookupProcessByProcessId(IN HANDLE Pid, OUT PEPROCESS* Process);
 NTSTATUS PsLookupThreadByThreadId(IN HANDLE ThreadId, OUT PETHREAD *Thread);
 */
 
+#define DbgPrint(...) DbgPrintEx(DPFLTR_IHVDRIVER_ID, 0xffffffff, __VA_ARGS__)
+
 #endif // __OARKDRIVER_H_VERSION__

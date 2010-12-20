@@ -29,10 +29,14 @@ THE SOFTWARE.
  */
 #include "process.h"
 #include "driverusr.h"
+#include "unicode.h"
+
+#include <string.h>
+#include <tchar.h>
 
 PSYSTEM_PROCESS_INFORMATION GetProcessList()
 {
-    PSYSTEM_PROCESS_INFORMATION pProcessInfo = NULL, firstValue = NULL;
+    PSYSTEM_PROCESS_INFORMATION pProcessInfo = NULL;
     NTSTATUS state = 0;
     DWORD size = 0;
 
@@ -42,21 +46,26 @@ PSYSTEM_PROCESS_INFORMATION GetProcessList()
             NULL,
             0,
             &size
-            );
+        );
 
         pProcessInfo = (PSYSTEM_PROCESS_INFORMATION)malloc(size);
         if(pProcessInfo == NULL)
         {
-            OARK_IOCTL_ERROR();
+            OARK_ALLOCATION_ERROR();
             return NULL;
         }
 
-        state = ZwQuerySystemInformation(SystemProcessInformation , pProcessInfo , size , &size);
+        state = ZwQuerySystemInformation(SystemProcessInformation,
+            pProcessInfo,
+            size,
+            &size
+        );
+
         if(!NT_SUCCESS(state))
         {
             OARK_ERROR("ZwQuerySystemInformation failed");
             free(pProcessInfo);
-            return NULL;
+            pProcessInfo = NULL;
         }
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
@@ -68,11 +77,11 @@ PSYSTEM_PROCESS_INFORMATION GetProcessList()
 PDWORD GetGUIThread(HANDLE hDevice)
 {
     PSYSTEM_PROCESS_INFORMATION pProcessInfos = NULL, pProcessInformation = NULL;
+    READ_KERN_MEM_t read_kern_m = {0};
     PSYSTEM_THREAD pThread = NULL;
     NTSTATUS ntState = 0;
+    PDWORD pEthreadGuiThread = NULL, pEthread = NULL, pSsdtSystem = NULL, pWin32Thread = NULL;    
     DWORD i = 0;
-    READ_KERN_MEM_t read_kern_m = {0};
-    PDWORD pEprocess = NULL, pEthreadGuiThread = NULL, pEthread = NULL, pSsdtSystem = NULL, pWin32Thread = NULL;    
 
     __try
     {
@@ -112,8 +121,8 @@ PDWORD GetGUIThread(HANDLE hDevice)
 
                     if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
                     {
-                        free(pProcessInformation);
                         OARK_IOCTL_ERROR();
+                        free(pProcessInformation);
                         return NULL;
                     }
 
@@ -141,20 +150,25 @@ PDWORD GetGUIThread(HANDLE hDevice)
 
 PDWORD GetETHREADStructureByTid(HANDLE hDevice, DWORD threadID)
 {
-    PDWORD pEthread = NULL;
     READ_KERN_MEM_t read_kern_mem = {0};
+    PDWORD pEthread = NULL;
 
-    read_kern_mem.type = SYM_TYP_PSLOUTHBYID;
-    read_kern_mem.src_address = (PVOID)threadID;
-    read_kern_mem.dst_address = &pEthread;
-    read_kern_mem.size = sizeof(PDWORD);
-
-    if(IOCTLReadKernMem(hDevice, &read_kern_mem) == NULL)
+    __try
     {
-        OARK_IOCTL_ERROR();
-        return NULL;
-    }
+        read_kern_mem.type = SYM_TYP_PSLOUTHBYID;
+        read_kern_mem.src_address = (PVOID)threadID;
+        read_kern_mem.dst_address = &pEthread;
+        read_kern_mem.size = sizeof(PDWORD);
 
+        if(IOCTLReadKernMem(hDevice, &read_kern_mem) == NULL)
+        {
+            OARK_IOCTL_ERROR();
+            return NULL;
+        }
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+    
     return pEthread;
 }
 
@@ -186,4 +200,59 @@ PDWORD Ethread2Eprocess(HANDLE hDevice, PDWORD pEthread)
         OARK_EXCEPTION();
 
     return pEprocess;
+}
+
+PDWORD PID2Eprocess(HANDLE hDevice, DWORD pid)
+{
+    READ_KERN_MEM_t read_kern_m = {0};
+    PDWORD pEprocess = NULL;
+
+    __try
+    {
+        read_kern_m.dst_address = &pEprocess;
+        read_kern_m.size = sizeof(DWORD);
+        read_kern_m.type = SYM_TYP_PSLOUPRBYID;
+
+        if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
+            OARK_IOCTL_ERROR();
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return pEprocess;
+}
+
+PCHAR PID2ProcessName(DWORD pid)
+{
+    PSYSTEM_PROCESS_INFORMATION pProcInfo = NULL, pProc = NULL;
+    PCHAR pName = NULL;
+    DWORD sizeStr = 0;
+
+    __try
+    {
+        pProcInfo = (pProc = GetProcessList());
+        if(pProcInfo == NULL)
+        {
+            OARK_ERROR("GetProcessList failed");
+            goto clean;
+        }
+
+        while(pProc->NextEntryOffset)
+        {
+            if((DWORD)pProc->ProcessId == pid)
+            {
+                pName = UnicodeToAnsi(pProc->ImageName.Buffer);
+                break;
+            }
+            pProc = (PSYSTEM_PROCESS_INFORMATION)((DWORD)pProc + pProc->NextEntryOffset);
+        }
+
+        clean:
+        if(pProcInfo != NULL)
+            free(pProcInfo);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return pName;
 }
