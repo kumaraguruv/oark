@@ -21,64 +21,33 @@ THE SOFTWARE.
 */
 
 /**
- * @file   ssdt.h
+ * @file   unicode.h
  * @Author 0vercl0k@tuxfamily.org
- * @date   November, 2010
- * @brief  SSDT Hooking stuff.
+ * @date   December, 2010
+ * @brief  Unicode stuff.
+ *
  */
+#ifndef _UNICODE_H_
+#define _UNICODE_H_
 
-#ifndef _SSDT_H
-#define _SSDT_H
-
-
-/*
-    Organization of Wdm.h, Ntddk.h, and Ntifs.h
-    http://msdn.microsoft.com/en-us/library/ff554739%28v=VS.85%29.aspx
-*/
-#include <wdm.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#pragma pack(1)
-    typedef struct
-    {
-        PULONG Base;
-        PULONG Count;
-        ULONG Limit;
-        PUCHAR Number;
-    } KSERVICE_TABLE_DESCRIPTOR, *PKSERVICE_TABLE_DESCRIPTOR;
-#pragma pack()
-
-/* 
-    /!\ This pointer isn't exported in x64 kernels
-    http://www.msuiche.net/papers/Windows_Vista_64bits_and_unexported_kernel_symbols.pdf
-*/
-__declspec(dllimport) KSERVICE_TABLE_DESCRIPTOR KeServiceDescriptorTable;
-
-
-
+#include <windows.h>
 
 /**
- * @name    GetSsdtSystemBaseAddress
- * @brief   Retrieves SSDT System base address.
+ * @name    UnicodeToAnsi
+ * @brief   This routine transforms an UNICODE string into an ANSI string.
  *
- * This API gives base address of SSDT System.
+ * This API gives you the ANSI string corresponding to its UNICODE representation.
  *
+ * @param [in] pStrW Pointer to UNICODE string.
  *
  * @retval NULL  An error occured.
- * @retval other  A pointer to a KSERVICE_TABLE_DESCRIPTOR structure.
+ * @retval other  An ANSI string.
  *
  * Example Usage:
  * @code
- *    GetSsdtSystemBaseAddress();
+ *    UnicodeToAnsi(L"stfu"); //Never forgotten to free pointer !
  * @endcode
  */
-PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress();
-
-#ifdef __cplusplus
-}
-#endif
+PCHAR UnicodeToAnsi(PWSTR pStrW);
 
 #endif

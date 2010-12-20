@@ -195,4 +195,41 @@ PDWORD GetGUIThread(HANDLE hDevice);
  */
 PDWORD Ethread2Eprocess(HANDLE hDevice, PDWORD pEthread);
 
+/**
+ * @name    PID2Eprocess
+ * @brief   This routine returns a pointer to an EPROCESS structure based on PID of process.
+ *
+ * This API gives you a pointer on an EPROCESS based on a PID.
+ *
+ * @param [in] hDevice Handle of the OARK kernelmode driver.
+ * @param [in] pid Process-Ident.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A pointer to an EPROCESS structure.
+ *
+ * Example Usage:
+ * @code
+ *    PID2Eprocess(42);
+ * @endcode
+ */
+PDWORD PID2Eprocess(HANDLE hDevice, DWORD pid);
+
+/**
+ * @name    PID2ProcessName
+ * @brief   This routine returns the name of process identified by its PID.
+ *
+ * This API gives you the name of a process based on its PID.
+ *
+ * @param [in] pid Process-Ident.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A string.
+ *
+ * Example Usage:
+ * @code
+ *    PID2ProcessName(42); //Never forgotten to free pointer !
+ * @endcode
+ */
+PCHAR PID2ProcessName(DWORD pid);
+
 #endif

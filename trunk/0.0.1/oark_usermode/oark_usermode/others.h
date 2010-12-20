@@ -40,6 +40,8 @@ typedef struct _OFFSETS
     DWORD KTHREADWin32Thread;
     DWORD KTHREADServiceTable;
     DWORD ETHREAD2Eprocess;
+
+    PCHAR *pGuiSyscallName;
 } OFFSETS;
 
 OFFSETS Offsets;

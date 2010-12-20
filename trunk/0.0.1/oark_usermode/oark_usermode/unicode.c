@@ -20,9 +20,59 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "ssdt.h"
+/**
+ * @file   unicode.c
+ * @Author 0vercl0k@tuxfamily.org
+ * @date   December, 2010
+ * @brief  Unicode stuff.
+ *
+ */
+#include "unicode.h"
+#include "debug.h"
 
-PKSERVICE_TABLE_DESCRIPTOR GetSsdtSystemBaseAddress()
+PCHAR UnicodeToAnsi(PWSTR pStrW)
 {
-    return &KeServiceDescriptorTable;
+    PCHAR pStrA = NULL;
+    DWORD sizeA = 0;
+
+    __try
+    {
+        sizeA = WideCharToMultiByte(CP_ACP,
+        0,
+        pStrW,
+        -1,
+        NULL,
+        0,
+        NULL,
+        NULL
+        );
+
+        if(sizeA == 0)
+        {
+            OARK_ERROR("WideCharToMultiByte failed");
+            return NULL;
+        }
+
+        pStrA = (PCHAR)malloc(sizeA * sizeof(CHAR));
+        if(pStrA == NULL)
+        {
+            OARK_ALLOCATION_ERROR();
+            return NULL;
+        }
+
+        memset(pStrA, 0, sizeA);
+        WideCharToMultiByte(CP_ACP,
+            0,
+            pStrW,
+            -1,
+            pStrA,
+            sizeA,
+            NULL,
+            NULL
+            );
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return pStrA;
 }

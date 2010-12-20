@@ -6,7 +6,7 @@
 	>
 	<UserMacro
 		Name="DDKBUILD_PATH"
-		Value="C:\WINDDK\ddkbuild.cmd"
+		Value="C:\WinDDK\ddkbuild.cmd"
 		PerformEnvironmentSet="true"
 	/>
 	<UserMacro

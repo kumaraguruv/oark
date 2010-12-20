@@ -15,5 +15,4 @@ NTTARGETFILES=makefile.inc
 C_DEFINES=$(C_DEFINES)
 
 SOURCES=oark_driver.cpp \
-		ssdt.c          \
         drvversion.rc

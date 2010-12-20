@@ -149,10 +149,6 @@
 				RelativePath=".\oark_driver.c"
 				>
 			</File>
-			<File
-				RelativePath=".\ssdt.c"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -172,10 +168,6 @@
 			</File>
 			<File
 				RelativePath=".\oark_driver.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ssdt.h"
 				>
 			</File>
 			<Filter
