@@ -5,8 +5,6 @@
 *WARNING: View always the Issue Tracker, maybe other developer is already working in a feature of the TO-DO!*
 
   * Hooks detection:
-    * Service Descriptor Table
-    * Shadow Service Descriptor Table 
     * SYSENTER / INT 0x2E
     * EAT (Export Address Table) / IAT (Import Address Table)
     * IRP
