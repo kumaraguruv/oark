@@ -30,6 +30,7 @@ THE SOFTWARE.
 #include "ssdt.h"
 #include "others.h"
 #include "pebhooking.h"
+#include "report.h"
 
 int main( void )
 {
@@ -80,15 +81,23 @@ int main( void )
 						printf( " OK: Driver Loaded!\n" );
 
 					CheckOSVersion();
-
-                    printf(" INFO: Detecting SSDT Hooking:\n");
+                    
+                    RenderInitialization();
+                    printf(" OK: Running detection...\n\t> SSDT Hooking: ");
                     CheckSSDTHooking(device);
-
-					printf( " INFO: Detecting PEB Hooking:\n" );
+                    printf("OK\n");
+                    /*
+                    printf("\t> PEB Hooking: ");
 					CheckPEBHooking( device );
-
-					printf( " INFO: Showing IDT Info:\n" );
+                    printf("OK\n");
+                    */
+					printf("\t> IDT Info: ");
 					idt( device );
+                    printf("OK\n");
+                    
+                    printf(" Generation of the report..");
+                    MakeReport(OUTPUT_FORMAT_TXT, OUTPUT_DST_FILE);
+                    printf("OK\n Check %s file !\n", OARK_FILENAME_LOG);
 
 					if ( UnloadDriver( & device ) )
 					{

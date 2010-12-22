@@ -31,11 +31,11 @@ THE SOFTWARE.
 #include "common.h"
 #include "driverusr.h"
 #include "debug.h"
-#include "modules.h"
 #include "process.h"
 #include "list.h"
 #include "pe.h"
 #include "unicode.h"
+#include "render.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -43,72 +43,96 @@ THE SOFTWARE.
 
 VOID CheckSSDTHooking(HANDLE hDevice)
 {
+    PREPORT_SUBSECTION idSubSys = NULL, idSubSha = NULL, idSubXra = NULL;
     PHOOK_INFORMATION pHookInfo = NULL;
+    PREPORT_SECTION idSecSsdt = NULL;
     PSLIST_HEADER pListHead = NULL;
     PCHAR* pTable = NULL;
     DWORD nbEntry = 0;
     BOOL ret = FALSE;
 
     __try
-    {       
+    {
+        idSecSsdt = RenderAddSection("SSDT Hooking Detection");
+
+        idSubSys = RenderAddSubSection(idSecSsdt, "SSDT System");
+        idSubSha = RenderAddSubSection(idSecSsdt, "SSDT Shadow");
+        idSubXra = RenderAddSubSection(idSecSsdt, "Xrayn Kung-fu");
+
+        RenderAddEntry(idSecSsdt, "SSDT System Base Address", GetSsdtSystemBaseAddress(), FORMAT_HEX);
+        RenderAddEntry(idSecSsdt, "SSDT Shadow Base Address", GetSsdtShadowBaseAddress(), FORMAT_HEX);
+   
         pListHead = SsdtSystemHookingDetection(hDevice, &nbEntry);
+
         pTable = (PCHAR*)malloc(sizeof(PCHAR) * nbEntry);
         if(pTable == NULL)
         {
             OARK_ALLOCATION_ERROR();
-
             CleanHookInfoList(pListHead);
-            free(pListHead);
             return;
         }
+
         memset(pTable, 0, sizeof(PCHAR) * nbEntry);
 
         ret = BuildSystemApiNameTable(pTable, nbEntry);
         if(ret == FALSE)
         {
             OARK_ERROR("BuildNativeApiNameTable failed");
-            
             CleanHookInfoList(pListHead);
             free(pTable);
-            free(pListHead);
             return;
         }
-        
-        printf(" INFO: SSDT System Hook Information (0x%.8x):\n", GetSsdtSystemBaseAddress(hDevice));
+  
         while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
         {
-            printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n API Name: %s\n Hooker driver: %s", pHookInfo->id, pHookInfo->addr, pTable[pHookInfo->id], pHookInfo->name);
+            RenderAddSeparator(idSubSys);
+            RenderAddEntry(idSubSys, "Syscall ID", pHookInfo->id, FORMAT_DEC);
+            RenderAddEntry(idSubSys, "Function Address", pHookInfo->addr, FORMAT_HEX);
+            RenderAddEntry(idSubSys, "API Name", pTable[pHookInfo->id], FORMAT_STR_ASCII);
+            RenderAddEntry(idSubSys, "Hooked by", pHookInfo->name, FORMAT_STR_ASCII);
+            
             if(pHookInfo->name != NULL)
                 free(pHookInfo->name);
             free(pHookInfo);
         }
-        printf("\n\n");
+
         free(pListHead);
         free(pTable);
 
         pListHead = SsdtShadowHookingDetection(hDevice, NULL);
 
-        printf(" INFO: SSDT Shadow Hook Information (0x%.8x):\n", GetSsdtShadowBaseAddress(hDevice));
         while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
         {
-            printf(" \n----\n Syscall ID: 0x%.4x\n Function address: 0x%.8x\n API Name: %s\n Hooker driver: %s", pHookInfo->id, pHookInfo->addr, Offsets.pGuiSyscallName[pHookInfo->id], pHookInfo->name);
+            RenderAddSeparator(idSubSha);
+            RenderAddEntry(idSubSha, "Syscall ID", pHookInfo->id, FORMAT_DEC);
+            RenderAddEntry(idSubSha, "Function Address", pHookInfo->addr, FORMAT_HEX);
+            RenderAddEntry(idSubSha, "API Name", Offsets.pGuiSyscallName[pHookInfo->id], FORMAT_STR_ASCII);
+            RenderAddEntry(idSubSha, "Hooked by", pHookInfo->name, FORMAT_STR_ASCII);
+            
             if(pHookInfo->name != NULL)
                 free(pHookInfo->name);
             free(pHookInfo);
         }
-        printf("\n\n");
+
         free(pListHead);
 
         pListHead = CheckXraynPoc(hDevice);
-        printf(" INFO: Xrayn PoC Hook Information:\n");
+
         while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
         {
-            printf(" \n----\n Process Id: 0x%.4x - %s (TID: 0x%.3x)\n ETHREAD Pointer: 0x%.8x\n ServiceTable: 0x%.8x\n", pHookInfo->id, pHookInfo->name, pHookInfo->other[1], pHookInfo->other[0], pHookInfo->addr);
+            RenderAddSeparator(idSubXra);
+            RenderAddEntry(idSubXra, "Process ID", (PVOID)pHookInfo->id, FORMAT_DEC);
+            RenderAddEntry(idSubXra, "Process Name", (PVOID)pHookInfo->name, FORMAT_STR_ASCII);
+            RenderAddEntry(idSubXra, "Thread ID", (PVOID)pHookInfo->other[1], FORMAT_DEC);
+            RenderAddEntry(idSubXra, "ETHREAD Pointer", (PVOID)pHookInfo->other[0], FORMAT_HEX);
+            RenderAddEntry(idSubXra, "Function Address", (PVOID)pHookInfo->addr, FORMAT_HEX);
+            RenderAddEntry(idSubXra, "KTHREAD.ServiceTable", (PVOID)pHookInfo->addr, FORMAT_HEX);
+ 
             if(pHookInfo->name != NULL)
                 free(pHookInfo->name);
             free(pHookInfo);
         }
-        printf("\n\n");
+
         free(pListHead);
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
@@ -127,7 +151,6 @@ PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
 
     __try
     {
-        printf(" INFO: Checking Xrayn PoC\n");
         if(Offsets.isSupported == FALSE)
         {
             OARK_ERROR("This function requires offsets support");
@@ -251,9 +274,7 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice, PDWORD nbEntry)
             OARK_ERROR("Couldn't retrieve a GUI-thread");
             goto clean;
         }
-        
-        printf(" INFO: ETHREAD GUI: 0x%x\n", pEthreadGui);
-        
+                
         pEprocessWithGuiThread = Ethread2Eprocess(hDevice, pEthreadGui);
         if(pEprocessWithGuiThread == NULL)
         {
@@ -268,8 +289,6 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice, PDWORD nbEntry)
             goto clean;
         }
         
-        printf(" INFO: EPROCESS GUI: 0x%x\n", pEprocessWithGuiThread);
-
         read_kern_m.dst_address = pFunctShadowSSDT;
         read_kern_m.other_info = pEprocessWithGuiThread;
         read_kern_m.size = sizeof(DWORD) * pShadowSSDT->Limit;
@@ -282,7 +301,7 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice, PDWORD nbEntry)
             goto clean;
         }
 
-        pListHead = SsdtHookingDetection(pShadowSSDT, pFunctShadowSSDT, (DWORD)pWin32kInfo->ImageBaseAddress, (DWORD)pWin32kInfo->ImageSize, nbEntry);
+        pListHead = SsdtHookingDetection(pShadowSSDT, pFunctShadowSSDT, pWin32kInfo, nbEntry);
   
         clean:
         if(pShadowSSDT != NULL)
@@ -343,7 +362,7 @@ PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice, PDWORD nbEntry)
             goto clean;
         }
 
-        pListHead = SsdtHookingDetection(pSystemSSDT, pFunctSystemSSDT, (DWORD)pKernInfo->ImageBaseAddress, (DWORD)pKernInfo->ImageSize, nbEntry);
+        pListHead = SsdtHookingDetection(pSystemSSDT, pFunctSystemSSDT, pKernInfo, nbEntry);
         
         clean:
         if(pKernInfo != NULL)
@@ -361,11 +380,12 @@ PSLIST_HEADER SsdtSystemHookingDetection(HANDLE hDevice, PDWORD nbEntry)
     return pListHead;
 }
 
-PSLIST_HEADER SsdtHookingDetection(PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, DWORD modBase, DWORD modSize, PDWORD nbEntry)
+PSLIST_HEADER SsdtHookingDetection(PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, PSYSTEM_MODULE pModInfo, PDWORD nbEntry)
 {
     PHOOK_INFORMATION pHookInfo = NULL;
     PSLIST_HEADER pListHead = NULL;
-    DWORD i = 0, mobEnd = modBase + modSize;
+    DWORD modBase = (DWORD)pModInfo->ImageBaseAddress, modSize = pModInfo->ImageSize,
+        i = 0, mobEnd = modBase + modSize;
 
     __try
     {
@@ -535,7 +555,6 @@ PKSERVICE_TABLE_DESCRIPTOR GetSsdtShadowBaseAddress()
 {
     PKSERVICE_TABLE_DESCRIPTOR pSsdtShadow = NULL;
     PSYSTEM_MODULE pKernInfo = NULL;
-    READ_KERN_MEM_t read_kern_m = {0};
     HANDLE pKern = NULL;
     PUCHAR pKeAddSystemServTab = NULL;
     DWORD i = 0, imgBaseKern = 0;

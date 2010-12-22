@@ -36,6 +36,7 @@ THE SOFTWARE.
 #include <stdio.h>
 
 #include "others.h"
+#include "modules.h"
 
 #pragma pack(1)
 typedef struct
@@ -198,9 +199,8 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice, PDWORD nbEntry);
  * NB : To manipulate SLIST_HEADER use PopHookInformationList/PushHookInformationList
  *
  * @param [in] pSsdt A pointer to an KSERVICE_TABLE_DESCRIPTOR.
- * @param [in] pFunctSsdt  A pointer to an array of SSDT entries.
- * @param [in] modBase The base address of module which exported functions contained in pSsdt.
- * @param [in] modSize The image size o this module.
+ * @param [in] pFunctSsdt  A pointer to an array of functions pointers (SSDT entries).
+ * @param [in] pModInfo The information about a module, kernel for SSDT System or win32 for SSDT Gui.
  * @param [out] nbEntry Number of entries in SSDT.
  *
  * @retval NULL  An error occured.
@@ -208,11 +208,11 @@ PSLIST_HEADER SsdtShadowHookingDetection(HANDLE hDevice, PDWORD nbEntry);
  *
  * Example Usage:
  * @code
- *    SsdtHookingDetection(pSsdtAddress, pSsdtAddress->modBase, pSsdtAddress->modSize, NULL); 
+ *    SsdtHookingDetection(pSsdtAddress, pFunctSsdtAddress, pSsdtAddress, NULL); 
  *    // /!\ Never forgotten to clean the list with PopInformationHookList and free for the 'name' field.
  * @endcode
  */
-PSLIST_HEADER SsdtHookingDetection(PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, DWORD modBase, DWORD modSize, PDWORD nbEntry);
+PSLIST_HEADER SsdtHookingDetection(PKSERVICE_TABLE_DESCRIPTOR pSsdt, PDWORD pFunctSsdt, PSYSTEM_MODULE pModInfo, PDWORD nbEntry);
 
 /**
  * @name    BuildSystemApiNameTable

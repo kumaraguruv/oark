@@ -78,9 +78,7 @@ PDWORD GetGUIThread(HANDLE hDevice)
 {
     PSYSTEM_PROCESS_INFORMATION pProcessInfos = NULL, pProcessInformation = NULL;
     READ_KERN_MEM_t read_kern_m = {0};
-    PSYSTEM_THREAD pThread = NULL;
-    NTSTATUS ntState = 0;
-    PDWORD pEthreadGuiThread = NULL, pEthread = NULL, pSsdtSystem = NULL, pWin32Thread = NULL;    
+    PDWORD pEthreadGuiThread = NULL, pEthread = NULL, pWin32Thread = NULL;    
     DWORD i = 0;
 
     __try
@@ -212,6 +210,7 @@ PDWORD PID2Eprocess(HANDLE hDevice, DWORD pid)
         read_kern_m.dst_address = &pEprocess;
         read_kern_m.size = sizeof(DWORD);
         read_kern_m.type = SYM_TYP_PSLOUPRBYID;
+        read_kern_m.src_address = (PVOID)pid;
 
         if(IOCTLReadKernMem(hDevice, &read_kern_m) == NULL)
             OARK_IOCTL_ERROR();
@@ -226,7 +225,6 @@ PCHAR PID2ProcessName(DWORD pid)
 {
     PSYSTEM_PROCESS_INFORMATION pProcInfo = NULL, pProc = NULL;
     PCHAR pName = NULL;
-    DWORD sizeStr = 0;
 
     __try
     {
