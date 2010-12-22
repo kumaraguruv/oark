@@ -220,6 +220,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\render.c"
+				>
+			</File>
+			<File
+				RelativePath=".\report.c"
+				>
+			</File>
+			<File
 				RelativePath=".\ssdt.c"
 				>
 			</File>
@@ -271,6 +279,14 @@
 			</File>
 			<File
 				RelativePath=".\process.h"
+				>
+			</File>
+			<File
+				RelativePath=".\render.h"
+				>
+			</File>
+			<File
+				RelativePath=".\report.h"
 				>
 			</File>
 			<File

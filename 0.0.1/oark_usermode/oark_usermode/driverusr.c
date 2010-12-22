@@ -24,7 +24,6 @@ THE SOFTWARE.
 
 void * IOCTLReadKernMem( HANDLE device, READ_KERN_MEM_t * read_kern_mem )
 {
-	int i = 0;
 	ULONG bytes_read ;
 
 	bytes_read = 0 ;

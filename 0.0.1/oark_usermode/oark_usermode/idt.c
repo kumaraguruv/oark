@@ -21,9 +21,12 @@ THE SOFTWARE.
 */
 
 #include "idt.h"
+#include "render.h"
 
 int idt( HANDLE device )
 {
+    PREPORT_SUBSECTION *idSubSec = NULL;
+    PREPORT_SECTION idSectIdt = NULL;
 	int    returnf = -1;
 	READ_KERN_MEM_t read_kern_mem;
 	KPCR            kpcr;
@@ -36,13 +39,22 @@ int idt( HANDLE device )
 	char * type_gate;
 	DWORD idt_info;
 
+    idSectIdt = RenderAddSection("IDT Information");
 	GetSystemInfo( & sysinfo );
 
 	memset( & kpcr, 0, sizeof( kpcr ) );
+    idSubSec = malloc(sizeof(PREPORT_SUBSECTION) * sysinfo.dwNumberOfProcessors);
+    if(idSubSec == NULL)
+    {
+        OARK_ALLOCATION_ERROR();
+        return 0;
+    }
 
 	for ( i = 0; i < sysinfo.dwNumberOfProcessors; i++ )
 	{
-		printf( " Set Thread Affinity Mask to: %d\n", i + 1 );
+        idSubSec[i] = RenderAddSubSection(idSectIdt, "IDT Entries");
+        RenderAddSeparator(idSubSec[i]);
+
 		SetThreadAffinityMask( GetCurrentThread(), 1 << i );
 		Sleep( 0 );
 
@@ -55,7 +67,7 @@ int idt( HANDLE device )
 			printf( " ERROR: IOCTL CHANGE MODE\n" );
 		else
 		{
-			printf( " IDT KPCR: 0x%08X\n", kpcr.IDT );
+			//printf( " IDT KPCR: 0x%08X\n", kpcr.IDT );
 
 			read_kern_mem.type        = SYM_TYP_IDT;
 			read_kern_mem.dst_address = & idtr_r0;
@@ -64,21 +76,25 @@ int idt( HANDLE device )
 				printf( " ERROR: IOCTL CHANGE MODE\n" );
 			else
 			{
+                /*
 				printf
 				( 
 					" SIDT RING0: 0x%08X, bytes: 0x%X\n", 
 					MAKEDWORD( idtr_r0.baseAddressLow, idtr_r0.baseAddressHi ),
 					idtr_r0.nBytes
 				);
+                */
 
 				__asm { sidt idtr_r3 }
-
+                
+                /*
 				printf
 				( 
 					" SIDT RING3: 0x%08X, bytes: 0x%X\n", 
 					MAKEDWORD( idtr_r3.baseAddressLow, idtr_r3.baseAddressHi ),
 					idtr_r3.nBytes
 				);
+                */
 
 				if 
 				( 
@@ -87,22 +103,29 @@ int idt( HANDLE device )
 					( MAKEDWORD( idtr_r3.baseAddressLow, idtr_r3.baseAddressHi ) == ( (DWORD) kpcr.IDT ) )
 				)
 				{
-					printf( " OK: WITHOUT EMULATION!, IDT DATA OK, USING IDT INSTRUCTION (WITHOUT KPCR)\n" );
+					//printf( " OK: WITHOUT EMULATION!, IDT DATA OK, USING IDT INSTRUCTION (WITHOUT KPCR)\n" );
 					idt_address = (void *) MAKEDWORD( idtr_r3.baseAddressLow, idtr_r3.baseAddressHi );
 					idt_size    = idtr_r3.nBytes;
 				}
 				else
 				{
+                    /*
 					printf
 					( 
 						" WARNING: WITH EMULATION!, ERROR IDT DATA, USING KPCR, HARDCODE SIZE: 0x%X\n",
 						IDT_HARDCODE_SIZE 
 					);
+                    */
 					idt_address = kpcr.IDT;
 					idt_size    = IDT_HARDCODE_SIZE;
 				}
 
-				printf( " IDT CORE %d, ADDRESS: 0x%08X, SIZE: 0x%X\n\n", i + 1, idt_address, idt_size );
+                RenderAddEntry(idSectIdt, "Core Id", i + 1, FORMAT_DEC);
+                RenderAddEntry(idSectIdt, "Address", idt_address, FORMAT_HEX);
+                RenderAddEntry(idSectIdt, "Size", idt_size, FORMAT_HEX);
+                RenderAddSeparator(idSectIdt);
+
+				//printf( " IDT CORE %d, ADDRESS: 0x%08X, SIZE: 0x%X\n\n", i + 1, idt_address, idt_size );
 
 				read_kern_mem.type        = SYM_TYP_NULL;
 				read_kern_mem.dst_address = & idt_desc;
@@ -142,7 +165,7 @@ int idt( HANDLE device )
 								type_gate = "-";
 							break;
 						}
-
+                        /*
 						printf
 						( 
 							" IDT ENTRY: 0x%02X: 0x%08X TYPE GATE: %s\n", 
@@ -150,6 +173,12 @@ int idt( HANDLE device )
 							idt_info,
 							type_gate
 						);
+                        */
+
+                        RenderAddEntry(idSubSec[i], "Entry Id", j, FORMAT_DEC);
+                        RenderAddEntry(idSubSec[i], "Address", idt_info, FORMAT_HEX);
+                        RenderAddEntry(idSubSec[i], "Type Gate", type_gate, FORMAT_STR_ASCII);
+                        RenderAddSeparator(idSubSec[i]);
 					}
 
 					( ( IDT_DESCRIPTOR * ) read_kern_mem.src_address )++;
@@ -157,6 +186,6 @@ int idt( HANDLE device )
 			}
 		}
 	}
-
+    free(idSubSec);
 	return returnf;
 }
