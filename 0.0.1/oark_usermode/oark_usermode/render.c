@@ -249,8 +249,8 @@ PREPORT_SECTION RenderInitialization()
         t = time(NULL);
         idSubInf = RenderAddSection("oark - The Open Source Anti Rootkit");
         RenderAddEntry(idSubInf, "URL", "http://code.google.com/p/oark/", FORMAT_STR_ASCII);
-        RenderAddEntry(idSubInf, "Main Developers", "David Reguera Garcia - Dreg@fr33project.org", FORMAT_STR_ASCII);
-        RenderAddEntry(idSubInf, "Comitters", "Axel Souchet - 0vercl0k@tuxfamily.org", FORMAT_STR_ASCII);
+        RenderAddEntry(idSubInf, "Main Developer", "David Reguera Garcia - Dreg@fr33project.org", FORMAT_STR_ASCII);
+        RenderAddEntry(idSubInf, "Main Developer", "Axel Souchet - 0vercl0k@tuxfamily.org", FORMAT_STR_ASCII);
         RenderAddEntry(idSubInf, "Greetings", "DiabloNova (RootkitUnhooker inspiration)", FORMAT_STR_ASCII);
 
         RenderAddSeparator(idSubInf);
