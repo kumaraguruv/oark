@@ -1,5 +1,5 @@
 /*
-Copyright (c) <2010> <Dreg aka David Reguera Garcia, dreg@fr33project.org>
+Copyright (c) <2010> <0vercl0k aka Souchet Axel, 0vercl0k@tuxfamily.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,39 +20,40 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "init.h"
+/**
+ * @file   msr.c
+ * @Author 0vercl0k@tuxfamily.org
+ * @date   December, 2010
+ * @brief  MSR stuff.
+ *
+ */
 #include "msr.h"
 
-INIT_TABLE_ENTRY_t INIT_TABLE[] =
+DWORD64 ReadMSR(DWORD msrId)
 {
-    { {FIN_SSDT_DEFAULTS}, CheckSSDTHooking, TRUE, "SSDT HOOKING DETECTION" },
-    { {FIN_SYSENTER_DEFAULTS}, CheckSysenterHookDetection, TRUE, "SYSENTER HOOKING DETECTION" },
-    { {FIN_IDT_DEFAULTS}, idt, TRUE, "IDT INFORMATION" },
-    { {FIN_PEBHOOKING_DEFAULTS}, CheckPEBHooking, TRUE, "PEB HOOKING DETECTION" }
-};
+    DWORD64 ret = 0;
+    DWORD highD = 0, lowD = 0;
 
-STATUS_t InitCalls( HANDLE hdevice )
-{
-    int i;
-    static FUNC_ARGS_GLOBAL_t globals;
-
-    globals.hdevice = hdevice;
-
-    for ( i = 0; i < ( sizeof( INIT_TABLE ) / sizeof( * INIT_TABLE ) ); i++ )
+    __try
     {
-        if 
-        ( 
-            ( INIT_TABLE[i].enable )
-            && 
-            ( INIT_TABLE[i].function_args.flags != 0 )
-        )
+        __asm
         {
-            INIT_TABLE[i].function( & INIT_TABLE[i].function_args, & globals );
+            mov ecx, msrId
+
+            //RMSR
+            _emit 0x0F
+            _emit 0x32
+
+            mov highD, edx
+            mov lowD, eax
         }
+
+        ret = ( (DWORD64)highD << 32) + lowD;
     }
-
-    return ST_OK;
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        DbgPrint("ReadMSR Exception catched.\n");
+    }
+    
+    return ret;
 }
-
-
-

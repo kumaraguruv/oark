@@ -73,6 +73,24 @@ typedef struct
 PCHAR IsAddressInADriver(DWORD pFunct);
 
 /**
+ * @name    isAddressInKernel
+ * @brief   This routine returns the answer to the question 'ptr is in kernel code ?'.
+ *
+ * This API is useful to know if an address is situated in kernel module.
+ *
+ * @param [in] pFunct  Address of the function.
+ *
+ * @retval TRUE  Address points into kernel module.
+ * @retval FALSE  Address does not point into kernel module.
+ *
+ * Example Usage:
+ * @code
+ *    IsAddressInKernel(0x1337);
+ * @endcode
+ */
+BOOL IsAddressInKernel(DWORD pFunc);
+
+/**
  * @name    GetKernelModuleInformation
  * @brief   This routine returns information concerning the kernel module.
  *

@@ -50,6 +50,7 @@ extern "C" {
 
 #include "oark_driver.h"
 #include "common.h"
+#include "msr.h"
 
 #ifdef __cplusplus
 namespace { // anonymous namespace to limit the scope of this global variable!
@@ -159,6 +160,7 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
     PETHREAD ethread;
     NTSTATUS retf;
     ULONG ret_len;
+    DWORD64 msr = 0;
     KAPC_STATE apcState = {0};
 	
     switch(irpSp->Parameters.DeviceIoControl.IoControlCode)
@@ -247,6 +249,11 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
                     WriteUserMode(read_kern_mem.dst_address, read_kern_mem.size, read_kern_mem.src_address);
                     ExFreePoolWithTag(ptrdat, OARK_TAG);
                     ptrdat = NULL;
+                break;
+
+                case SYM_TYP_READ_MSR:
+                    msr = ReadMSR((DWORD)read_kern_mem.src_address);
+                    ptrdat = &msr;
                 break;
 
                 case SYM_TYP_OBDEREFOBJ:

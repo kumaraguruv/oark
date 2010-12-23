@@ -26,10 +26,7 @@ THE SOFTWARE.
 #include "debug.h"
 #include "common.h"
 #include "driverusr.h"
-#include "idt.h"
-#include "ssdt.h"
 #include "others.h"
-#include "pebhooking.h"
 #include "report.h"
 #include "init.h"
 
@@ -86,8 +83,8 @@ int main( void )
                     RenderInitialization();
 
                     InitCalls( device );
- 
-                    printf(" Generation of the report..");
+                    
+                    printf(" Generation of the report..\n");
                     MakeReport(OUTPUT_FORMAT_TXT, OUTPUT_DST_STDOUT, FALSE );
                     printf(" Generation of the file report..");
                     MakeReport(OUTPUT_FORMAT_TXT, OUTPUT_DST_FILE, TRUE );

@@ -167,6 +167,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\msr.h"
+				>
+			</File>
+			<File
 				RelativePath=".\oark_driver.h"
 				>
 			</File>
@@ -218,6 +222,10 @@
 			</File>
 			<File
 				RelativePath=".\makefile.inc"
+				>
+			</File>
+			<File
+				RelativePath=".\msr.c"
 				>
 			</File>
 			<File

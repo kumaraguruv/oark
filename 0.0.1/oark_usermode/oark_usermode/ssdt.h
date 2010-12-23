@@ -59,14 +59,15 @@ typedef struct
  *
  * This API search and displays potential hook in SSDTs structures.
  *
- * @param [in] hDevice Handle of the OARK kernelmode driver.
+ * @param [in] args Arguments.
+ * @param [in] globals Globals variables that the function needs.
  *
  * Example Usage:
  * @code
  *    CheckSSDTHooking(hDevice);
  * @endcode
  */
-STATUS_t CheckSSDTHooking( FUNC_ARGS_t *, FUNC_ARGS_GLOBAL_t * );
+STATUS_t CheckSSDTHooking(FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals);
 
 /**
  * @name    CheckXraynPoc

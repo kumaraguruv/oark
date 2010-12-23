@@ -41,7 +41,7 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-STATUS_t CheckSSDTHooking( FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals )
+STATUS_t CheckSSDTHooking(FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals)
 {
     PREPORT_SUBSECTION idSubSys = NULL, idSubSha = NULL, idSubXra = NULL;
     PHOOK_INFORMATION pHookInfo = NULL;
@@ -63,7 +63,7 @@ STATUS_t CheckSSDTHooking( FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals )
         RenderAddEntry(idSecSsdt, "SSDT System Base Address", GetSsdtSystemBaseAddress(), FORMAT_HEX);
         RenderAddEntry(idSecSsdt, "SSDT Shadow Base Address", GetSsdtShadowBaseAddress(), FORMAT_HEX);
    
-        pListHead = SsdtSystemHookingDetection( globals->hdevice, &nbEntry);
+        pListHead = SsdtSystemHookingDetection(globals->hdevice, &nbEntry);
 
         pTable = (PCHAR*)malloc(sizeof(PCHAR) * nbEntry);
         if(pTable == NULL)

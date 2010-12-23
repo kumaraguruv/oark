@@ -113,6 +113,37 @@ PSYSTEM_MODULE GetKernelModuleInformation()
     return pSysModule;
 }
 
+BOOL IsAddressInKernel(DWORD pFunc)
+{
+    PSYSTEM_MODULE pKern = NULL;
+    DWORD end = 0, base = 0;
+    BOOL ret = FALSE;
+
+    __try
+    {
+        pKern = GetKernelModuleInformation();
+        if(pKern == NULL)
+        {
+            OARK_ERROR("GetKernelModuleInformation failed");
+            goto clean;
+        }
+
+        base = end = (DWORD)pKern->ImageBaseAddress;
+        end += pKern->ImageSize;
+
+        if( (pFunc >= base) && (pFunc <= end) )
+            ret = TRUE;
+
+        clean:
+        if(pKern != NULL)
+            free(pKern);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return ret;
+}
+
 PSYSTEM_MODULE GetWin32kModuleInformation()
 {
     PSYSTEM_MODULE pSysModule = NULL;
