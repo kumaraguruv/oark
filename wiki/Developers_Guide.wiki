@@ -10,6 +10,7 @@
   # [#Coding_Style Coding Style]
     # [#Comment_Code Comment Code]
   # [#Direct_Kernel_Object_Manipulation_(DKOM) Direct Kernel Object Manipulation (DKOM)]
+  # [#Subversion Subversion]
 
 = I want to be a Developer / Commiter / Contributor =
 
@@ -487,3 +488,7 @@ enum TEnum
 = Direct Kernel Object Manipulation (DKOM) =
 
 Here you have structures definitions and offsets of each field, very usefull for *XP/VISTA/7 compatibility*: [http://msdn.moonsols.com/]
+
+= Subversion =
+
+http://svnbook.red-bean.com/en/1.2/svn-book.html: It is a book very interesting and it explains a lot of concepts of Control Software.
