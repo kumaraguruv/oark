@@ -5,7 +5,7 @@
 *WARNING: View always the Issue Tracker, maybe other developer is already working in a feature of the TO-DO!*
 
   * Hooks detection:
-    * SYSENTER / INT 0x2E
+    * INT 0x2E
     * EAT (Export Address Table) / IAT (Import Address Table)
     * IRP
     * IDT (Interrupt Descriptor Table)
