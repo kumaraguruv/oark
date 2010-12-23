@@ -250,6 +250,18 @@ typedef struct _PROCESS_BASIC_INFORMATION
 
 } PROCESS_BASIC_INFORMATION;
 
+typedef struct FUNC_ARGS_GLOBAL_s
+{
+    HANDLE * hdevice;
+
+} FUNC_ARGS_GLOBAL_t;
+
+typedef struct FUNC_ARGS_s
+{
+    DWORD flags;
+
+} FUNC_ARGS_t;
+
 ZWQUERYINFORMATIONPROCESS_t ZwQueryInformationProcess;
 ZWQUERYSYSTEMINFORMATION_t ZwQuerySystemInformation;
 

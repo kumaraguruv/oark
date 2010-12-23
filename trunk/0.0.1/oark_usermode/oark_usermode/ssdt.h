@@ -38,6 +38,11 @@ THE SOFTWARE.
 #include "others.h"
 #include "modules.h"
 
+#define FIN_SSDT_STD   (0x01)
+#define FIN_SSDT_XRAYN (0x02)
+
+#define FIN_SSDT_DEFAULTS ( FIN_SSDT_XRAYN | FIN_SSDT_STD )
+
 #pragma pack(1)
 typedef struct
 {
@@ -61,7 +66,7 @@ typedef struct
  *    CheckSSDTHooking(hDevice);
  * @endcode
  */
-VOID CheckSSDTHooking(HANDLE hDevice);
+STATUS_t CheckSSDTHooking( FUNC_ARGS_t *, FUNC_ARGS_GLOBAL_t * );
 
 /**
  * @name    CheckXraynPoc

@@ -31,6 +31,8 @@ THE SOFTWARE.
 #include "debug.h"
 #include "vad.h"
 
+#define FIN_PEBHOOKING_DEFAULTS (0)
+
 typedef struct LDR_USEFULL_s
 {
 	SLIST_ENTRY SingleListEntry;
@@ -47,7 +49,7 @@ typedef struct LDR_USEFULL_s
 void CheckDuplicateEntries( PSLIST_HEADER, LDR_USEFULL_t * );
 void CheckRawFile( LDR_USEFULL_t * );
 int _CheckPEBHooking( HANDLE, DWORD );
-STATUS_t CheckPEBHooking( HANDLE );
+STATUS_t CheckPEBHooking( FUNC_ARGS_t *, FUNC_ARGS_GLOBAL_t * );
 void ComparePEBEntryVADInfo( LDR_USEFULL_t *, PSLIST_HEADER );
 BOOLEAN IsVADStringEqPebStr( char *, char * );
 char * RemovePrePATH( char  *, BOOLEAN * );

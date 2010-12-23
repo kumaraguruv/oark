@@ -20,47 +20,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef _IDT_H__
-#define _IDT_H__
+#ifndef _INIT_H__
+#define _INIT_H__
 
-#include <windows.h>
-#include <stdio.h>
-#include "common.h"
-#include "driverusr.h"
+#include "others.h"
+#include "ssdt.h"
+#include "idt.h"
+#include "pebhooking.h"
 
-#define FIN_IDT_DEFAULTS (0)
+typedef STATUS_t (* INIT_TABLE_ENTRY_FUNC_t)( FUNC_ARGS_t *, FUNC_ARGS_GLOBAL_t * );
 
-typedef struct _KIDTENTRY
+typedef struct INIT_TABLE_ENTRY_s
 {
-     WORD Offset;
-     WORD Selector;
-     WORD Access;
-     WORD ExtendedOffset;
-} KIDTENTRY, *PKIDTENTRY;
+    FUNC_ARGS_t                 function_args;
+    INIT_TABLE_ENTRY_FUNC_t     function;
+    BOOLEAN                     enable;
+    char                      * name;
 
-typedef struct _KGDTENTRY
-{
-     WORD LimitLow;
-     WORD BaseLow;
-     ULONG HighWord;
-} KGDTENTRY, *PKGDTENTRY;
+} INIT_TABLE_ENTRY_t;
 
-typedef struct _KPCR
-{
-     NT_TIB NtTib;   /* FIXED UNION: I AM NOT INTERESTED IN THIS */
-     void * SelfPcr; /* FIXED: I AM NOT INTERESTED IN THIS */
-     void * Prcb;    /* FIXED: I AM NOT INTERESTED IN THIS */
-     UCHAR Irql;
-     ULONG IRR;
-     ULONG IrrActive;
-     ULONG IDR;
-     PVOID KdVersionBlock;
-     PKIDTENTRY IDT;
-     PKGDTENTRY GDT;
+extern INIT_TABLE_ENTRY_t INIT_TABLE[];
 
-    /* ... */
-} KPCR, *PKPCR;
+STATUS_t InitCalls( HANDLE );
 
-STATUS_t idt( FUNC_ARGS_t *, FUNC_ARGS_GLOBAL_t * );
-
-#endif /* _IDT_H__ */
+#endif /* _INIT_H__ */
