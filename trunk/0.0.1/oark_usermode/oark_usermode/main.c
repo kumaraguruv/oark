@@ -88,7 +88,9 @@ int main( void )
                     InitCalls( device );
  
                     printf(" Generation of the report..");
-                    MakeReport(OUTPUT_FORMAT_TXT, OUTPUT_DST_FILE);
+                    MakeReport(OUTPUT_FORMAT_TXT, OUTPUT_DST_STDOUT, FALSE );
+                    printf(" Generation of the file report..");
+                    MakeReport(OUTPUT_FORMAT_TXT, OUTPUT_DST_FILE, TRUE );
                     printf("OK\n Check %s file !\n", OARK_FILENAME_LOG);
 
 					if ( UnloadDriver( & device ) )

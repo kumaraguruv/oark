@@ -165,7 +165,7 @@ VOID MakeReportText(PREPORT_SECTION pRootList, FILE* pOut)
         OARK_EXCEPTION();
 }
 
-VOID MakeReport(OUTPUT_FORMAT outForm, OUTPUT_DST outDst)
+VOID MakeReport(OUTPUT_FORMAT outForm, OUTPUT_DST outDst, BOOLEAN remove )
 {
     PREPORT_SECTION pRootList = NULL;
     FILE *pFile = NULL;
@@ -203,7 +203,8 @@ VOID MakeReport(OUTPUT_FORMAT outForm, OUTPUT_DST outDst)
                 OARK_ERROR("Format not supported yet");
                 return;
         }
-        RenderCleanList();
+        if ( remove )
+            RenderCleanList();
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
         OARK_EXCEPTION();
