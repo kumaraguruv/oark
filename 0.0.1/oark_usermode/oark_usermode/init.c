@@ -37,7 +37,17 @@ STATUS_t InitCalls( HANDLE hdevice )
     globals.hdevice = hdevice;
 
     for ( i = 0; i < ( sizeof( INIT_TABLE ) / sizeof( * INIT_TABLE ) ); i++ )
-        INIT_TABLE[i].function( & INIT_TABLE[i].function_args, & globals );
+    {
+        if 
+        ( 
+            ( INIT_TABLE[i].enable )
+            && 
+            ( INIT_TABLE[i].function_args.flags != 0 )
+        )
+        {
+            INIT_TABLE[i].function( & INIT_TABLE[i].function_args, & globals );
+        }
+    }
 
     return ST_OK;
 }

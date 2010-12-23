@@ -28,7 +28,7 @@ THE SOFTWARE.
 #include "common.h"
 #include "driverusr.h"
 
-#define FIN_IDT_DEFAULTS (0)
+#define FIN_IDT_DEFAULTS (1)
 
 typedef struct _KIDTENTRY
 {
