@@ -491,4 +491,4 @@ Here you have structures definitions and offsets of each field, very usefull for
 
 = Subversion =
 
-http://svnbook.red-bean.com/en/1.2/svn-book.html: It is a book very interesting and it explains a lot of concepts of Control Software.
+[http://svnbook.red-bean.com/en/1.2/svn-book.html]: This book is very interesting and it explains a lot of concepts of Control Software.
