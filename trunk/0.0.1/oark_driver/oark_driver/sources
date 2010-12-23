@@ -15,4 +15,5 @@ NTTARGETFILES=makefile.inc
 C_DEFINES=$(C_DEFINES)
 
 SOURCES=oark_driver.cpp \
+        msr.c           \
         drvversion.rc

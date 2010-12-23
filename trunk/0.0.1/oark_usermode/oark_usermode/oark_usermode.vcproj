@@ -208,6 +208,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\msr.c"
+				>
+			</File>
+			<File
 				RelativePath=".\others.c"
 				>
 			</File>
@@ -271,6 +275,10 @@
 			</File>
 			<File
 				RelativePath=".\modules.h"
+				>
+			</File>
+			<File
+				RelativePath=".\msr.h"
 				>
 			</File>
 			<File

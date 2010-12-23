@@ -1,5 +1,5 @@
 /*
-Copyright (c) <2010> <Dreg aka David Reguera Garcia, dreg@fr33project.org>
+Copyright (c) <2010> <0vercl0k aka Souchet Axel, 0vercl0k@tuxfamily.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,39 +20,44 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "init.h"
-#include "msr.h"
+/**
+ * @file   msr.h
+ * @Author 0vercl0k@tuxfamily.org
+ * @date   December, 2010
+ * @brief  MSR stuff.
+ *
+ */
+#ifndef _MSR_H_
+#define _MSR_H_
 
-INIT_TABLE_ENTRY_t INIT_TABLE[] =
-{
-    { {FIN_SSDT_DEFAULTS}, CheckSSDTHooking, TRUE, "SSDT HOOKING DETECTION" },
-    { {FIN_SYSENTER_DEFAULTS}, CheckSysenterHookDetection, TRUE, "SYSENTER HOOKING DETECTION" },
-    { {FIN_IDT_DEFAULTS}, idt, TRUE, "IDT INFORMATION" },
-    { {FIN_PEBHOOKING_DEFAULTS}, CheckPEBHooking, TRUE, "PEB HOOKING DETECTION" }
-};
+#include <wdm.h>
+#include "common.h"
 
-STATUS_t InitCalls( HANDLE hdevice )
-{
-    int i;
-    static FUNC_ARGS_GLOBAL_t globals;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    globals.hdevice = hdevice;
 
-    for ( i = 0; i < ( sizeof( INIT_TABLE ) / sizeof( * INIT_TABLE ) ); i++ )
-    {
-        if 
-        ( 
-            ( INIT_TABLE[i].enable )
-            && 
-            ( INIT_TABLE[i].function_args.flags != 0 )
-        )
-        {
-            INIT_TABLE[i].function( & INIT_TABLE[i].function_args, & globals );
-        }
-    }
+/**
+ * @name    ReadMSR
+ * @brief   This routine reads a MSR.
+ *
+ * This API is useful to read a MSR.
+ *
+ * @param [in] msrId  MSR number.
+ *
+ * @retval 0 An error occured
+ * @retval other  The MSR Value.
+ *
+ * Example Usage:
+ * @code
+ *    ReadMSR(0x1337);
+ * @endcode
+ */
+DWORD64 ReadMSR(DWORD msrId);
 
-    return ST_OK;
+#ifdef __cplusplus
 }
+#endif
 
-
-
+#endif
