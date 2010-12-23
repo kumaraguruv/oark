@@ -20,47 +20,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef _IDT_H__
-#define _IDT_H__
+#include "init.h"
 
-#include <windows.h>
-#include <stdio.h>
-#include "common.h"
-#include "driverusr.h"
-
-#define FIN_IDT_DEFAULTS (0)
-
-typedef struct _KIDTENTRY
+INIT_TABLE_ENTRY_t INIT_TABLE[] =
 {
-     WORD Offset;
-     WORD Selector;
-     WORD Access;
-     WORD ExtendedOffset;
-} KIDTENTRY, *PKIDTENTRY;
+    { {FIN_SSDT_DEFAULTS}, CheckSSDTHooking, TRUE, "SSDT HOOKING DETECTION" },
+    { {FIN_IDT_DEFAULTS}, idt, TRUE, "IDT INFORMATION" },
+    { {FIN_PEBHOOKING_DEFAULTS}, CheckPEBHooking, TRUE, "PEB HOOKING DETECTION" }
+};
 
-typedef struct _KGDTENTRY
+STATUS_t InitCalls( HANDLE hdevice )
 {
-     WORD LimitLow;
-     WORD BaseLow;
-     ULONG HighWord;
-} KGDTENTRY, *PKGDTENTRY;
+    int i;
+    static FUNC_ARGS_GLOBAL_t globals;
 
-typedef struct _KPCR
-{
-     NT_TIB NtTib;   /* FIXED UNION: I AM NOT INTERESTED IN THIS */
-     void * SelfPcr; /* FIXED: I AM NOT INTERESTED IN THIS */
-     void * Prcb;    /* FIXED: I AM NOT INTERESTED IN THIS */
-     UCHAR Irql;
-     ULONG IRR;
-     ULONG IrrActive;
-     ULONG IDR;
-     PVOID KdVersionBlock;
-     PKIDTENTRY IDT;
-     PKGDTENTRY GDT;
+    globals.hdevice = hdevice;
 
-    /* ... */
-} KPCR, *PKPCR;
+    for ( i = 0; i < ( sizeof( INIT_TABLE ) / sizeof( * INIT_TABLE ) ); i++ )
+        INIT_TABLE[i].function( & INIT_TABLE[i].function_args, & globals );
 
-STATUS_t idt( FUNC_ARGS_t *, FUNC_ARGS_GLOBAL_t * );
+    return ST_OK;
+}
 
-#endif /* _IDT_H__ */
+
+

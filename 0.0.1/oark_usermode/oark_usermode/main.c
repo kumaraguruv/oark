@@ -31,6 +31,7 @@ THE SOFTWARE.
 #include "others.h"
 #include "pebhooking.h"
 #include "report.h"
+#include "init.h"
 
 int main( void )
 {
@@ -83,18 +84,9 @@ int main( void )
 					CheckOSVersion();
                     
                     RenderInitialization();
-                    printf(" OK: Running detection...\n\t> SSDT Hooking: ");
-                    CheckSSDTHooking(device);
-                    printf("OK\n");
-                    /*
-                    printf("\t> PEB Hooking: ");
-					CheckPEBHooking( device );
-                    printf("OK\n");
-                    */
-					printf("\t> IDT Info: ");
-					idt( device );
-                    printf("OK\n");
-                    
+
+                    InitCalls( device );
+ 
                     printf(" Generation of the report..");
                     MakeReport(OUTPUT_FORMAT_TXT, OUTPUT_DST_FILE);
                     printf("OK\n Check %s file !\n", OARK_FILENAME_LOG);

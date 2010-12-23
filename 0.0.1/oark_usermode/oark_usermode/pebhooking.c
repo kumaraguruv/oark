@@ -39,8 +39,7 @@ THE SOFTWARE.
 
 #include "pebhooking.h"
 
-
-STATUS_t CheckPEBHooking( HANDLE device )
+STATUS_t CheckPEBHooking( FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals )
 {
 	HANDLE hProcessSnap;
 	PROCESSENTRY32 pe32;
@@ -59,7 +58,7 @@ STATUS_t CheckPEBHooking( HANDLE device )
 			{
 				if ( pe32.th32ProcessID != own_pid )
 				{
-					if ( _CheckPEBHooking( device, pe32.th32ProcessID ) == -1 )
+					if ( _CheckPEBHooking( globals->hdevice, pe32.th32ProcessID ) == -1 )
 						fprintf( stderr, " Error: Checking PEB HOOKING PID :%d\n", pe32.th32ProcessID );
 				}
 

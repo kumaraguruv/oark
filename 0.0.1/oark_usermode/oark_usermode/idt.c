@@ -23,7 +23,7 @@ THE SOFTWARE.
 #include "idt.h"
 #include "render.h"
 
-int idt( HANDLE device )
+STATUS_t idt( FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals )
 {
     PREPORT_SUBSECTION *idSubSec = NULL;
     PREPORT_SECTION idSectIdt = NULL;
@@ -63,7 +63,7 @@ int idt( HANDLE device )
 		read_kern_mem.dst_address = & kpcr;
 		read_kern_mem.size        = sizeof( kpcr );
 
-		if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
+		if ( IOCTLReadKernMem( globals->hdevice, & read_kern_mem ) == NULL )
 			printf( " ERROR: IOCTL CHANGE MODE\n" );
 		else
 		{
@@ -72,7 +72,7 @@ int idt( HANDLE device )
 			read_kern_mem.type        = SYM_TYP_IDT;
 			read_kern_mem.dst_address = & idtr_r0;
 			read_kern_mem.size        = sizeof( idtr_r0 );
-			if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
+			if ( IOCTLReadKernMem( globals->hdevice, & read_kern_mem ) == NULL )
 				printf( " ERROR: IOCTL CHANGE MODE\n" );
 			else
 			{
@@ -133,7 +133,7 @@ int idt( HANDLE device )
 				read_kern_mem.src_address = idt_address;
 				for ( j = 0; j <= ( idt_size / 8 ); j++ )
 				{
-					if ( IOCTLReadKernMem( device, & read_kern_mem ) == NULL )
+					if ( IOCTLReadKernMem( globals->hdevice, & read_kern_mem ) == NULL )
 						printf( " ERROR: IOCTL CHANGE MODE\n" );
 					else
 					{

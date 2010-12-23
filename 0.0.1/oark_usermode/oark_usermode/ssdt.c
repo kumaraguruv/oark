@@ -41,7 +41,7 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-VOID CheckSSDTHooking(HANDLE hDevice)
+STATUS_t CheckSSDTHooking( FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals )
 {
     PREPORT_SUBSECTION idSubSys = NULL, idSubSha = NULL, idSubXra = NULL;
     PHOOK_INFORMATION pHookInfo = NULL;
@@ -50,6 +50,7 @@ VOID CheckSSDTHooking(HANDLE hDevice)
     PCHAR* pTable = NULL;
     DWORD nbEntry = 0;
     BOOL ret = FALSE;
+    STATUS_t returnf = ST_ERROR;
 
     __try
     {
@@ -62,14 +63,14 @@ VOID CheckSSDTHooking(HANDLE hDevice)
         RenderAddEntry(idSecSsdt, "SSDT System Base Address", GetSsdtSystemBaseAddress(), FORMAT_HEX);
         RenderAddEntry(idSecSsdt, "SSDT Shadow Base Address", GetSsdtShadowBaseAddress(), FORMAT_HEX);
    
-        pListHead = SsdtSystemHookingDetection(hDevice, &nbEntry);
+        pListHead = SsdtSystemHookingDetection( globals->hdevice, &nbEntry);
 
         pTable = (PCHAR*)malloc(sizeof(PCHAR) * nbEntry);
         if(pTable == NULL)
         {
             OARK_ALLOCATION_ERROR();
             CleanHookInfoList(pListHead);
-            return;
+            return returnf;
         }
 
         memset(pTable, 0, sizeof(PCHAR) * nbEntry);
@@ -80,7 +81,7 @@ VOID CheckSSDTHooking(HANDLE hDevice)
             OARK_ERROR("BuildNativeApiNameTable failed");
             CleanHookInfoList(pListHead);
             free(pTable);
-            return;
+            return returnf;
         }
   
         while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
@@ -99,7 +100,7 @@ VOID CheckSSDTHooking(HANDLE hDevice)
         free(pListHead);
         free(pTable);
 
-        pListHead = SsdtShadowHookingDetection(hDevice, NULL);
+        pListHead = SsdtShadowHookingDetection(globals->hdevice, NULL);
 
         while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
         {
@@ -116,7 +117,7 @@ VOID CheckSSDTHooking(HANDLE hDevice)
 
         free(pListHead);
 
-        pListHead = CheckXraynPoc(hDevice);
+        pListHead = CheckXraynPoc(globals->hdevice);
 
         while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
         {
@@ -137,6 +138,10 @@ VOID CheckSSDTHooking(HANDLE hDevice)
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
         OARK_EXCEPTION();
+
+    returnf = ST_OK;
+
+    return returnf;
 }
 
 PSLIST_HEADER CheckXraynPoc(HANDLE hDevice)
