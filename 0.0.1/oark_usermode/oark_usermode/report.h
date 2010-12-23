@@ -129,6 +129,6 @@ VOID MakeReportText(PREPORT_SECTION pRootList, FILE* pOut);
  *    MakeReport(OUTPUT_FORMAT_TXT, OUTPUT_DST_STDOUT); 
  * @endcode
  */
-VOID MakeReport(OUTPUT_FORMAT outForm, OUTPUT_DST outDst);
+VOID MakeReport(OUTPUT_FORMAT outForm, OUTPUT_DST outDst, BOOLEAN );
 
 #endif
