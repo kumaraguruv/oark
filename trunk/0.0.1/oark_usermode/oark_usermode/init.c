@@ -144,7 +144,7 @@ STATUS_t ArgumentParser(int argc, char *argv[])
 		while(*argument)
 			++argument_length;
 
-		if(argument_length > 2 | argument_length == 0) {
+		if(argument_length > 2 || argument_length == 0) {
 			printf( "Bad Syntax. Argument %d is not a valid argument\n",i);
 			PrintOptions();
 			return ST_ERROR;
