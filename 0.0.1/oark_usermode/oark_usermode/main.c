@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 		" | Main Developers (Alphabetical order):                           |\n"
 		" |   - Dreg aka David Reguera Garcia - Dreg@fr33project.org        |\n"
         " |   - 0vercl0k aka Axel Souchet - 0vercl0k@tuxfamily.org          |\n"
-		" |                                                                 |\n"
+		" |   - George Nicolaou - nicolaou.george@gmail.com                 |\n"
 		" | Committers (Alphabetical order):                                |\n"
 		" |                                                                 |\n"
 		" | Credits / Greetings (Alphabetical order):                       |\n"
