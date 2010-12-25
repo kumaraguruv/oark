@@ -55,92 +55,101 @@ STATUS_t CheckSSDTHooking(FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals)
     __try
     {
         idSecSsdt = RenderAddSection("SSDT Hooking Detection");
-
-        idSubSys = RenderAddSubSection(idSecSsdt, "SSDT System");
-        idSubSha = RenderAddSubSection(idSecSsdt, "SSDT Shadow");
-        idSubXra = RenderAddSubSection(idSecSsdt, "Xrayn Kung-fu");
-
-        RenderAddEntry(idSecSsdt, "SSDT System Base Address", GetSsdtSystemBaseAddress(), FORMAT_HEX);
-        RenderAddEntry(idSecSsdt, "SSDT Shadow Base Address", GetSsdtShadowBaseAddress(), FORMAT_HEX);
-   
-        pListHead = SsdtSystemHookingDetection(globals->hdevice, &nbEntry);
-
-        pTable = (PCHAR*)malloc(sizeof(PCHAR) * nbEntry);
-        if(pTable == NULL)
+        
+        if(args->flags & FIN_SSDT_SYSTEM)
         {
-            OARK_ALLOCATION_ERROR();
-            CleanHookInfoList(pListHead);
-            return returnf;
+            idSubSys = RenderAddSubSection(idSecSsdt, "SSDT System");
+            RenderAddEntry(idSecSsdt, "SSDT System Base Address", GetSsdtSystemBaseAddress(), FORMAT_HEX);
+
+            pListHead = SsdtSystemHookingDetection(globals->hdevice, &nbEntry);
+
+            pTable = (PCHAR*)malloc(sizeof(PCHAR) * nbEntry);
+            if(pTable == NULL)
+            {
+                OARK_ALLOCATION_ERROR();
+                CleanHookInfoList(pListHead);
+                return returnf;
+            }
+
+            memset(pTable, 0, sizeof(PCHAR) * nbEntry);
+
+            ret = BuildSystemApiNameTable(pTable, nbEntry);
+            if(ret == FALSE)
+            {
+                OARK_ERROR("BuildNativeApiNameTable failed");
+                CleanHookInfoList(pListHead);
+                free(pTable);
+                return returnf;
+            }
+
+            while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
+            {
+                RenderAddSeparator(idSubSys);
+                RenderAddEntry(idSubSys, "Syscall ID", pHookInfo->id, FORMAT_DEC);
+                RenderAddEntry(idSubSys, "Function Address", pHookInfo->addr, FORMAT_HEX);
+                RenderAddEntry(idSubSys, "API Name", pTable[pHookInfo->id], FORMAT_STR_ASCII);
+                RenderAddEntry(idSubSys, "Hooked by", pHookInfo->name, FORMAT_STR_ASCII);
+
+                if(pHookInfo->name != NULL)
+                    free(pHookInfo->name);
+                free(pHookInfo);
+            }
+
+            free(pListHead);
+            free(pTable);
         }
 
-        memset(pTable, 0, sizeof(PCHAR) * nbEntry);
-
-        ret = BuildSystemApiNameTable(pTable, nbEntry);
-        if(ret == FALSE)
+        if(args->flags & FIN_SSDT_SHADOW)
         {
-            OARK_ERROR("BuildNativeApiNameTable failed");
-            CleanHookInfoList(pListHead);
-            free(pTable);
-            return returnf;
+            idSubSha = RenderAddSubSection(idSecSsdt, "SSDT Shadow");
+            RenderAddEntry(idSecSsdt, "SSDT Shadow Base Address", GetSsdtShadowBaseAddress(), FORMAT_HEX);
+
+            pListHead = SsdtShadowHookingDetection(globals->hdevice, NULL);
+
+            while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
+            {
+                RenderAddSeparator(idSubSha);
+                RenderAddEntry(idSubSha, "Syscall ID", pHookInfo->id, FORMAT_DEC);
+                RenderAddEntry(idSubSha, "Function Address", pHookInfo->addr, FORMAT_HEX);
+                RenderAddEntry(idSubSha, "API Name", Offsets.pGuiSyscallName[pHookInfo->id], FORMAT_STR_ASCII);
+                RenderAddEntry(idSubSha, "Hooked by", pHookInfo->name, FORMAT_STR_ASCII);
+
+                if(pHookInfo->name != NULL)
+                    free(pHookInfo->name);
+                free(pHookInfo);
+            }
+
+            free(pListHead);
         }
   
-        while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
+        if(args->flags & FIN_SSDT_XRAYN)
         {
-            RenderAddSeparator(idSubSys);
-            RenderAddEntry(idSubSys, "Syscall ID", pHookInfo->id, FORMAT_DEC);
-            RenderAddEntry(idSubSys, "Function Address", pHookInfo->addr, FORMAT_HEX);
-            RenderAddEntry(idSubSys, "API Name", pTable[pHookInfo->id], FORMAT_STR_ASCII);
-            RenderAddEntry(idSubSys, "Hooked by", pHookInfo->name, FORMAT_STR_ASCII);
-            
-            if(pHookInfo->name != NULL)
-                free(pHookInfo->name);
-            free(pHookInfo);
+            idSubXra = RenderAddSubSection(idSecSsdt, "Xrayn Kung-fu");
+
+            pListHead = CheckXraynPoc(globals->hdevice);
+
+            while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
+            {
+                RenderAddSeparator(idSubXra);
+                RenderAddEntry(idSubXra, "Process ID", (PVOID)pHookInfo->id, FORMAT_DEC);
+                RenderAddEntry(idSubXra, "Process Name", (PVOID)pHookInfo->name, FORMAT_STR_ASCII);
+                RenderAddEntry(idSubXra, "Thread ID", (PVOID)pHookInfo->other[1], FORMAT_DEC);
+                RenderAddEntry(idSubXra, "ETHREAD Pointer", (PVOID)pHookInfo->other[0], FORMAT_HEX);
+                RenderAddEntry(idSubXra, "Function Address", (PVOID)pHookInfo->addr, FORMAT_HEX);
+                RenderAddEntry(idSubXra, "KTHREAD.ServiceTable", (PVOID)pHookInfo->addr, FORMAT_HEX);
+
+                if(pHookInfo->name != NULL)
+                    free(pHookInfo->name);
+                free(pHookInfo);
+            }
+
+            free(pListHead);
         }
-
-        free(pListHead);
-        free(pTable);
-
-        pListHead = SsdtShadowHookingDetection(globals->hdevice, NULL);
-
-        while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
-        {
-            RenderAddSeparator(idSubSha);
-            RenderAddEntry(idSubSha, "Syscall ID", pHookInfo->id, FORMAT_DEC);
-            RenderAddEntry(idSubSha, "Function Address", pHookInfo->addr, FORMAT_HEX);
-            RenderAddEntry(idSubSha, "API Name", Offsets.pGuiSyscallName[pHookInfo->id], FORMAT_STR_ASCII);
-            RenderAddEntry(idSubSha, "Hooked by", pHookInfo->name, FORMAT_STR_ASCII);
-            
-            if(pHookInfo->name != NULL)
-                free(pHookInfo->name);
-            free(pHookInfo);
-        }
-
-        free(pListHead);
-
-        pListHead = CheckXraynPoc(globals->hdevice);
-
-        while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
-        {
-            RenderAddSeparator(idSubXra);
-            RenderAddEntry(idSubXra, "Process ID", (PVOID)pHookInfo->id, FORMAT_DEC);
-            RenderAddEntry(idSubXra, "Process Name", (PVOID)pHookInfo->name, FORMAT_STR_ASCII);
-            RenderAddEntry(idSubXra, "Thread ID", (PVOID)pHookInfo->other[1], FORMAT_DEC);
-            RenderAddEntry(idSubXra, "ETHREAD Pointer", (PVOID)pHookInfo->other[0], FORMAT_HEX);
-            RenderAddEntry(idSubXra, "Function Address", (PVOID)pHookInfo->addr, FORMAT_HEX);
-            RenderAddEntry(idSubXra, "KTHREAD.ServiceTable", (PVOID)pHookInfo->addr, FORMAT_HEX);
- 
-            if(pHookInfo->name != NULL)
-                free(pHookInfo->name);
-            free(pHookInfo);
-        }
-
-        free(pListHead);
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
         OARK_EXCEPTION();
 
     returnf = ST_OK;
-
     return returnf;
 }
 

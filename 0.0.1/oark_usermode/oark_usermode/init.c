@@ -26,7 +26,8 @@ THE SOFTWARE.
 ARGUMENT_PARSER_TABLE_t ARG_TABLE[] =
 {
 	{ "S", "SSDT Hook detection module with default options", {FIN_SSDT_DEFAULTS}, 0 },
-	{ "Ss", "Display hooked SSDT shadow entries", {FIN_SSDT_STD}, 0 },
+    { "Ss", "Display hooked SSDT System entries", {FIN_SSDT_SYSTEM}, 0},
+	{ "Sh", "Display hooked SSDT Shadow entries", {FIN_SSDT_SHADOW}, 0 },
 	{ "Sx", "Display potential hook in KTHREAD.ServiceTable field (Xrayn POC)", {FIN_SSDT_XRAYN}, 0 },
 	{ "P", "PEB Hook detection module with default options", {FIN_PEBHOOKING_DEFAULTS}, 3 },
 	{ "E", "SYSENTER Hook detection module with default options", {FIN_SYSENTER_DEFAULTS}, 1 },
@@ -41,10 +42,10 @@ INIT_TABLE_ENTRY_t INIT_TABLE[] =
     { {FIN_PEBHOOKING_DEFAULTS}, CheckPEBHooking, TRUE, "PEB HOOKING DETECTION", 3 }
 };
 
-void PrintOptions( void )
+void PrintOptions()
 {
-
 	int i;
+
 	printf("Each option can be enabled using the plus (+) symbol and disabled using the minus (-) symbol\n");
 	printf( "-h \t Display usage help\n-l \t Display default features\n");
 	for ( i = 0; i < ( sizeof( ARG_TABLE ) / sizeof( * ARG_TABLE ) ); i++ )
@@ -53,7 +54,7 @@ void PrintOptions( void )
 	}
 }
 
-void PrintEnabled( void )
+VOID PrintEnabled()
 {
 	int i,j;
 	int id;
@@ -84,7 +85,7 @@ void PrintEnabled( void )
 
 }
 
-void ZeroInitTable( void )
+VOID ZeroInitTable()
 {
 	int i;
 	
@@ -92,18 +93,17 @@ void ZeroInitTable( void )
 		INIT_TABLE[i].function_args.flags = (DWORD)NULL;
 }
 
-void UpdateEnabledModules( void )
+VOID UpdateEnabledModules()
 {
-
 	int i;
 
 	for ( i = 0; i < ( sizeof( INIT_TABLE ) / sizeof( * INIT_TABLE ) ); i++ )
 		INIT_TABLE[i].enable = ( INIT_TABLE[i].function_args.flags == (DWORD)NULL ) ? FALSE : TRUE;
 
 }
+
 STATUS_t ArgumentParser(int argc, char *argv[])
 {
-
 	int						i,
 							j = 0;
 	BOOLEAN					onoff_switch;
@@ -181,7 +181,8 @@ STATUS_t InitCalls( HANDLE hdevice )
             ( INIT_TABLE[i].function_args.flags != 0 )
         )
         {
-            INIT_TABLE[i].function( & INIT_TABLE[i].function_args, & globals );
+            printf(" > Calling %s module..", INIT_TABLE[i].name);
+            printf("%s\n", (INIT_TABLE[i].function( & INIT_TABLE[i].function_args, & globals ) == ST_OK) ? "OK": "KO");
         }
     }
 
