@@ -47,11 +47,11 @@ void PrintOptions()
 {
 	int i;
 
-	printf("Each option can be enabled using the plus (+) symbol and disabled using the minus (-) symbol\n");
-	printf( "-h \t Display usage help\n-l \t Display default features\n");
+    printf(" NB: Each option can be enabled using the plus (+) symbol and\n disabled using the minus (-) symbol\n");
+	printf( "\t-h \t Display usage help\n\t-l \t Display default features\n");
 	for ( i = 0; i < ( sizeof( ARG_TABLE ) / sizeof( * ARG_TABLE ) ); i++ )
 	{
-		printf( "+%s \t%s\n", ARG_TABLE[i].command_line_flag, ARG_TABLE[i].command_line_description );
+		printf( "\t+%s \t%s\n", ARG_TABLE[i].command_line_flag, ARG_TABLE[i].command_line_description );
 	}
 }
 
