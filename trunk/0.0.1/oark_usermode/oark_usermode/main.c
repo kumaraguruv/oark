@@ -30,7 +30,7 @@ THE SOFTWARE.
 #include "report.h"
 #include "init.h"
 
-int main( void )
+int main(int argc, char* argv[])
 {
 	HANDLE device;
 	DWORD other_pid;
@@ -78,6 +78,9 @@ int main( void )
 					if ( debug )
 						printf( " OK: Driver Loaded!\n" );
 
+                    if(ArgumentParser(argc, argv) == ST_ERROR)
+                        goto clean;
+
 					CheckOSVersion();
                     
                     RenderInitialization();
@@ -90,6 +93,7 @@ int main( void )
                     MakeReport(OUTPUT_FORMAT_TXT, OUTPUT_DST_FILE, TRUE );
                     printf("OK\n Check %s file !\n", OARK_FILENAME_LOG);
 
+                    clean:
 					if ( UnloadDriver( & device ) )
 					{
 						if ( debug ) 

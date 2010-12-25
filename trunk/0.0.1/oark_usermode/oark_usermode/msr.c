@@ -55,14 +55,11 @@ STATUS_t CheckSysenterHookDetection(FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * glo
 
         RenderAddEntry(idSysenter, "IA32_MSR_EIP Value", msrEip, FORMAT_HEX);
         pMod = IsAddressInADriver(msrEip);
-        printf("%s\n", pMod);
+
         if(pMod == NULL)
             OARK_ERROR("IsAddressInADriver failed")
         else
-        {
-            printf("SUCE\n");
             RenderAddEntry(idSysenter, "Address points in", pMod, FORMAT_STR_ASCII);
-        }
 
         if(IsAddressInKernel(msrEip) == FALSE)
             isHooked = TRUE;

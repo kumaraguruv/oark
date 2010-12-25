@@ -53,6 +53,6 @@ extern INIT_TABLE_ENTRY_t INIT_TABLE[];
 
 STATUS_t ArgumentParser( int argc, char * argv[] );
 STATUS_t InitCalls( HANDLE );
-void PrintOptions( void );
+VOID PrintOptions();
 
 #endif /* _INIT_H__ */
