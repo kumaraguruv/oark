@@ -11,6 +11,7 @@
     # [#Comment_Code Comment Code]
   # [#Direct_Kernel_Object_Manipulation_(DKOM) Direct Kernel Object Manipulation (DKOM)]
   # [#Subversion Subversion]
+  # [#Adding_new_modules_and_features Adding new modules and features]
 
 = I want to be a Developer / Commiter / Contributor =
 
@@ -492,3 +493,143 @@ Here you have structures definitions and offsets of each field, very usefull for
 = Subversion =
 
 [http://svnbook.red-bean.com/en/1.2/svn-book.html]: This book is very interesting and it explains a lot of concepts of Control Software.
+
+= Adding new modules and features =
+
+Each module in OARK can have one up to 32 features (for now). Each feature is defined in the module's header file as a DWORD with *only one bit set*.
+
+Each Definition *must* begin with:
+
+{{{
+#define FIN_<module short name>_<feature> value
+}}}
+
+For example:
+
+{{{
+#define FIN_SSDT_STD   (0x00000001) // Binary = 00000000 0000000 00000000 00000001
+#define FIN_SSDT_XRAYN (0x00000002) // Binary = 00000000 0000000 00000000 00000010
+}}}
+
+Additionally, it is required that a default feature is defined. This feature must be the result of Bitwise OR-ing all the default features together.
+
+For example:
+
+{{{
+#define FIN_SSDT_DEFAULTS ( FIN_SSDT_XRAYN | FIN_SSDT_STD )
+}}}
+
+Moreover, each module must have an "Entry point" function which accepts the following arguments:
+
+  * FUNC_ARGS_t `*` flags
+  (As in revision 375). A struct containing a DWORD denoting which features are enabled and which are not.
+  * FUNC_ARGS_GLOBAL_t `*` globals
+  (As in revision 375). A struct containing global definitions.
+
+For Example:
+{{{
+STATUS_t CheckSSDTHooking(FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals)
+}}}
+
+Where *flags* inside *FUNC_ARGS_t* is used for deciding which features should be executed or not.
+Given the above example, CheckSSDTHooking function must only execute features enabled features. For example:
+
+{{{
+STATUS_t CheckSSDTHooking(FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals)
+{
+   // ...
+
+   if ( args.flags & FIN_SSDT_STD )
+   {
+       // Execute feature STD
+       something = SsdtShadowHookingDetection( /*some arguments*/ );
+   }
+
+   if ( args.flags & FIN_SSDT_XRAYN )
+   {
+      // Execute feature XRAYN
+      something = CheckXraynPoc( /*some arguments*/ );
+   }
+   
+   // ...
+}
+}}}
+
+*Adding new modules for execution*
+Adding new modules requires updating the INIT_TABLE[] inside *init.c*.
+
+{{{
+INIT_TABLE_ENTRY_t INIT_TABLE[] =
+{
+    { {FIN_SYSENTER_DEFAULTS}, CheckSysenterHookDetection, TRUE, "SYSENTER HOOKING DETECTION", 1 },
+    { {FIN_IDT_DEFAULTS}, idt, TRUE, "IDT INFORMATION", 2 },
+    { {FIN_PEBHOOKING_DEFAULTS}, CheckPEBHooking, TRUE, "PEB HOOKING DETECTION", 3 }
+};
+}}}
+
+INIT_TABLE_ENTRY_t is defined as:
+{{{
+typedef struct INIT_TABLE_ENTRY_s
+{
+    FUNC_ARGS_t                 function_args; // Arguments struct
+    INIT_TABLE_ENTRY_FUNC_t     function; // Module's entry function
+    BOOLEAN                     enable; // Module is Enabled or Disabled
+    char                      * name; // Official module's name
+    int				id; // Unique module's id, given by programmer
+
+} INIT_TABLE_ENTRY_t;
+}}}
+
+For Example, given the SSDT module:
+  * *FIN_SSDT_DEFAULTS* Is the default features
+  * *CheckSSDTHooking* Is the entry function of this module
+  * *TRUE* Yes this module is enabled by default
+  * *"SSDT HOOKING DETECTion"* is the official name of this module
+  * *0* is the unique id of this module, which i just came up with
+
+Therefore the new INIT_TABLE[] should look like this:
+
+{{{
+INIT_TABLE_ENTRY_t INIT_TABLE[] =
+{
+    { {FIN_SSDT_DEFAULTS}, CheckSSDTHooking, TRUE, "SSDT HOOKING DETECTION", 0 },
+    { {FIN_SYSENTER_DEFAULTS}, CheckSysenterHookDetection, TRUE, "SYSENTER HOOKING DETECTION", 1 },
+    { {FIN_IDT_DEFAULTS}, idt, TRUE, "IDT INFORMATION", 2 },
+    { {FIN_PEBHOOKING_DEFAULTS}, CheckPEBHooking, TRUE, "PEB HOOKING DETECTION", 3 }
+};
+}}}
+
+*Define command line arguments*
+Defining the command line arguments for your module in OARK is rather simple. Inside *init.c* you will find a tabled defined as *ARGUMENT_PARSER_TABLE_t ARG_TABLE[]*.
+
+Which contains elements of the following struct:
+{{{
+typedef struct ARGUMENT_PARSER_TABLE_s
+{
+	char		*	command_line_flag; // The command line argument
+	char		*	command_line_description; // description of feature
+	FUNC_ARGS_t		function_arg; // The feature's arguments
+	int			init_table_entry_id; // The associated module's id from INIT_TABLE[]
+
+} ARGUMENT_PARSER_TABLE_t;
+}}} 
+
+For example, SSDT module features can be added as:
+
+  * *"S"* Module's default features command line argument
+  * *"SSDT Hook detection module with default options"* Feature description
+  * *{FIN_SSDT_DEFAULTS}* The FUNC_ARGS_t struct with default flag
+  * *0* SSDT Module's id as defined in INIT_TABLE[]
+
+Additionally, we can define Shadow and xrayn features as "Ss" and "Sx".
+
+The new ARG_TABLE[] should look like this:
+
+{{{
+ARGUMENT_PARSER_TABLE_t ARG_TABLE[] =
+{
+	{ "S", "SSDT Hook detection module with default options", {FIN_SSDT_DEFAULTS}, 0 },
+	{ "Ss", "Display hooked SSDT shadow entries", {FIN_SSDT_STD}, 0 },
+	{ "Sx", "Display potential hook in KTHREAD.ServiceTable field (Xrayn POC)", {FIN_SSDT_XRAYN}, 0 }
+}
+}}}
