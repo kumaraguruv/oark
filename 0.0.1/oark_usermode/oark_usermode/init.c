@@ -105,7 +105,7 @@ VOID UpdateEnabledModules()
 
 STATUS_t ArgumentParser(int argc, char *argv[])
 {
-	int						i,
+	int						i, argument_length,
 							j = 0;
 	BOOLEAN					onoff_switch;
 	char				*	argument;
@@ -132,11 +132,23 @@ STATUS_t ArgumentParser(int argc, char *argv[])
 			onoff_switch = FALSE;
 		else 
 		{
-			printf("Argument %d is not a valid argument\n", i);
+			printf("Bad Syntax. Argument %d is not a valid argument\n", i);
+			PrintOptions();
 			return ST_ERROR;
 		}
 
 		++argument;
+		
+		argument_length = 0;
+
+		while(*argument)
+			++argument_length;
+
+		if(argument_length > 2 | argument_length == 0) {
+			printf( "Bad Syntax. Argument %d is not a valid argument\n",i);
+			PrintOptions();
+			return ST_ERROR;
+		}
 
 		j = 0;
 		while( j < ( sizeof(ARG_TABLE) / sizeof( * ARG_TABLE ) ) )
