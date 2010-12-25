@@ -38,9 +38,9 @@ THE SOFTWARE.
 #include "others.h"
 #include "modules.h"
 
-#define FIN_SSDT_SYSTEM (0x01)
+#define FIN_SSDT_SYSTEM (0x1)
 #define FIN_SSDT_SHADOW (0x2)
-#define FIN_SSDT_XRAYN (0x02)
+#define FIN_SSDT_XRAYN  (0x4)
 
 #define FIN_SSDT_DEFAULTS (FIN_SSDT_XRAYN | FIN_SSDT_SYSTEM | FIN_SSDT_XRAYN)
 
