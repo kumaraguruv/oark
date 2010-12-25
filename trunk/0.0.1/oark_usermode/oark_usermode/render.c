@@ -251,6 +251,7 @@ PREPORT_SECTION RenderInitialization()
         RenderAddEntry(idSubInf, "URL", "http://code.google.com/p/oark/", FORMAT_STR_ASCII);
         RenderAddEntry(idSubInf, "Main Developer", "David Reguera Garcia - Dreg@fr33project.org", FORMAT_STR_ASCII);
         RenderAddEntry(idSubInf, "Main Developer", "Axel Souchet - 0vercl0k@tuxfamily.org", FORMAT_STR_ASCII);
+		RenderAddEntry(idSubInf, "Main Developer", "George Nicolaou - nicolaou.george@gmail.com", FORMAT_STR_ASCII);
         RenderAddEntry(idSubInf, "Greetings", "DiabloNova (RootkitUnhooker inspiration)", FORMAT_STR_ASCII);
 
         RenderAddSeparator(idSubInf);
