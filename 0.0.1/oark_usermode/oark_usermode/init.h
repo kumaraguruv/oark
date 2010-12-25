@@ -36,11 +36,23 @@ typedef struct INIT_TABLE_ENTRY_s
     INIT_TABLE_ENTRY_FUNC_t     function;
     BOOLEAN                     enable;
     char                      * name;
+	int							id;
 
 } INIT_TABLE_ENTRY_t;
 
+typedef struct ARGUMENT_PARSER_TABLE_s
+{
+	char		*	command_line_flag;
+	char		*	command_line_description;
+	FUNC_ARGS_t		function_arg;
+	int				init_table_entry_id;
+
+} ARGUMENT_PARSER_TABLE_t;
+
 extern INIT_TABLE_ENTRY_t INIT_TABLE[];
 
+STATUS_t ArgumentParser( int argc, char * argv[] );
 STATUS_t InitCalls( HANDLE );
+void PrintOptions( void );
 
 #endif /* _INIT_H__ */
