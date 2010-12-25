@@ -46,26 +46,40 @@ void PrintOptions( void )
 
 	int i;
 	printf("Each option can be enabled using the plus (+) symbol and disabled using the minus (-) symbol\n");
-	printf( "-h\t Display usage help\n");
+	printf( "-h \t Display usage help\n-l \t Display default features\n");
 	for ( i = 0; i < ( sizeof( ARG_TABLE ) / sizeof( * ARG_TABLE ) ); i++ )
 	{
-		printf( "+%s\t%s\n", ARG_TABLE[i].command_line_flag, ARG_TABLE[i].command_line_description );
+		printf( "+%s \t%s\n", ARG_TABLE[i].command_line_flag, ARG_TABLE[i].command_line_description );
 	}
 }
 
 void PrintEnabled( void )
 {
-	int i;
+	int i,j;
+	int id;
 
 	for ( i = 0; i < ( sizeof( INIT_TABLE ) / sizeof( * INIT_TABLE ) ); i++ )
 	{
 		printf
 			( 
-				"Module: %s\n\tStatus: %s \tFlags:0x%08X\n",
-				INIT_TABLE[i].name,
+				"[%s] %s\n",
 				( INIT_TABLE[i].enable == TRUE ) ? "Enabled" : "Disabled",
-				INIT_TABLE[i].function_args.flags
+				INIT_TABLE[i].name
 			 );
+		if(INIT_TABLE[i].enable == TRUE)
+		{
+			j = 0;
+			id = INIT_TABLE[i].id;
+			while( j < ( sizeof( ARG_TABLE ) / sizeof( * ARG_TABLE ) ) )
+			{
+				if ( ARG_TABLE[j].init_table_entry_id == id )
+				{
+					if ( ARG_TABLE[j].function_arg.flags & INIT_TABLE[i].function_args.flags )
+						printf( "\t%s\n", ARG_TABLE[j].command_line_description );
+				}
+				++j;
+			}
+		}
 	}
 
 }
@@ -84,7 +98,7 @@ void UpdateEnabledModules( void )
 	int i;
 
 	for ( i = 0; i < ( sizeof( INIT_TABLE ) / sizeof( * INIT_TABLE ) ); i++ )
-		INIT_TABLE[i].enable = (INIT_TABLE[i].function_args.flags == (DWORD)NULL) ? FALSE : TRUE;
+		INIT_TABLE[i].enable = ( INIT_TABLE[i].function_args.flags == (DWORD)NULL ) ? FALSE : TRUE;
 
 }
 STATUS_t ArgumentParser(int argc, char *argv[])
@@ -96,10 +110,13 @@ STATUS_t ArgumentParser(int argc, char *argv[])
 	char				*	argument;
 	INIT_TABLE_ENTRY_t	*	init_entry;
 	
-	if( strcmp( argv[1], "-h" ) == 0 )
+	argument = argv[1];
+	argument++;
+
+	switch(*argument)
 	{
-		PrintOptions();
-		return ST_ERROR;
+		case 'h': PrintOptions(); return ST_ERROR;
+		case 'l': PrintEnabled(); return ST_ERROR;
 	}
 
 	ZeroInitTable();
@@ -143,7 +160,7 @@ STATUS_t ArgumentParser(int argc, char *argv[])
 
 	if ( debug )
 		PrintEnabled();
-
+	
 	return ST_OK;
 }
 
