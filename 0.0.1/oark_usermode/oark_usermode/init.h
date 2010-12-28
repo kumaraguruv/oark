@@ -28,6 +28,7 @@ THE SOFTWARE.
 #include "ssdt.h"
 #include "idt.h"
 #include "pebhooking.h"
+#include "call_gates.h"
 
 typedef STATUS_t (* INIT_TABLE_ENTRY_FUNC_t)( FUNC_ARGS_t *, FUNC_ARGS_GLOBAL_t * );
 

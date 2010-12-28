@@ -262,6 +262,37 @@ typedef struct FUNC_ARGS_s
 
 } FUNC_ARGS_t;
 
+typedef struct _KIDTENTRY
+{
+    WORD Offset;
+    WORD Selector;
+    WORD Access;
+    WORD ExtendedOffset;
+} KIDTENTRY, *PKIDTENTRY;
+
+typedef struct _KGDTENTRY
+{
+    WORD LimitLow;
+    WORD BaseLow;
+    ULONG HighWord;
+} KGDTENTRY, *PKGDTENTRY;
+
+typedef struct _KPCR
+{
+    NT_TIB NtTib;   /* FIXED UNION: I AM NOT INTERESTED IN THIS */
+    void * SelfPcr; /* FIXED: I AM NOT INTERESTED IN THIS */
+    void * Prcb;    /* FIXED: I AM NOT INTERESTED IN THIS */
+    UCHAR Irql;
+    ULONG IRR;
+    ULONG IrrActive;
+    ULONG IDR;
+    PVOID KdVersionBlock;
+    PKIDTENTRY IDT;
+    PKGDTENTRY GDT;
+
+    /* ... */
+} KPCR, *PKPCR;
+
 ZWQUERYINFORMATIONPROCESS_t ZwQueryInformationProcess;
 ZWQUERYSYSTEMINFORMATION_t ZwQuerySystemInformation;
 
