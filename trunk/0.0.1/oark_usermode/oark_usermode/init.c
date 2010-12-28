@@ -37,7 +37,7 @@ ARGUMENT_PARSER_TABLE_t ARG_TABLE[] =
     { "Cg", "Call Gates and LDT FW searching only in GDTs", {FIN_CALL_GATES_GDT}, 4 },
     { "Cl", "Call Gates and LDT FW searching only in LDTs of GDTs", {FIN_CALL_GATES_LDT}, 4 },
     { "Cl", "Call Gates and LDT FW searching only in LDT of EPROCESS", {FIN_CALL_GATES_LDT_EPROCESS}, 4 },
-    { "Cf", "Call Gates and LDT FW option which active the LDT FW", {FIN_CALL_GATES_LDT_FW}, 4 }
+    { "Cf", "Call Gates module option which active the LDT FW detection", {FIN_CALL_GATES_LDT_FW}, 4 }
 };
 
 INIT_TABLE_ENTRY_t INIT_TABLE[] =
