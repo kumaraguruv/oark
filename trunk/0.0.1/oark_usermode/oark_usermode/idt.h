@@ -27,39 +27,9 @@ THE SOFTWARE.
 #include <stdio.h>
 #include "common.h"
 #include "driverusr.h"
+#include "others.h"
 
 #define FIN_IDT_DEFAULTS (1)
-
-typedef struct _KIDTENTRY
-{
-     WORD Offset;
-     WORD Selector;
-     WORD Access;
-     WORD ExtendedOffset;
-} KIDTENTRY, *PKIDTENTRY;
-
-typedef struct _KGDTENTRY
-{
-     WORD LimitLow;
-     WORD BaseLow;
-     ULONG HighWord;
-} KGDTENTRY, *PKGDTENTRY;
-
-typedef struct _KPCR
-{
-     NT_TIB NtTib;   /* FIXED UNION: I AM NOT INTERESTED IN THIS */
-     void * SelfPcr; /* FIXED: I AM NOT INTERESTED IN THIS */
-     void * Prcb;    /* FIXED: I AM NOT INTERESTED IN THIS */
-     UCHAR Irql;
-     ULONG IRR;
-     ULONG IrrActive;
-     ULONG IDR;
-     PVOID KdVersionBlock;
-     PKIDTENTRY IDT;
-     PKGDTENTRY GDT;
-
-    /* ... */
-} KPCR, *PKPCR;
 
 STATUS_t idt( FUNC_ARGS_t *, FUNC_ARGS_GLOBAL_t * );
 

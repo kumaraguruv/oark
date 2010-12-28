@@ -32,7 +32,12 @@ ARGUMENT_PARSER_TABLE_t ARG_TABLE[] =
 	{ "Sx", "Display potential hook in KTHREAD.ServiceTable field (Xrayn POC)", {FIN_SSDT_XRAYN}, 0 },
 	{ "P", "PEB Hook detection module with default options", {FIN_PEBHOOKING_DEFAULTS}, 3 },
 	{ "E", "SYSENTER Hook detection module with default options", {FIN_SYSENTER_DEFAULTS}, 1 },
-	{ "I", "Print IDT Information", {FIN_IDT_DEFAULTS}, 2 }
+	{ "I", "Print IDT Information", {FIN_IDT_DEFAULTS}, 2 },
+    { "C", "Call Gates and LDT FW module with default options", {FIN_CALL_GATES_DEFAULTS}, 4 },
+    { "Cg", "Call Gates and LDT FW searching only in GDTs", {FIN_CALL_GATES_GDT}, 4 },
+    { "Cl", "Call Gates and LDT FW searching only in LDTs of GDTs", {FIN_CALL_GATES_LDT}, 4 },
+    { "Cl", "Call Gates and LDT FW searching only in LDT of EPROCESS", {FIN_CALL_GATES_LDT_EPROCESS}, 4 },
+    { "Cf", "Call Gates and LDT FW option which active the LDT FW", {FIN_CALL_GATES_LDT_FW}, 4 }
 };
 
 INIT_TABLE_ENTRY_t INIT_TABLE[] =
@@ -40,7 +45,9 @@ INIT_TABLE_ENTRY_t INIT_TABLE[] =
     { {FIN_SSDT_DEFAULTS}, CheckSSDTHooking, TRUE, "SSDT HOOKING DETECTION", 0 },
     { {FIN_SYSENTER_DEFAULTS}, CheckSysenterHookDetection, TRUE, "SYSENTER HOOKING DETECTION", 1 },
     { {FIN_IDT_DEFAULTS}, idt, TRUE, "IDT INFORMATION", 2 },
-    { {FIN_PEBHOOKING_DEFAULTS}, CheckPEBHooking, TRUE, "PEB HOOKING DETECTION", 3 }
+    { {FIN_PEBHOOKING_DEFAULTS}, CheckPEBHooking, TRUE, "PEB HOOKING DETECTION", 3 },
+    { {FIN_CALL_GATES_DEFAULTS}, CheckCallGates, TRUE, "CALL GATES AND LDT FW DETECTION", 4 }
+
 };
 
 void PrintOptions()
