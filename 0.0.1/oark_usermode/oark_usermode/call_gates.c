@@ -45,7 +45,7 @@ BOOLEAN GetGDTFromKernel( GDTR * gdt, FUNC_ARGS_GLOBAL_t * globals )
     read_kern_mem.dst_address = gdt;
     read_kern_mem.size        = sizeof( * gdt );
     if ( IOCTLReadKernMem( globals->hdevice, & read_kern_mem ) == NULL )
-        FALSE;
+        return FALSE;
 
     return TRUE;
 }
@@ -129,7 +129,7 @@ BOOLEAN GetGDTEntries( GDTR * gdt, PSEG_DESCRIPTOR descriptors, FUNC_ARGS_GLOBAL
     read_kern_mem.size        = gdt->nBytes;
     read_kern_mem.src_address = (void *) gdt->baseAddress;
     if ( IOCTLReadKernMem( globals->hdevice, & read_kern_mem ) == NULL )
-        FALSE;
+        return FALSE;
 
     return TRUE;
 }
