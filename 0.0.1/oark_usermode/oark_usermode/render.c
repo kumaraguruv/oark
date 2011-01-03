@@ -207,7 +207,7 @@ VOID renderAddEntry(PREPORT_SECTION pSec, PCHAR pDesc, PVOID pInfo, FORMAT_TYPE 
 
         pEntry->format = format;
         pEntry->pDesc = pDesc;
-        if(format == FORMAT_STR_ASCII)
+        if(format == FORMAT_STR_ASCII && pInfo != NULL)
         {
             pEntry->pInformation.isFreeable = TRUE;
             pEntry->pInformation.ptr = RenderAllocator(strlen(pInfo) + 1);

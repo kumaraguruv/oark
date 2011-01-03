@@ -30,6 +30,11 @@ THE SOFTWARE.
 #include "process.h"
 #include "driverusr.h"
 #include "unicode.h"
+#include "list.h"
+#include "pe.h"
+#include "mem.h"
+#include "render.h"
+#include "unicode.h"
 
 #include <string.h>
 #include <tchar.h>
@@ -253,4 +258,211 @@ PCHAR PID2ProcessName(DWORD pid)
         OARK_EXCEPTION();
 
     return pName;
+}
+
+VOID Test()
+{
+    CheckEATs(NULL, NULL);
+}
+
+STATUS_t CheckEATs(FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals)
+{
+    PSYSTEM_PROCESS_INFORMATION pProcInfo = NULL;
+    PHOOK_INFORMATION pHookInfo = NULL;
+    PREPORT_SECTION idSubEat = NULL;
+    PSLIST_HEADER pListHead = NULL;
+    STATUS_t ret = ST_OK;
+    PCHAR pName = NULL;
+    BOOL status = FALSE;
+
+    __try
+    {
+        idSubEat = RenderAddSection("Export Address Table Hooking Detection");
+        pProcInfo = GetProcessList();
+        if(pProcInfo == NULL)
+        {
+            OARK_ERROR("GetProcessList failed");
+            ret = ST_ERROR;
+            goto clean;
+        }
+
+        while(pProcInfo->NextEntryOffset != 0)
+        {
+            pListHead = CheckEATsInProcessContext((DWORD)pProcInfo->ProcessId);
+            while( (pHookInfo = PopHookInformationEntry(pListHead)) != NULL)
+            {
+                pName = PID2ProcessName((DWORD)pHookInfo->other[0]);
+                RenderAddSeparator(idSubEat);
+                RenderAddEntry(idSubEat, "Ordinal", pHookInfo->id, FORMAT_DEC);
+                RenderAddEntry(idSubEat, "Export Name", pHookInfo->other[1], FORMAT_STR_ASCII);
+                RenderAddEntry(idSubEat, "Function address", pHookInfo->addr, FORMAT_HEX);
+                RenderAddEntry(idSubEat, "DLL Name", pHookInfo->name, FORMAT_STR_ASCII);
+                RenderAddEntry(idSubEat, "Process ID", pHookInfo->other[0], FORMAT_HEX);
+                RenderAddEntry(idSubEat, "Process Name", pName, FORMAT_STR_ASCII);
+
+                if(pHookInfo->name != NULL)
+                    free(pHookInfo->name);
+
+                if(pHookInfo->other[1] != NULL)
+                    free(pHookInfo->other[1]);
+
+                if(pName != NULL)
+                    free(pName);
+
+                free(pHookInfo);
+            }
+
+            if(pListHead != NULL)
+                free(pListHead);
+            
+            pProcInfo = (PSYSTEM_PROCESS_INFORMATION)((DWORD)pProcInfo + pProcInfo->NextEntryOffset);
+        }
+
+        clean:
+        if(pProcInfo != NULL)
+            free(pProcInfo);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return ret;
+}
+
+PSLIST_HEADER CheckEATsInProcessContext(DWORD pid)
+{
+    PIMAGE_EXPORT_DIRECTORY pExpDir = NULL;
+    PHOOK_INFORMATION pHookInfo = NULL;
+    PIMAGE_DOS_HEADER pImgDos = NULL;
+    MODULEENTRY32 mod = {0};
+    PSLIST_HEADER pListHead = NULL;
+    HANDLE hSnap = NULL;
+    PDWORD pAddrFunct = NULL, pName = NULL;
+    PSHORT pOrd = NULL;
+    DWORD i = 0;
+    BOOL ret = TRUE;
+
+    __try
+    {
+        pListHead = malloc(sizeof(SLIST_HEADER));
+        if(pListHead == NULL)
+        {
+            OARK_ALLOCATION_ERROR();
+            goto clean;
+        }
+
+        InitializeSListHead(pListHead);
+
+        mod.dwSize = sizeof(MODULEENTRY32);
+        hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid);
+        if(hSnap == INVALID_HANDLE_VALUE)
+        {
+            OARK_ERROR("CreateToolhelp32Snapshot failed");
+            goto clean;
+        }
+
+        if(Module32First(hSnap, &mod) == FALSE)
+        {
+            OARK_ERROR("Module32First failed");
+            goto clean;
+        }
+
+        //First is the binary itself, we don't care :)
+        while(Module32Next(hSnap, &mod) != FALSE) 
+        {
+            pExpDir = GetRemoteExportTableDirectory(pid, (DWORD)mod.modBaseAddr);
+            if(pExpDir != NULL)
+            {
+                pAddrFunct = ReadRemoteMemory(pid, 
+                    (DWORD)mod.modBaseAddr + pExpDir->AddressOfFunctions,
+                    sizeof(DWORD) * pExpDir->NumberOfFunctions
+                );
+
+                if(pAddrFunct == NULL)
+                {
+                    OARK_ALLOCATION_ERROR();
+                    ret = FALSE;
+                    free(pExpDir);
+                    goto clean;
+                }
+                
+                pName = ReadRemoteMemory(pid,
+                    (DWORD)mod.modBaseAddr + pExpDir->AddressOfNames,
+                    sizeof(DWORD) * pExpDir->NumberOfNames
+                );
+
+                if(pName == NULL)
+                {
+                    OARK_ALLOCATION_ERROR();
+                    ret = FALSE;
+                    free(pAddrFunct);
+                    free(pExpDir);
+                    goto clean;
+                }
+
+                pOrd = ReadRemoteMemory(pid,
+                    (DWORD)mod.modBaseAddr + pExpDir->AddressOfNameOrdinals,
+                    sizeof(SHORT) * pExpDir->NumberOfNames
+                );
+
+                if(pOrd == NULL)
+                {
+                    OARK_ALLOCATION_ERROR();
+                    ret = FALSE;
+                    free(pName);
+                    free(pAddrFunct);
+                    free(pExpDir);
+                    goto clean;
+                }
+
+                //Hooked functions exported by ordinal are not detected
+                for(i = 0; i < pExpDir->NumberOfNames; ++i)
+                {
+                    if(pAddrFunct[pOrd[i]] > mod.modBaseSize)
+                    {
+                        pHookInfo = malloc(sizeof(HOOK_INFORMATION));
+                        if(pHookInfo == NULL)
+                        {
+                            OARK_ALLOCATION_ERROR();
+                            ret = FALSE;
+                            free(pExpDir);
+                            goto clean;
+                        }
+                        ZeroMemory(pHookInfo, sizeof(HOOK_INFORMATION));
+
+                        pHookInfo->id = pOrd[i] + pExpDir->Base;
+                        pHookInfo->addr = (DWORD)mod.modBaseAddr + pAddrFunct[pOrd[i]];
+                        pHookInfo->other[0] = (PVOID)pid;
+                        pHookInfo->name = UnicodeToAnsi(mod.szModule);
+
+                        if(i < pExpDir->NumberOfNames)
+                            pHookInfo->other[1] = ReadRemoteString(pid,
+                                (DWORD)mod.modBaseAddr + pName[i]
+                            );
+
+                        PushHookInformationEntry(pListHead, pHookInfo);
+                    }
+                }
+
+                free(pAddrFunct);
+                free(pExpDir);
+            }
+            else
+                OARK_ERROR("GetRemoteExportTableDirectory failed");
+        }
+
+        clean:
+        if(hSnap != NULL)
+            CloseHandle(hSnap);
+
+        if(ret == FALSE)
+        {
+            CleanHookInfoList(pListHead);
+            free(pListHead);
+            pListHead = NULL;
+        }
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return pListHead;
 }

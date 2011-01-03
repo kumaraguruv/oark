@@ -73,6 +73,25 @@ typedef enum FIELD_PE
 PIMAGE_DOS_HEADER GetDosHeader(HANDLE hBin);
 
 /**
+ * @name    GetRemoteDosHeader
+ * @brief   Retrieves DOS Header of a remote process.
+ *
+ * This API gives DOS Header structure of a remote process.
+ *
+ * @param [in] pid Process-ident.
+ * @param [in] imgBase Image Base Address of the PE.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A pointer to a IMAGE_DOS_HEADER structure.
+ *
+ * Example Usage:
+ * @code
+ *    GetRemoteDosHeader(123, 0x400000);
+ * @endcode
+ */
+PIMAGE_DOS_HEADER GetRemoteDosHeader(DWORD pid, DWORD imgBase);
+
+/**
  * @name    GetNtHeaders
  * @brief   Retrieves NT Headers.
  *
@@ -85,10 +104,29 @@ PIMAGE_DOS_HEADER GetDosHeader(HANDLE hBin);
  *
  * Example Usage:
  * @code
- *    GetNtHeaders(hBin);
+ *    GetNtHeaders(hBin); //Never forgotten to free ptr !
  * @endcode
  */
 PIMAGE_NT_HEADERS GetNtHeaders(HANDLE hBin);
+
+/**
+ * @name    GetRemoteNtHeaders
+ * @brief   Retrieves a remote NT Headers.
+ *
+ * This API gives a remote NT Headers structure.
+ *
+ * @param [in] pid Process-ident.
+ * @param [in] imgBase Image Base Address of the PE.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A pointer to a IMAGE_NT_HEADERS structure.
+ *
+ * Example Usage:
+ * @code
+ *    GetRemoteNtHeaders(123, 0x1337); //Never forgotten to free ptr !
+ * @endcode
+ */
+PIMAGE_NT_HEADERS GetRemoteNtHeaders(DWORD pid, DWORD imgBase);
 
 /**
  * @name    GetExportTableDirectory
@@ -107,6 +145,25 @@ PIMAGE_NT_HEADERS GetNtHeaders(HANDLE hBin);
  * @endcode
  */
 PIMAGE_EXPORT_DIRECTORY GetExportTableDirectory(HANDLE hBin);
+
+/**
+ * @name    GetRemoteExportTableDirectory
+ * @brief   Retrieves a remote EAT.
+ *
+ * This API gives a remote EAT structure.
+ *
+ * @param [in] pid Process-ident.
+ * @param [in] imgBase Image Base Address of the PE.
+ *
+ * @retval NULL  An error occured.
+ * @retval other  A pointer to a IMAGE_EXPORT_DIRECTORY structure.
+ *
+ * Example Usage:
+ * @code
+ *    GetRemoteExportTableDirectory(123, 0x600000);
+ * @endcode
+ */
+PIMAGE_EXPORT_DIRECTORY GetRemoteExportTableDirectory(DWORD pid, DWORD imgBase);
 
 /**
  * @name    GetExportedSymbol

@@ -204,6 +204,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\mem.c"
+				>
+			</File>
+			<File
 				RelativePath=".\modules.c"
 				>
 			</File>
@@ -271,6 +275,10 @@
 			</File>
 			<File
 				RelativePath=".\list.h"
+				>
+			</File>
+			<File
+				RelativePath=".\mem.h"
 				>
 			</File>
 			<File

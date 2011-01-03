@@ -122,6 +122,46 @@ typedef struct _SYSTEM_PROCESS_INFORMATION
     SYSTEM_THREAD Threads[0];
 } SYSTEM_PROCESS_INFORMATION, *PSYSTEM_PROCESS_INFORMATION;
 
+VOID Test();
+
+/**
+ * @name    CheckEATs
+ * @brief   Check EATs structures.
+ *
+ * This API searchs and displays potential hook in Export Address Table of modules in all process context.
+ *
+ * @param [in] args Arguments.
+ * @param [in] globals Globals variables that the function needs.
+ *
+ * @retval ST_ERROR An error occured.
+ *         ST_OK Function succeed.
+ *
+ * Example Usage:
+ * @code
+ *    CheckEATs(arg, global);
+ * @endcode
+ */
+STATUS_t CheckEATs(FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals);
+
+
+/**
+ * @name    CheckEATsInProcessContext
+ * @brief   Check EATs modules in a process context.
+ *
+ * This API searchs and displays potential hook in modules' EATs of in a process context.
+ * NB : To manipulate SLIST_HEADER use PopHookInformationList/PushHookInformationList
+ *
+ * @param [in] pid Process-Ident of the process.
+ *
+ * @retval NULL An error occured.
+ *         other A pointer to a SLIST_HEADER.
+ *
+ * Example Usage:
+ * @code
+ *    CheckEATsInProcessContext(1337);
+ * @endcode
+ */
+PSLIST_HEADER CheckEATsInProcessContext(DWORD pid);
 
 /**
  * @name    GetProcessList
