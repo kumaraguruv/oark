@@ -63,9 +63,12 @@ typedef struct
  * @param [in] args Arguments.
  * @param [in] globals Globals variables that the function needs.
  *
+ * @retval ST_ERROR An error occured.
+ *         ST_OK Function succeed.
+ *
  * Example Usage:
  * @code
- *    CheckSSDTHooking(hDevice);
+ *    CheckSSDTHooking(arg, global);
  * @endcode
  */
 STATUS_t CheckSSDTHooking(FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals);
@@ -75,9 +78,9 @@ STATUS_t CheckSSDTHooking(FUNC_ARGS_t * args, FUNC_ARGS_GLOBAL_t * globals);
  * @brief   Check Xrayn PoC.
  *
  * This API searchs and displays potential hook in KTHREAD.ServiceTable field.
+ * NB : To manipulate SLIST_HEADER use PopHookInformationList/PushHookInformationList
  *
  * @param [in] hDevice Handle of the OARK kernelmode driver.
- *
  * @retval NULL An error occured.
  *         other A pointer to a SLIST_HEADER.
  *

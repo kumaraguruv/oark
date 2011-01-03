@@ -29,6 +29,7 @@ THE SOFTWARE.
  */
 #include "pe.h"
 #include "debug.h"
+#include "mem.h"
 
 PIMAGE_DOS_HEADER GetDosHeader(HANDLE hBin)
 {
@@ -200,4 +201,74 @@ PVOID GetPEField(HANDLE hBin, FIELD_PE fieldPe)
         OARK_EXCEPTION();
 
     return field;
+}
+
+PIMAGE_DOS_HEADER GetRemoteDosHeader(DWORD pid, DWORD imgBase)
+{
+    PIMAGE_DOS_HEADER pImgDosHead = NULL;
+
+    __try
+    {
+        pImgDosHead = ReadRemoteMemory(pid, imgBase, sizeof(IMAGE_DOS_HEADER));
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return pImgDosHead;
+}
+
+PIMAGE_NT_HEADERS GetRemoteNtHeaders(DWORD pid, DWORD imgBase)
+{
+    PIMAGE_DOS_HEADER pImgDosHead = NULL;
+    PIMAGE_NT_HEADERS pImgNtHead = NULL;
+
+    __try
+    {
+        pImgDosHead = GetRemoteDosHeader(pid, imgBase);
+        if(pImgDosHead == NULL)
+        {
+            OARK_ERROR("GetRemoteDosHeader failed");
+            goto clean;
+        }
+
+        pImgNtHead = ReadRemoteMemory(pid, imgBase + pImgDosHead->e_lfanew, sizeof(IMAGE_NT_HEADERS));
+        
+        clean:
+        if(pImgDosHead != NULL)
+            free(pImgDosHead);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return pImgNtHead;
+}
+
+PIMAGE_EXPORT_DIRECTORY GetRemoteExportTableDirectory(DWORD pid, DWORD imgBase)
+{
+    PIMAGE_EXPORT_DIRECTORY pImgExportDir = NULL;
+    PIMAGE_NT_HEADERS pImgNtHead = NULL;  
+
+    __try
+    {
+        pImgNtHead = GetRemoteNtHeaders(pid, imgBase);
+        if(pImgNtHead == NULL)
+        {
+            OARK_ERROR("GetRemoteNtHeaders failed");
+            goto clean;
+        }
+
+        if(pImgNtHead->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress != 0)
+            pImgExportDir = ReadRemoteMemory(pid,
+                imgBase + pImgNtHead->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress,
+                sizeof(IMAGE_EXPORT_DIRECTORY)
+                );
+
+        clean:
+        if(pImgNtHead != NULL)
+            free(pImgNtHead);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+        OARK_EXCEPTION();
+
+    return pImgExportDir;
 }

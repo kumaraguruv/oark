@@ -29,6 +29,7 @@ THE SOFTWARE.
 #include "others.h"
 #include "report.h"
 #include "init.h"
+#include "process.h"
 
 int main(int argc, char* argv[])
 {
@@ -78,15 +79,16 @@ int main(int argc, char* argv[])
 					if ( debug )
 						printf( " OK: Driver Loaded!\n" );
 
-                    if(ArgumentParser(argc, argv) == ST_ERROR)
-                        goto clean;
+                    //if(ArgumentParser(argc, argv) == ST_ERROR)
+                      //  goto clean;
 
 					CheckOSVersion();
                     
                     RenderInitialization();
 
-                    InitCalls( device );
-                    
+                    //InitCalls( device );
+                    Test();
+
                     printf(" Generation of the report..\n");
                     MakeReport(OUTPUT_FORMAT_TXT, OUTPUT_DST_STDOUT, FALSE );
                     printf(" Generation of the file report..");
