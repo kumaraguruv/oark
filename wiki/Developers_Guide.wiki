@@ -12,6 +12,7 @@
   # [#Direct_Kernel_Object_Manipulation_(DKOM) Direct Kernel Object Manipulation (DKOM)]
   # [#Subversion Subversion]
   # [#Adding_new_modules_and_features Adding new modules and features]
+  # [#oark_book oark book]
 
 = I want to be a Developer / Commiter / Contributor =
 
@@ -633,3 +634,5 @@ ARGUMENT_PARSER_TABLE_t ARG_TABLE[] =
 	{ "Sx", "Display potential hook in KTHREAD.ServiceTable field (Xrayn POC)", {FIN_SSDT_XRAYN}, 0 }
 }
 }}}
+
+= oark book =
