@@ -640,5 +640,5 @@ ARGUMENT_PARSER_TABLE_t ARG_TABLE[] =
 LaTeX for Windows: *[http://miktex.org/2.9/setup MiKTeX 2.9]*
 
 LaTeX editors:
-  * *[http://www.winedt.com/winedt.html WinEdt 6.0]
-  * *[http://www.texniccenter.org/ TeXnicCenter]
+  * *[http://www.winedt.com/winedt.html WinEdt 6.0]*
+  * *[http://www.texniccenter.org/ TeXnicCenter]*
