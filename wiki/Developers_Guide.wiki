@@ -642,3 +642,10 @@ LaTeX for Windows: *[http://miktex.org/2.9/setup MiKTeX 2.9]*
 LaTeX editors:
   * *[http://www.winedt.com/winedt.html WinEdt 6.0]*
   * *[http://www.texniccenter.org/ TeXnicCenter]*
+
+Make the output with WinEdt (the spelling by default is English): 
+  * Open the .tex oark book.
+  * (Up in the window): TeX - > PDF -> PDFTeXify.
+
+LaTeX Documentation:
+  * [http://www.maths.tcd.ie/~dwilkins/LaTeXPrimer/ Getting Started with LaTeX]
