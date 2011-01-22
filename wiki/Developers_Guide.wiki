@@ -649,3 +649,7 @@ Make the output with !WinEdt (the spelling by default is English):
 
 LaTeX Documentation:
   * [http://www.maths.tcd.ie/~dwilkins/LaTeXPrimer/ Getting Started with LaTeX]
+
+The lastest output book always be: *trunk/VERSION/doc/oark book.pdf*
+
+.tex and other Latex resources: *trunk/VERSION/doc/book latex*
