@@ -5,22 +5,26 @@
 \usepackage{hyperref}
 \usepackage{fancyhdr}
 \usepackage{listings}
+\usepackage[autocite=inline, labelalpha=true, style=alphabetic]{biblatex}
+\usepackage{makeidx}
 \usepackage{tocbibind}
-\usepackage{bibentry}
 
-\nobibliography*
+\makeindex
 
-\settocbibname{References}
+\bibliography{mybib}
 
-\newcommand{\fullcite}[1]{(\cite{#1}:~\bibentry{#1})}
+
+\newcommand{\keyword}[1]{\index{#1}#1} 
+\newcommand{\ocite}[1]{\footfullcite{#1}}
+\newcommand{\oscite}[1]{\cite{#1}}
 \let\cleardoublepage\clearpage
 
 \pagestyle{fancy}
 \fancyhead{}
 \fancyfoot{}
-\fancyhead[LE,RO]{\slshape \rightmark}
-\fancyhead[LO,RE]{\slshape \leftmark}
 \fancyfoot[C]{\thepage}
+\fancyhead[LE,RO]{\slshape \rightmark} 
+\fancyhead[LO,RE]{\slshape \leftmark}
 
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
@@ -78,19 +82,14 @@ framexbottommargin=3pt
 \maketitle
 \date{}
 
-\fancyhead{}
-\fancyfoot{}
-\fancyhead[LE,RO]{\slshape \rightmark}
-\fancyfoot[C]{\thepage}
+\fancyhead[LE,RO]{} 
 \tableofcontents
-
-\newpage
-\fancyhead[LE,RO]{\slshape \rightmark}
-\fancyhead[LO,RE]{\slshape \leftmark}
+\fancyhead[LE,RO]{\slshape \rightmark} 
 
 \chapter{Introduction}
 This chapter's content..
 
+\keyword{keyword1}
 
 \lstset{language=C,caption=Descriptive Caption Text,label=DescriptiveLabels}
 \begin{lstlisting}
@@ -125,18 +124,26 @@ void * IOCTLReadKernMem( HANDLE device, READ_KERN_MEM_t * read_kern_mem )
 
 \end{lstlisting}
 
-\subsection{sub sub Introduction}
-This subsection's content..
 
-\chapter{Other chapter}
-Biblio reference: \fullcite{choishoen1985} \fullcite{osserman1969} And this is a normal cite: \cite{choishoen1985} and other normal cite: \cite{osserman1969}
+\section{Introduction Section}
+sss
 
-\bibliographystyle{ownbst}
+\subsection{sub Introduction}
+This subsection's content.. 
+\oscite{usserman}
 
-\fancyhead{}
-\fancyhead[LE,RO]{\slshape \rightmark}
+\subsubsection{sub sub Introduction}
+\ocite{usserman}
 
-\bibliography{mybib}
+a: \keyword{keyword1}
+
+\fancyhead[LE,RO]{} 
+\printbibliography[heading=bibintoc]
+
+\clearpage
+\phantomsection
+\printindex
+
 
 \end{document}
 
