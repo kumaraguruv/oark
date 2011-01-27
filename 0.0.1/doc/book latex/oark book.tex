@@ -8,13 +8,24 @@
 \usepackage[autocite=inline, labelalpha=true, style=alphabetic]{biblatex}
 \usepackage{makeidx}
 \usepackage{tocbibind}
+\usepackage[lmargin=2.5cm, rmargin=2.5cm,tmargin=2.5cm,bmargin=2.5cm]{geometry}
+\usepackage[compact]{titlesec}
+
+\titleformat{\chapter}[display]
+  {\bfseries\Huge}
+  {\filright\Large\chaptertitlename\ \thechapter}
+  {0mm}{\filright}
+\titlespacing*{\chapter}
+  {0pt}{-10pt}{20pt}
+
+
 
 \makeindex
 
 \bibliography{mybib}
 
 
-\newcommand{\keyword}[1]{\index{#1}#1} 
+\newcommand{\keyword}[1]{\index{#1}#1}
 \newcommand{\ocite}[1]{\footfullcite{#1}}
 \newcommand{\oscite}[1]{\cite{#1}}
 \let\cleardoublepage\clearpage
@@ -23,7 +34,7 @@
 \fancyhead{}
 \fancyfoot{}
 \fancyfoot[C]{\thepage}
-\fancyhead[LE,RO]{\slshape \rightmark} 
+\fancyhead[LE,RO]{\slshape \rightmark}
 \fancyhead[LO,RE]{\slshape \leftmark}
 
 \renewcommand{\headrulewidth}{0pt}
@@ -42,6 +53,9 @@
   bookmarksopen=true,
   pdfdisplaydoctitle=true
 }
+
+
+
 \begin{document}
 \lstset{ %
 language=Octave,                % choose the language of the code
@@ -73,7 +87,7 @@ framextopmargin=3pt,
 framexbottommargin=3pt
 }
 
-\title{The oark book \url{http://code.google.com/p/oark/} \newline\begin{figure} [h]
+\title{The oark book: \url{http://code.google.com/p/oark/}\newline\begin{figure} [h]
 \begin {center}
 \includegraphics[width=0.2\textwidth]{oark.jpg}
 \end {center}
@@ -82,9 +96,10 @@ framexbottommargin=3pt
 \maketitle
 \date{}
 
-\fancyhead[LE,RO]{} 
+\titlespacing*{\chapter}{0pt}{-40pt}{20pt}
+\fancyhead[LE,RO]{}
 \tableofcontents
-\fancyhead[LE,RO]{\slshape \rightmark} 
+\fancyhead[LE,RO]{\slshape \rightmark}
 
 \chapter{Introduction}
 This chapter's content..
@@ -126,18 +141,19 @@ void * IOCTLReadKernMem( HANDLE device, READ_KERN_MEM_t * read_kern_mem )
 
 
 \section{Introduction Section}
-sss
+ is hereby granted, free of charge,Permission is hereby granted, free of charge,is hereby granted, free of charge,Permission is hereby granted, free of charge,Permission is hereby granted, free of charge,Permission
 
 \subsection{sub Introduction}
-This subsection's content.. 
+This subsection's content..
 \oscite{usserman}
 
 \subsubsection{sub sub Introduction}
 \ocite{usserman}
 
 a: \keyword{keyword1}
+This subsection's content..This subsection's content..This subsection's content..This subsection's content..This subsection's content..This subsection's content..This subsection's content..This subsection's 
 
-\fancyhead[LE,RO]{} 
+\fancyhead[LE,RO]{}
 \printbibliography[heading=bibintoc]
 
 \clearpage
