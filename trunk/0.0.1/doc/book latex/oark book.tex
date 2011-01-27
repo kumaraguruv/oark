@@ -11,14 +11,14 @@
 \usepackage[lmargin=2.5cm, rmargin=2.5cm,tmargin=2.5cm,bmargin=2.5cm]{geometry}
 \usepackage[compact]{titlesec}
 
+
+
 \titleformat{\chapter}[display]
   {\bfseries\Huge}
   {\filright\Large\chaptertitlename\ \thechapter}
   {0mm}{\filright}
 \titlespacing*{\chapter}
-  {0pt}{-10pt}{20pt}
-
-
+  {0pt}{-10pt}{15pt}
 
 \makeindex
 
@@ -28,6 +28,8 @@
 \newcommand{\keyword}[1]{\index{#1}#1}
 \newcommand{\ocite}[1]{\footfullcite{#1}}
 \newcommand{\oscite}[1]{\cite{#1}}
+\newcommand{\paraph}{\paragraph{}}
+
 \let\cleardoublepage\clearpage
 
 \pagestyle{fancy}
@@ -96,20 +98,21 @@ framexbottommargin=3pt
 \maketitle
 \date{}
 
-\titlespacing*{\chapter}{0pt}{-40pt}{20pt}
+\titlespacing*{\chapter}{0pt}{-40pt}{15pt}
 \fancyhead[LE,RO]{}
 \tableofcontents
 \fancyhead[LE,RO]{\slshape \rightmark}
 
 \chapter{Introduction}
-This chapter's content..
+\paraph{}
+This chapter's content.. \keyword{keyword1}
 
-\keyword{keyword1}
-
+\paraph{}
+Pasting code...
 \lstset{language=C,caption=Descriptive Caption Text,label=DescriptiveLabels}
 \begin{lstlisting}
 /* Copyright Dreg aka David Reguera Garcia dreg@fr33project.org
-Permission is hereby granted, free of charge,  */
+Permission is hereby granted, free of chargen is hereby granted, free of chargen is hereby granted, free of chargen is hereby granted, free of charge,  */
 
 #include "driverusr.h"
 
@@ -141,17 +144,23 @@ void * IOCTLReadKernMem( HANDLE device, READ_KERN_MEM_t * read_kern_mem )
 
 
 \section{Introduction Section}
- is hereby granted, free of charge,Permission is hereby granted, free of charge,is hereby granted, free of charge,Permission is hereby granted, free of charge,Permission is hereby granted, free of charge,Permission
-
+\paraph{}
+is hereby granted, free of charge,Permission is hereby granted, free of charge,is hereby granted, free of
+\paraph{}
+charge,Permission is hereby granted, free of charge,Permission is hereby granted, free of charge,Permission \\
+bbbbb
 \subsection{sub Introduction}
+\paraph{}
 This subsection's content..
 \oscite{usserman}
 
 \subsubsection{sub sub Introduction}
-\ocite{usserman}
+\paraph{}
+a: \ocite{usserman}, This subsection's content..
 
-a: \keyword{keyword1}
-This subsection's content..This subsection's content..This subsection's content..This subsection's content..This subsection's content..This subsection's content..This subsection's content..This subsection's 
+\paraph{}
+This subsection's content..This subsection's content..This sub content..This subsection's content..This subsection's content..This subsection's content..This subsection's
+\keyword{keyword1} ggggggggrrrrrr
 
 \fancyhead[LE,RO]{}
 \printbibliography[heading=bibintoc]
