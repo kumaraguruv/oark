@@ -222,9 +222,65 @@ We can obtain the number of entries (number of GDT descriptors) with GDTR.nBytes
 
 \end{enumerate}
 
-\subsection{An example scenario}
+\subsection{Windows specific}
 \paraph{}
-a
+Now is time for a more detailed view. On Windows is easy to control in which core do you want run the code, it is only necessary two APIs, to get the number of COREs you can use GetSystemInfo:
+
+\lstset{language=C,caption=API to get the system info}
+\begin{lstlisting}
+void WINAPI GetSystemInfo( LPSYSTEM_INFO lpSystemInfo );
+\end{lstlisting}
+
+\paraph{}
+SYSTEM\_INFO has the following appearance:
+
+\lstset{language=C,caption=SYSTEM INFO structure}
+\begin{lstlisting}
+typedef struct _SYSTEM_INFO {
+    // .............
+    DWORD dwNumberOfProcessors;
+    // .............
+}SYSTEM_INFO;
+\end{lstlisting}
+
+\paraph{}
+We do a loop with the field dwNumberOfProcessors that executes CORE by CORE by adding the Call Gate or you can also force the Call Gate only to the first core (1) and the user space application will be executed only in the core 1, this is accomplished using the API: SetThreadAffinityMask, as follows:
+
+\lstset{language=C,caption=SetThreadAffinityMask API}
+\begin{lstlisting}
+DWORD_PTR WINAPI SetThreadAffinityMask( HANDLE hThread, DWORD_PTR dwThreadAffinityMask );
+\end{lstlisting}
+
+\paraph{}
+Passing a GetCurrentThread() and the value 1 as AffinityMask, Be careful, DWORD\_PTR is not a pointer to a DWORD, is passed by value:
+
+\lstset{language=C,caption=SetThreadAffinityMask to core 1}
+\begin{lstlisting}
+Affinity = 1;
+SetThreadAffinityMask( GetCurrentThread(), Affinity );
+\end{lstlisting}
+
+\paraph{}
+You can do a loop for the number of processors and the rate variable (the first core is 1 not 0) using Affinity you can install a Call Gate in all the cores. Take notice that it's a mask, so you should use a bit shift like: AffinityMask = 1 << index\_variable to scroll through the cores.
+
+\paraph{}
+To install a Call Gate from a driver your need other APIs, to obtain the number of cores:
+
+\lstset{language=C,caption=Get the number of cores from a driver}
+\begin{lstlisting}
+ZwQuerySystemInformation( SystemBasicInformation, & system_basic_information, sizeof( system_basic_information ), NULL );
+\end{lstlisting}
+
+\paraph{}
+To change the core, -2 is the equivalent to GetCurrentThread():
+
+\lstset{language=C,caption=Change the affinity from a driver}
+\begin{lstlisting}
+ZwSetInformationThread( (HANDLE) -2, ThreadAffinityMask, & AffinityMask, sizeof( AffinityMask ) );
+\end{lstlisting}
+
+\paraph{}
+With this information you can install/detect call gates in the GDTs and LDTs of all cores. 
 
 \chapter{PEB Hooking}
 \paraph{}
