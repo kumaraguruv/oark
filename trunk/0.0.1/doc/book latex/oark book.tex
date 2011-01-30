@@ -104,23 +104,50 @@ framexbottommargin=3pt
 \tableofcontents
 \fancyhead[LE,RO]{\slshape \rightmark}
 
-\chapter{Call Gates}
+\chapter{Call Gates and GDT/LDT}
+
+\section{GDT/LDT}
+\paraph{}
+The Global Descriptor Table or GDT (extracted from Wikipedia\ocite{wikglb2010}) is a data structure used by Intel x86-family processors in order to define the characteristics of the various memory areas used during program execution, for example the base address, the size and access privileges like executability and writability. These memory areas are called segments in Intel terminology. \ocite{Int6432sofdvman3A}
 
 \paraph{}
-A Call Gate \ocite{Int6432sofdvman3A} is a mechanism in the Intel x86 architecture to change privilege levels of the CPU when running a predefined function that is called by the instruction CALL/JMP FAR.
+The GDT can hold things other than segment descriptors as well. Every 8-byte entry in the GDT is a descriptor, but these can be Task State Segment (or TSS) descriptors, Local Descriptor Table (LDT) descriptors, or Call Gate descriptors. The last one, Call Gates, are particularly important for transferring control between x86 privilege levels although this mechanism is not used on most modern operating systems.
 
 \paraph{}
-A call to a Call Gate allows you to obtain higher privileges than the current, for example we can execute a routine in ring0 using a CALL FAR in ring3. A Call Gate is an entry in the GDT (Global Descriptor Table) or LDT (Local Descriptor Table).
+There is also an LDT or Local Descriptor Table. The LDT is supposed to contain memory segments which are private to a specific program, while the GDT is supposed to contain global segments. The x86 processors contain facilities for automatically switching the current LDT on specific machine events, but no facilities for automatically switching the GDT.
+
+\paraph{}
+Every memory access which a program can perform always goes through a segment. On the 386 processor and later, because of 32-bit segment offsets and limits, it is possible to make segments cover the entire addressable memory, which makes segment-relative addressing transparent to the user.
+
+\paraph{}
+In order to reference a segment, a program must use its index inside the GDT or the LDT. Such an index is called a segment selector or selector in short. The selector must generally be loaded into a segment register to be used. Apart from the machine instructions which allow one to set/get the position of the GDT (and of the Interrupt Descriptor Table) in memory, every machine instruction referencing memory has an implicit Segment Register, occasionally two. Most of the time this Segment Register can be overridden by adding a Segment Prefix before the instruction.
+
+\paraph{}
+Loading a selector into a segment register automatically reads the GDT or the LDT and stores the properties of the segment inside the processor itself. Subsequent modifications to the GDT or LDT will not be effective unless the segment register is reloaded.
+
+\section{Call Gates}
+
+\paraph{}
+A Call Gate \oscite{Int6432sofdvman3A} is a mechanism in the Intel x86 architecture to change privilege levels of the CPU when running a predefined function that is called by the instruction CALL/JMP FAR.
+
+\paraph{}
+A call to a Call Gate allows you to obtain higher privileges than the current, for example we can execute a routine in ring0 using a CALL FAR in ring3. A Call Gate is an entry in the GDT (Global Descriptor Table) or LDT (Local Descriptor Table). There are a GDT for each CORE, and each GDT can have one or more LDTs \ocite{dregrkar2010}.
 
 \paraph{}
 Windows doesn't use Call Gate for anything special, but there are malware, as the worm Gurong.A \ocite{w32guronga2006} , that installs a Call Gate via DevicePhysicalMemory to execute code on ring0. An article that talks about it is "Playing with Windows/dev/(k)mem" \ocite{crazylplayph2002}.
 
 \paraph{}
-Nowadays we can't easily access to /Device/PhysicalMemory, I recommend reading the presentation by Alex Ionescu at RECON 2006 "Subverting Windows 2003 SP1 Kernel Integrity Protection" \ocite{alexionsubwin2006}. Also, there are examples in the wired that use the API ZwSystemDebugControl \ocite{undocntinternals} to install a Call Gate, but Ionescu's article says that it doesn't work nowadays (although there are techniques to reactivate them).
+Nowadays we can't easily access to /Device/PhysicalMemory, I recommend reading the presentation by Alex Ionescu at RECON 2006 "Subverting Windows 2003 SP1 Kernel Integrity Protection" \ocite{alexionsubwin2006}. Also, there are examples \ocite{saccocallg2006} in the wired that use the API ZwSystemDebugControl \ocite{undocntinternals} to install a Call Gate, but Ionescu's article says that it doesn't work nowadays (although there are techniques to reactivate them).
+
+\paraph{}
+Gynvael and j00ru made a Call-Gate mechanism in kernel/driver exploit development on Windows \ocite{j00rugyngdtldt2010}, or, to be more precise, to use a write-what-where condition to convert a custom LDT entry into a Call-Gate (this can be done by modifying just one byte), and using the Call-Gate to elevate the code privilege from user-land to ring0.
+
+\paraph{}
+David Reguera Garcia aka Dreg made a Call Gate detector for the free anti-rootkit Rootkit Unhooker \ocite{diableprkusr12010}. The next releases have new features to detect other new stuff like the 'new LDT Forward to user mode attack' (published also in the Gynvael and j00ru's paper.)
 
 \paraph{}
 An entry in the GDT/LDT looks like this:
-\lstset{language=C,caption=GDT/LDT Descriptor structure,label=DescriptiveLabels}
+\lstset{language=C,caption=GDT/LDT Descriptor structure}
 \begin{lstlisting}
 typedef struct _SEG_DESCRIPTOR
 {
@@ -142,7 +169,7 @@ typedef struct _SEG_DESCRIPTOR
 
 \paraph{}
 A Call Gate is an entry type in the GDT/LDT which has the following appearance:
-\lstset{language=C,caption=Call Gate Descriptor structure,label=DescriptiveLabels}
+\lstset{language=C,caption=Call Gate Descriptor structure}
 \begin{lstlisting}
 typedef struct _CALL_GATE_DESCRIPTOR
 {
@@ -170,10 +197,10 @@ typedef struct _CALL_GATE_DESCRIPTOR
 To create a Call Gate we can follow the following steps:
 \begin{enumerate}
 \item {Build the Call Gate that points to our routine.}
-\item {Set the code only in a core (remember: there are a GDT for each CORE).}
+\item {Set the code only in a core (remember: there are a GDT for each CORE.}
 \item {Read the GDTR register in order to find the GDT address and the size using SGDT instruction:
 
-\lstset{language=C,caption=GDTR register,label=DescriptiveLabels}
+\lstset{language=C,caption=GDTR register}
 \begin{lstlisting}
 typedef struct _GDTR
 {
