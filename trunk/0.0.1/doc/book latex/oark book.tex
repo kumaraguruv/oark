@@ -11,7 +11,7 @@
 \usepackage[lmargin=2.5cm, rmargin=2.5cm,tmargin=2.5cm,bmargin=2.5cm]{geometry}
 \usepackage[compact]{titlesec}
 
-
+\nocite{*}
 
 \titleformat{\chapter}[display]
   {\bfseries\Huge}
@@ -59,6 +59,7 @@
 
 
 \begin{document}
+
 \lstset{ %
 language=Octave,                % choose the language of the code
 basicstyle=\footnotesize,      % the size of the fonts that are used for the code
@@ -103,45 +104,106 @@ framexbottommargin=3pt
 \tableofcontents
 \fancyhead[LE,RO]{\slshape \rightmark}
 
+\chapter{Call Gates}
+
+\paraph{}
+A Call Gate \ocite{Int6432sofdvman3A} is a mechanism in the Intel x86 architecture to change privilege levels of the CPU when running a predefined function that is called by the instruction CALL/JMP FAR.
+
+\paraph{}
+A call to a Call Gate allows you to obtain higher privileges than the current, for example we can execute a routine in ring0 using a CALL FAR in ring3. A Call Gate is an entry in the GDT (Global Descriptor Table) or LDT (Local Descriptor Table).
+
+\paraph{}
+Windows doesn't use Call Gate for anything special, but there are malware, as the worm Gurong.A \ocite{w32guronga2006} , that installs a Call Gate via DevicePhysicalMemory to execute code on ring0. An article that talks about it is "Playing with Windows/dev/(k)mem" \ocite{crazylplayph2002}.
+
+\paraph{}
+Nowadays we can't easily access to /Device/PhysicalMemory, I recommend reading the presentation by Alex Ionescu at RECON 2006 "Subverting Windows 2003 SP1 Kernel Integrity Protection" \ocite{alexionsubwin2006}. Also, there are examples in the wired that use the API ZwSystemDebugControl \ocite{undocntinternals} to install a Call Gate, but Ionescu's article says that it doesn't work nowadays (although there are techniques to reactivate them).
+
+\paraph{}
+An entry in the GDT/LDT looks like this:
+\lstset{language=C,caption=GDT/LDT Descriptor structure,label=DescriptiveLabels}
+\begin{lstlisting}
+typedef struct _SEG_DESCRIPTOR
+{
+    WORD size_00_15;
+    WORD baseAddress_00_15;
+    WORD baseAddress_16_23:8;
+    WORD type:4;
+    WORD sFlag:1;
+    WORD dpl:2;
+    WORD pFlag:1;
+    WORD size_16_19:4;
+    WORD notUsed:1;
+    WORD lFlag:1;
+    WORD DB:1;
+    WORD gFlag:1;
+    WORD baseAddress_24_31:8;
+} SEG_DESCRIPTOR, *PSEG_DESCRIPTOR;
+\end{lstlisting}
+
+\paraph{}
+A Call Gate is an entry type in the GDT/LDT which has the following appearance:
+\lstset{language=C,caption=Call Gate Descriptor structure,label=DescriptiveLabels}
+\begin{lstlisting}
+typedef struct _CALL_GATE_DESCRIPTOR
+{
+    WORD offset_00_15;
+    WORD selector;
+    WORD argCount:5;
+    WORD zeroes:3;
+    WORD type:4;
+    WORD sFlag:1;
+    WORD dpl:2;
+    WORD pFlag:1;
+    WORD offset_16_31;
+} CALL_GATE_DESCRIPTOR, *PCALL_GATE_DESCRIPTOR;
+\end{lstlisting}
+
+\begin{itemize}
+\item {{\bf offset\_00\_15:} is the bottom of the address of the routine to be executed in ring0, {\bf offset\_16\_31} is the top.}
+\item {{\bf selector:} specifies the code segment with the value KGDT\_R0\_CODE (0x8), the routine will run ring0 privileges.}
+\item {{\bf argCount:} the number of arguments of the routine in DWORDs.}
+\item {{\bf type:} the descriptor type for a 32-bit Call Gate needs the value 0xC}
+\item {{\bf dpl:} minimum privileges that the code must have to call the routine, in this case 0x3, because it will be called by the routine ring3}
+\end{itemize}
+
+\paraph{}
+To create a Call Gate we can follow the following steps:
+\begin{enumerate}
+\item {Build the Call Gate that points to our routine.}
+\item {Set the code only in a core (remember: there are a GDT for each CORE).}
+\item {Read the GDTR register in order to find the GDT address and the size using SGDT instruction:
+
+\lstset{language=C,caption=GDTR register,label=DescriptiveLabels}
+\begin{lstlisting}
+typedef struct _GDTR
+{
+    WORD nBytes;
+    DWORD baseAddress;
+} GDTR;
+\end{lstlisting}
+
+We can obtain the number of entries (number of GDT descriptors) with GDTR.nBytes/8.
+}
+\item {Find a free entry in the GDT/LDT.}
+\item {Write the Call Gate descriptor.}
+\item { To call the Call Gate is only necessary to make a CALL/JMP FAR to the GDT/LDT selector:
+\begin{itemize}
+\item { ie if we've introduced the Call Gate at the entry {\bf 100} of the {\bf GDT}, the user space application must execute a CALL/JMP FAR {\bf 0x320}:00000000. 0x320 is in binary 1100100 {\bf 0} 00, then the entry is:1100100 (100 in binary is 1100100), {\bf TI=0} (entry is in {\bf GDT}) RPL=00.. The other part of the FAR CALL is not useful but must be in the instruction.}
+\item { ie if we've introduced the Call Gate at the entry {\bf 100} of the {\bf LDT}, the user space application must execute a CALL/JMP FAR {\bf 0x324}:00000000. 0x324 is in binary 1100100 {\bf 1} 00, then the entry is:1100100 (100 in binary is 1100100), {\bf TI=1} (entry is in {\bf LDT}) RPL=00..}
+\end{itemize}
+}
+
+\end{enumerate}
+
+
+\chapter{PEB Hooking}
+
 \chapter{Introduction}
 \paraph{}
 This chapter's content.. \keyword{keyword1}
 
 \paraph{}
 Pasting code...
-\lstset{language=C,caption=Descriptive Caption Text,label=DescriptiveLabels}
-\begin{lstlisting}
-/* Copyright Dreg aka David Reguera Garcia dreg@fr33project.org
-Permission is hereby granted, free of chargen is hereby granted, free of chargen is hereby granted, free of chargen is hereby granted, free of charge,  */
-
-#include "driverusr.h"
-
-void * IOCTLReadKernMem( HANDLE device, READ_KERN_MEM_t * read_kern_mem )
-{
-        ULONG bytes_read ;
-        bytes_read = 0 ;
-
-        if
-        (
-                DeviceIoControl
-                (
-                        device,
-                        OARK_IOCTL_CHANGE_MODE,
-                        read_kern_mem,
-                        sizeof( * read_kern_mem ),
-                        NULL,
-                        "chuuuuu",
-                        & bytes_read,
-                        ( LPOVERLAPPED) NULL
-                )
-        )
-                return read_kern_mem->dst_address;
-
-        return NULL;
-}
-
-\end{lstlisting}
-
 
 \section{Introduction Section}
 \paraph{}
