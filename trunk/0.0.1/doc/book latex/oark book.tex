@@ -101,6 +101,7 @@ framexbottommargin=3pt
 
 \titlespacing*{\chapter}{0pt}{-40pt}{15pt}
 \fancyhead[LE,RO]{}
+\setcounter{tocdepth}{3}
 \tableofcontents
 \fancyhead[LE,RO]{\slshape \rightmark}
 
@@ -197,7 +198,7 @@ typedef struct _CALL_GATE_DESCRIPTOR
 To create a Call Gate we can follow the following steps:
 \begin{enumerate}
 \item {Build the Call Gate that points to our routine.}
-\item {Set the code only in a core (remember: there are a GDT for each CORE.}
+\item {Set the code only in a core (remember: there are a GDT for each CORE.)}
 \item {Read the GDTR register in order to find the GDT address and the size using SGDT instruction:
 
 \lstset{language=C,caption=GDTR register}
@@ -280,7 +281,11 @@ ZwSetInformationThread( (HANDLE) -2, ThreadAffinityMask, & AffinityMask, sizeof(
 \end{lstlisting}
 
 \paraph{}
-With this information you can install/detect call gates in the GDTs and LDTs of all cores. 
+With this information you can install/detect call gates in the GDTs and LDTs of all cores. But for the best detection it is necessary view all LDTs, and the Windows Scheduler uses the same entry in the GDT for all processes, and only with the last information you can loss some LDTs.
+
+\subsubsection{LDT specific}
+\paraph{}
+Windows Scheduler uses the same entry in the GDT for LDT in all processes and it is necessary read the LDTs of all processes, there are two ways: Using the Windows API and DKOM (Direct Kernel Object Manipulation).
 
 \chapter{PEB Hooking}
 \paraph{}
