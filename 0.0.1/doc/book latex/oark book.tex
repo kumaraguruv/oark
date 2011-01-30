@@ -143,7 +143,7 @@ Nowadays we can't easily access to /Device/PhysicalMemory, I recommend reading t
 Gynvael and j00ru made a Call-Gate mechanism in kernel/driver exploit development on Windows \ocite{j00rugyngdtldt2010}, or, to be more precise, to use a write-what-where condition to convert a custom LDT entry into a Call-Gate (this can be done by modifying just one byte), and using the Call-Gate to elevate the code privilege from user-land to ring0.
 
 \paraph{}
-David Reguera Garcia aka Dreg made a Call Gate detector for the free anti-rootkit Rootkit Unhooker \ocite{diableprkusr12010}. The next releases have new features to detect other new stuff like the 'new LDT Forward to user mode attack' (published also in the Gynvael and j00ru's paper.)
+David Reguera Garcia aka Dreg made a Call Gate detector for the free anti-rootkit Rootkit Unhooker \ocite{diableprkusr12010}. The next releases have new features to detect other new stuff like the 'new LDT Forward to user mode attack' (published also in the Gynvael and j00ru's paper). With this attack, an attacker can add a Call Gate or other descriptor to LDT without restrictions from user mode.
 
 \paraph{}
 An entry in the GDT/LDT looks like this:
@@ -222,34 +222,13 @@ We can obtain the number of entries (number of GDT descriptors) with GDTR.nBytes
 
 \end{enumerate}
 
+\subsection{An example scenario}
+\paraph{}
+a
 
 \chapter{PEB Hooking}
-
-\chapter{Introduction}
 \paraph{}
 This chapter's content.. \keyword{keyword1}
-
-\paraph{}
-Pasting code...
-
-\section{Introduction Section}
-\paraph{}
-is hereby granted, free of charge,Permission is hereby granted, free of charge,is hereby granted, free of
-\paraph{}
-charge,Permission is hereby granted, free of charge,Permission is hereby granted, free of charge,Permission \\
-bbbbb
-\subsection{sub Introduction}
-\paraph{}
-This subsection's content..
-\oscite{usserman}
-
-\subsubsection{sub sub Introduction}
-\paraph{}
-a: \ocite{usserman}, This subsection's content..
-
-\paraph{}
-This subsection's content..This subsection's content..This sub content..This subsection's content..This subsection's content..This subsection's content..This subsection's
-\keyword{keyword1} ggggggggrrrrrr
 
 \fancyhead[LE,RO]{}
 \printbibliography[heading=bibintoc]
