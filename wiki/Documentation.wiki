@@ -2,7 +2,7 @@
 
 = Official documentation =
 
-  * View The oark book online: [https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxvYXJrc3RvcmV8Z3g6M2MzNzdlYjY5ZTJkYzIzNw click here]
-  * Download the oark book: [https://sites.google.com/site/oarkstore/oarkbook.zip?attredirects=0 click here] (ZIP file)
+  * View The oark book online (frequently updated): [https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxvYXJrc3RvcmV8Z3g6M2MzNzdlYjY5ZTJkYzIzNw click here]
+  * Download the oark book (frequently updated): [https://sites.google.com/site/oarkstore/oarkbook.zip?attredirects=0 click here] (ZIP file)
   * The oark book site: [https://sites.google.com/site/oarkstore/ click here]
   * Developers Guide: [http://code.google.com/p/oark/wiki/Developers_Guide click here]
