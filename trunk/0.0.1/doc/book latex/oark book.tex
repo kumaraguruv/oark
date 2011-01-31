@@ -289,7 +289,12 @@ Windows Scheduler uses the same entry in the GDT for LDT in all processes and it
 
 \chapter{PEB Hooking}
 \paraph{}
-This chapter's content.. \keyword{keyword1}
+PEB HOOKING method consists in supplanting a DLL in memory using a fake DLL, so all modules of a process now will use the fake DLL. Deroko writes in ARTeam 2 "PEB DLL Hooking Novel method to Hook DLLs"\ocite{deropebdllh2006} the first public article about PEB Hooking (including a POC). After, Juan Carlos Montes and David Reguera Garcia writes an article for Phrack 65 called: phook - The PEB Hooker\ocite{dregshearphk2008}, this article have more information and other tools. After David Reguera Garcia writes other article \ocite{dreggendllpeb2009} and a new engine called dwtf\ocite{dregdwtf2010} to generate Fake DLLs at runtime, in the past you needed a fake DLL repository for the different DLLs versions, a useful engine for the system DLLs (Windows SP1 have different system DLLs than Windows SP2 etc).
+
+
+
+
+% This chapter's content.. \keyword{keyword1}
 
 \fancyhead[LE,RO]{}
 \printbibliography[heading=bibintoc]
