@@ -291,6 +291,50 @@ Windows Scheduler uses the same entry in the GDT for LDT in all processes and it
 \paraph{}
 PEB HOOKING method consists in supplanting a DLL in memory using a fake DLL, so all modules of a process now will use the fake DLL. Deroko writes in ARTeam 2 "PEB DLL Hooking Novel method to Hook DLLs"\ocite{deropebdllh2006} the first public article about PEB Hooking (including a POC). After, Juan Carlos Montes and David Reguera Garcia writes an article for Phrack 65 called: phook - The PEB Hooker\ocite{dregshearphk2008}, this article have more information and other tools. After David Reguera Garcia writes other article \ocite{dreggendllpeb2009} and a new engine called dwtf\ocite{dregdwtf2010} to generate Fake DLLs at runtime, in the past you needed a fake DLL repository for the different DLLs versions, a useful engine for the system DLLs (Windows SP1 have different system DLLs than Windows SP2 etc).
 
+\paraph{}
+Process Environment Block (PEB) is a structure located in the user's space, that contains the process' enviroment data: Enviroment variables. Loaded modules list...
+
+\lstset{language=C,caption=Process Environment Block}
+\begin{lstlisting}
+typedef struct _PEB
+{
+    //...
+    PVOID ImageBaseAddress;
+    PPEB_LDR_DATA LoaderData;
+    //...
+} PEB;
+\end{lstlisting}
+
+\paraph{}
+For PEB HOOKING we need use the LoaderData field, this field is a structure in which there are some data about the modules of a process. It is a doubly linked list and it can be sorted by Order of: loading, in memory and initialization. All flink and blink fields in LIST\_ENTRY are in reality pointers to LDR\_MODULE. We are going to manipulate from LDR\_MODULE: BaseAddress, EntryPoint and SizeOfImage.
+
+\paraph{}
+It is necessary to search DLL\_FAKE and DLL\_REAL for some identificative fields of LDR\_MODULE, once found the following data will be exchanged: EntryPoint, BaseAddress and SizeOfImage.
+
+\lstset{language=C,caption=PEB Loader Data}
+\begin{lstlisting}
+typedef struct _PEB_LDR_DATA
+{
+    ...
+    //BOOLEAN Initialized;
+    PVOID SsHandle;
+    LIST_ENTRY InLoadOrderModuleList;
+    //....
+}
+\end{lstlisting}
+
+\lstset{language=C,caption=Loader Module Data}
+\begin{lstlisting}
+typedef struct _LDR_MODULE
+{
+    LIST_ENTRY InLoadOrderModuleList;
+    // ...
+    PVOID BaseAddress;
+    PVOID EntryPoint;
+    ULONG SizeOfImage;
+    // ...
+} LDR_MODULE, *PLDR_MODULE;
+\end{lstlisting}
 
 
 
