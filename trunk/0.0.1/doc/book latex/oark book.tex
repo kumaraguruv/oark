@@ -109,7 +109,7 @@ framexbottommargin=3pt
 
 \section{GDT/LDT}
 \paraph{}
-The Global Descriptor Table or GDT (extracted from Wikipedia\ocite{wikglb2010}) is a data structure used by Intel x86-family processors in order to define the characteristics of the various memory areas used during program execution, for example the base address, the size and access privileges like executability and writability. These memory areas are called segments in Intel terminology. \ocite{Int6432sofdvman3A}
+The Global Descriptor Table or \keyword{GDT} (extracted from Wikipedia\ocite{wikglb2010}) is a data structure used by Intel x86-family processors in order to define the characteristics of the various memory areas used during program execution, for example the base address, the size and access privileges like executability and writability. These memory areas are called segments in Intel terminology. \ocite{Int6432sofdvman3A}
 
 \paraph{}
 The GDT can hold things other than segment descriptors as well. Every 8-byte entry in the GDT is a descriptor, but these can be Task State Segment (or TSS) descriptors, Local Descriptor Table (LDT) descriptors, or Call Gate descriptors. The last one, Call Gates, are particularly important for transferring control between x86 privilege levels although this mechanism is not used on most modern operating systems.
@@ -289,7 +289,7 @@ Windows Scheduler uses the same entry in the GDT for LDT in all processes and it
 
 \chapter{PEB Hooking}
 \paraph{}
-PEB HOOKING method consists in supplanting a DLL in memory using a fake DLL, so all modules of a process now will use the fake DLL. Deroko writes in ARTeam 2 "PEB DLL Hooking Novel method to Hook DLLs"\ocite{deropebdllh2006} the first public article about PEB Hooking (including a POC). After, Juan Carlos Montes and David Reguera Garcia writes an article for Phrack 65 called: phook - The PEB Hooker\ocite{dregshearphk2008}, this article have more information and other tools. 
+PEB HOOKING method consists in supplanting a DLL in memory using a fake DLL, so all modules of a process now will use the fake DLL. Deroko writes in ARTeam 2 "PEB DLL Hooking Novel method to Hook DLLs"\ocite{deropebdllh2006} the first public article about PEB Hooking (including a POC). After, Juan Carlos Montes and David Reguera Garcia writes an article for Phrack 65 called: phook - The PEB Hooker\ocite{dregshearphk2008}, this article have more information and other tools.
 
 \paraph{}
 After David Reguera Garcia writes other article \ocite{dreggendllpeb2009} and a new engine called dwtf\ocite{dregdwtf2010} to generate Fake DLLs at runtime, in the past you needed a fake DLL repository for the different DLLs versions, a useful engine for the system DLLs (Windows SP1 have different system DLLs than Windows SP2 etc). Also David Reguera Garcia aka Dreg made a PEB Hooking detector for the free anti-rootkit Rootkit Unhooker \ocite{diablorku3895sr22010}.
@@ -360,36 +360,199 @@ typedef struct _LDR_MODULE
 } LDR_MODULE, *PLDR_MODULE;
 \end{lstlisting}
 
-{\bf FullDllName} is the FULL PATH in disk of the DLL, and the {\bf BaseDllName} the name of the DLL. 
+{\bf FullDllName} is the FULL PATH in disk of the DLL, and the {\bf BaseDllName} the name of the DLL.
 
 \paraph{}
 The LDR\_MODULE information can be compared with the DISK file information and also can be compared with the VAD (Virtual Address Descriptor) information.
 
+\lstset{language=C,caption=MMVAD data useful for the detection}
+\begin{lstlisting}
+typedef struct _MMVAD
+{
+    // ...
+    UINT32 StartingVpn;
+    UINT32 EndingVpn;
+    // ...
+} MMVAD, *PMMVAD;
+\end{lstlisting}
+
 \paraph{}
-The current methods are:
+With the StartingVpn you have the base address of the DLL (the same info of BaseAddress of LDR\_MODULE) and the (EndingVpn + 1) - StartingVpn is the size of image (the same info of SizeOfImage of LDR\_MODULE).
+
+The MMVAD struct is different in some Windows versions, for example XP have a "struct CONTROL\_AREA* ControlArea" and the next Windows versions have a struct SUBSECTION* Subsection, which have a "struct CONTROL\_AREA":
+
+\lstset{language=C,caption=MMVAD data after XP have a pointer to SubSection}
+\begin{lstlisting}
+typedef struct _MMVAD_AFTER_XP
+{
+    // ...
+    struct _SUBSECTION* Subsection;
+    // ...
+} MMVAD_AFTER_XP, *PMMVAD_AFTER_XP;
+\end{lstlisting}
+
+
+\lstset{language=C,caption=SUBSECTION structure}
+\begin{lstlisting}
+typedef struct _SUBSECTION
+{
+    struct _CONTROL_AREA* ControlArea;
+    // ...
+} SUBSECTION, *PSUBSECTION;
+\end{lstlisting}
+
+\lstset{language=C,caption=MMVAD data in XP have a pointer to ControlArea}
+\begin{lstlisting}
+typedef struct _MMVAD_XP
+{
+    // ...
+    struct _CONTROL_AREA* ControlArea;
+    // ...
+} MMVAD_XP, *PMMVAD_XP;
+\end{lstlisting}
+
+\lstset{language=C,caption=ControlArea struct}
+\begin{lstlisting}
+typedef struct _CONTROL_AREA
+{
+    // ...
+    PVOID FilePointer; // struct _FILE_OBJECT * in XP and after a EX\_FAST\_REF to struct _FILE_OBJECT *
+} CONTROL_AREA,*PCONTROL_AREA;
+\end{lstlisting}
+
+The FilePointer in Windows XP is a normal pointer, and after XP is a EX\_FAST\_REF:
+
+\lstset{language=C,caption=EX\_FAST\_REF struct}
+\begin{lstlisting}
+typedef struct _EX_FAST_REF
+{
+    union
+    {
+        PVOID Object;
+        ULONG_PTR RefCnt:3;
+        ULONG_PTR Value;
+    };
+} EX_FAST_REF, *PEX_FAST_REF;
+\end{lstlisting}
+
+To convert a EX\_FAST\_REF to a normal pointer you need clean the RefCnt of the pointer: for example with two shifts:
+
+\lstset{language=C,caption=cleaning RefCnt of a EX\_FAST\_REF pointer}
+\begin{lstlisting}
+fast_ref_ptr.Value >>= 3;
+fast_ref_ptr.Value <<= 3;
+\end{lstlisting}
+
+\paraph{}
+Then the FilePointer is the type of FILE\_OBJECT, this struct have the File Name information:
+
+\lstset{language=C,caption=FILE\_OBJECT}
+\begin{lstlisting}
+typedef struct _FILE_OBJECT
+{
+    //...
+    struct _UNICODE_STRING FileName;
+} FILE_OBJECT, *PFILE_OBJECT;
+\end{lstlisting}
+
+The UNICODE STRING FileName have the FULL PATH of the DLL, from this field you can extract the FULL PATH of the DLL to compare with the FullDllName of LDR\_MODULE, and from the FULL PATH you can extract the DLL name to compare with the BaseDllName of LDR\_MODULE.
+
+\paraph{}
+if the DLL file do not exist in the disk maybe this is a suspicious enviroment, to compare the memory information with the file information of the DLL is necessary read the PE format \ocite{microsoftpecoff2010}:
+
+The first header of the file is the DOS HEADER, it have the offset to the PE header:
+\lstset{language=C,caption=IMAGE\_DOS\_HEADER structure}
+\begin{lstlisting}
+typedef struct _IMAGE_DOS_HEADER
+{
+    //...
+    LONG e_lfanew;
+} IMAGE_DOS_HEADER, *PIMAGE_DOS_HEADER;
+\end{lstlisting}
+
+The IMAGE NT HEADERS is the PE HEADER, the interesting fields is the FileHeader and the OptionalHeader:
+\lstset{language=C,caption=IMAGE\_NT\_HEADERS structure}
+\begin{lstlisting}
+typedef struct _IMAGE_NT_HEADERS 
+{
+    //...
+    IMAGE_FILE_HEADER     FileHeader;
+    IMAGE_OPTIONAL_HEADER OptionalHeader;
+} IMAGE_NT_HEADERS, *PIMAGE_NT_HEADERS;
+\end{lstlisting}
+
+The FileHeader have the TimeDateStamp value which is the same of the LDR\_MODULE TimeDateStamp:
+\lstset{language=C,caption=IMAGE\_FILE\_HEADER structure}
+\begin{lstlisting}
+typedef struct _IMAGE_FILE_HEADER 
+{
+    //...
+    DWORD TimeDateStamp;
+    //...
+} IMAGE_FILE_HEADER, *PIMAGE_FILE_HEADER;
+\end{lstlisting}
+
+And the Optional Header have the others LDR\_MODULE data: SizeOfImage is the SizeOfImage of the LDR, ImageBase is the BaseAddress of the LDR, and AddressOfEntryPoint is the EntryPoint - BaseAddress of the LDR:
+\lstset{language=C,caption=IMAGE\_OPTIONAL\_HEADER structure}
+\begin{lstlisting}
+typedef struct _IMAGE_OPTIONAL_HEADER 
+{
+    // ...
+    DWORD AddressOfEntryPoint;
+    // ...
+    DWORD ImageBase;
+    // ...
+    DWORD SizeOfImage;
+    // ...
+} IMAGE_OPTIONAL_HEADER, *PIMAGE_OPTIONAL_HEADER;
+\end{lstlisting}
+
+\paraph{}
+With this information the current methods to detect PEB HOOKING are, it includes the false positives information:
 
 \begin{itemize}
-\item { Checks if the VAD (Virtual Address Descriptor) info is different of PEB INFO: 
+\item { Checks if the VAD (Virtual Address Descriptor) info is different of PEB INFO:
 \begin{itemize}
-\item { VAD DLL name }
-\item { VAD DLL size }
+\item { {\bf VAD FULL PATH name:} without problems }
+\item { {\bf VAD DLL name:} without problems }
+\item { {\bf VAD DLL size:} without problems }
 \end{itemize}
 }
-\item { Same DLL Name in two or more PEB entries. }
-\item { Same DLL FULL Name PATH in two or more PEB entries. }
+\item { {\bf Same DLL Name in two or more PEB entries:} without problems }
+\item { {\bf Same DLL FULL Name PATH in two or more PEB entries:} false positives in some enviroment }
 \item { Different memory data and PE32 raw file data:
 \begin{itemize}
-\item { SIZE OF IMAGE in PEB }
-\item { ENTRY POINT in PEB }
-\item { TIME DATE STAMP in PEB }
+\item { {\bf SIZE OF IMAGE in PEB:} false positives with some packers etc. }
+\item { {\bf ENTRY POINT in PEB:} false positives, some DLLs have not got entry point etc. }
+\item { {\bf TIME DATE STAMP in PEB:} without problems. }
 \end{itemize}
-} 
-\item { Different DLL Name of the FULL PATH NAME (string inside). }
+}
+\item { {\bf Different DLL Name of the FULL PATH NAME (string inside):} without problems }
 \end{itemize}
 
+\paraph{}
+By default to check all DLLs of all process in memory have a very poor performance because the DISK I/O for all DLLs, then the DISK FILE methods for the quick scan must be disabled. The useful and trusted information for a quick scan is: 
 
+{\bf
+\begin{itemize}
+\item { All VAD stuff }
+\item { Same DLL Name in two or more PEB entries }
+\item { Different DLL Name of the FULL PATH NAME (string inside) }
+\end{itemize}
+}
+And for the deep scan DISK FILE checks the useful and trusted information:
 
-% This chapter's content.. \keyword{keyword1}
+{\bf
+\begin{itemize}
+\item { check TIME DATE STAMP }
+\end{itemize}
+}
+
+\paraph{}
+
+\chapter{Greetings}
+\paraph{}
+0vercl0k aka Souchet Axel, George Nicolaou, DiabloNova aka EP\_X0FF, Ivanlef0u, Gynvael, j00ru
 
 \fancyhead[LE,RO]{}
 \printbibliography[heading=bibintoc]
