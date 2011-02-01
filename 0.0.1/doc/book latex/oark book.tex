@@ -363,7 +363,7 @@ typedef struct _LDR_MODULE
 {\bf FullDllName} is the FULL PATH in disk of the DLL, and the {\bf BaseDllName} the name of the DLL.
 
 \paraph{}
-The LDR\_MODULE information can be compared with the DISK file information and also can be compared with the VAD (Virtual Address Descriptor) information.
+The LDR\_MODULE information can be compared with the DISK file information and also can be compared with the VAD (Virtual Address Descriptor) information. Virtual Address Descriptor tree is a kernel data structure found in Windows memory, can provide such an abstraction layer over the page directory and page tables by describing the memory ranges allocated by a process as they might be seen by the process as mapped files, loaded DLLs, or privately allocated regions... \ocite{brendogavad2007}
 
 \lstset{language=C,caption=MMVAD data useful for the detection}
 \begin{lstlisting}
@@ -473,7 +473,7 @@ typedef struct _IMAGE_DOS_HEADER
 The IMAGE NT HEADERS is the PE HEADER, the interesting fields is the FileHeader and the OptionalHeader:
 \lstset{language=C,caption=IMAGE\_NT\_HEADERS structure}
 \begin{lstlisting}
-typedef struct _IMAGE_NT_HEADERS 
+typedef struct _IMAGE_NT_HEADERS
 {
     //...
     IMAGE_FILE_HEADER     FileHeader;
@@ -484,7 +484,7 @@ typedef struct _IMAGE_NT_HEADERS
 The FileHeader have the TimeDateStamp value which is the same of the LDR\_MODULE TimeDateStamp:
 \lstset{language=C,caption=IMAGE\_FILE\_HEADER structure}
 \begin{lstlisting}
-typedef struct _IMAGE_FILE_HEADER 
+typedef struct _IMAGE_FILE_HEADER
 {
     //...
     DWORD TimeDateStamp;
@@ -495,7 +495,7 @@ typedef struct _IMAGE_FILE_HEADER
 And the Optional Header have the others LDR\_MODULE data: SizeOfImage is the SizeOfImage of the LDR, ImageBase is the BaseAddress of the LDR, and AddressOfEntryPoint is the EntryPoint - BaseAddress of the LDR:
 \lstset{language=C,caption=IMAGE\_OPTIONAL\_HEADER structure}
 \begin{lstlisting}
-typedef struct _IMAGE_OPTIONAL_HEADER 
+typedef struct _IMAGE_OPTIONAL_HEADER
 {
     // ...
     DWORD AddressOfEntryPoint;
@@ -531,7 +531,7 @@ With this information the current methods to detect PEB HOOKING are, it includes
 \end{itemize}
 
 \paraph{}
-By default to check all DLLs of all process in memory have a very poor performance because the DISK I/O for all DLLs, then the DISK FILE methods for the quick scan must be disabled. The useful and trusted information for a quick scan is: 
+By default to check all DLLs of all process in memory have a very poor performance because the DISK I/O for all DLLs, then the DISK FILE methods for the quick scan must be disabled. The useful and trusted information for a quick scan is:
 
 {\bf
 \begin{itemize}
