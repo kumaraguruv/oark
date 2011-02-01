@@ -341,7 +341,52 @@ typedef struct _LDR_MODULE
 
 \section{Detection}
 \paraph{}
-The PEB Hooking detection is in experimental stage yet.
+The PEB Hooking detection is in experimental stage yet. The current strategy is check some incongruities, and detects a bad PEB Hooking stealth. Of course some methods have more false positives than others (Depends on the environment and other factors). Of course, detects HIDDEN DLLs also is a good idea, for example a PEB HOOKING can have a good design, but if it try to hide a DLL with a bad design you can detect a suspicious enviroment etc.
+
+\paraph{} The information in PEB useful to check if there are PEB HOOKING or not are:
+\lstset{language=C,caption=Loader Module Data useful for the detection}
+\begin{lstlisting}
+typedef struct _LDR_MODULE
+{
+    // ...
+    PVOID BaseAddress;
+    PVOID EntryPoint;
+    ULONG SizeOfImage;
+    UNICODE_STRING FullDllName;
+    UNICODE_STRING BaseDllName;
+    // ...
+    ULONG TimeDateStamp;
+
+} LDR_MODULE, *PLDR_MODULE;
+\end{lstlisting}
+
+{\bf FullDllName} is the FULL PATH in disk of the DLL, and the {\bf BaseDllName} the name of the DLL. 
+
+\paraph{}
+The LDR\_MODULE information can be compared with the DISK file information and also can be compared with the VAD (Virtual Address Descriptor) information.
+
+\paraph{}
+The current methods are:
+
+\begin{itemize}
+\item { Checks if the VAD (Virtual Address Descriptor) info is different of PEB INFO: 
+\begin{itemize}
+\item { VAD DLL name }
+\item { VAD DLL size }
+\end{itemize}
+}
+\item { Same DLL Name in two or more PEB entries. }
+\item { Same DLL FULL Name PATH in two or more PEB entries. }
+\item { Different memory data and PE32 raw file data:
+\begin{itemize}
+\item { SIZE OF IMAGE in PEB }
+\item { ENTRY POINT in PEB }
+\item { TIME DATE STAMP in PEB }
+\end{itemize}
+} 
+\item { Different DLL Name of the FULL PATH NAME (string inside). }
+\end{itemize}
+
 
 
 % This chapter's content.. \keyword{keyword1}
