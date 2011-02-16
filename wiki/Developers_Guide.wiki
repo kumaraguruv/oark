@@ -45,6 +45,7 @@ Others necessary reads:
   * *[http://www.codeproject.com/KB/system/driverdev6asp.aspx Driver Development Part 6: Introduction to Display Drivers]*
   * *[http://www.freewebs.com/four-f/ MemoryManagement at KernelMode]*
   * *[http://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/IRPs.doc Handling IRPs: What Every Driver Writer Needs to Know]*
+  * *[http://www.cs.sjtu.edu.cn/~kzhu/cs490/]* - Windows Internals course (very interesing for the new people.)
 
 Of course you can send questions to our mailing list (aka Google Groups) (view [http://code.google.com/p/oark/ Project Home page])
 
