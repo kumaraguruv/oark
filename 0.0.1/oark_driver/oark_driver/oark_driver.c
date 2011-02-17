@@ -166,11 +166,9 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
     switch(irpSp->Parameters.DeviceIoControl.IoControlCode)
     {
         case OARK_IOCTL_CHANGE_MODE:
-            DbgPrint( " IOCTL!\n" );
             if( irpSp->Parameters.DeviceIoControl.InputBufferLength != sizeof( READ_KERN_MEM_t ) ) 
                 break;
 
-            DbgPrint( " IN IOCTL!\n" );
             read_kern_mem =  * ( (READ_KERN_MEM_t *) Irp->AssociatedIrp.SystemBuffer );
 
             switch ( read_kern_mem.type )
@@ -216,7 +214,6 @@ NTSTATUS OARKDRIVER_DispatchDeviceControl(
 
                 case SYM_TYP_NULL:
                     ptrdat = read_kern_mem.src_address;
-                    DbgPrint( " Reading... 0x%08X\n", ptrdat );
                 break;
 
                 case SYM_TYP_PSLOUPRBYID:
