@@ -2,7 +2,7 @@
 
 = Introduction =
 
-*(Get the sources from the Subversion: svn checkout http://oark.googlecode.com/svn/trunk/)*
+*(Get the sources from the Subversion: svn checkout !http://oark.googlecode.com/svn/trunk/)*
 
 To build/compile oark is necessary the Visual Studio (we are using the 2008 version). Build *ALWAYS* first the driver, and after the User Mode project, it needs the driver to compile:
 
