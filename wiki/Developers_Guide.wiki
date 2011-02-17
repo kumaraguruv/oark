@@ -51,6 +51,8 @@ Of course you can send questions to our mailing list (aka Google Groups) (view [
 
 = Environment for Developers =
 
+Here the page with the How To Compile Build: [http://code.google.com/p/oark/wiki/How_To_Compile_Build]
+
 The driver is built with *WinDDK 6001.17121*, you can install this DDK with others DDKs in the system without problems.
 
 For an easy environment you can install this tools:
