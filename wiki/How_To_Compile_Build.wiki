@@ -4,6 +4,8 @@
 
 To build/compile oark is necessary the Visual Studio (we are using the 2008 version). Build *ALWAYS* first the driver, and after the User Mode project, it needs the driver to compile:
 
+To build the driver you need the DDKWIZARD and the DDKBUILDCMD:  View this page to know how it works, installation etc.: [http://code.google.com/p/oark/wiki/Developers_Guide#Environment_for_Developers]
+
   * oark driver, we recommend use Release:
     * From Visual Studio GUI: open the oark_driver.sln, select if you want a WXP Free or WXP Checked, and click in Build in the top of window and after: Build Solution.
 
