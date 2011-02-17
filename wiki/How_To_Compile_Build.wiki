@@ -8,9 +8,12 @@ To build/compile oark is necessary the Visual Studio (we are using the 2008 vers
 
   * *oark driver*, we recommend use *WXP Free*:
     * *From Visual Studio GUI:* open the oark_driver.sln, select if you want a WXP Free or WXP Checked, and click in Build in the top of window and after: Build Solution.
+    * From *Command line:* 
+      # Set variables: C:\WinDDK\6001.17121\src\oark\oark_driver>set WXPBASE=C:\WinDDK\6001.17121
+      # Build the driver: C:\WinDDK\6001.17121\src\oark\oark_driver>c:\WinDDK\ddkbuild.cmd  -WXP free "C:\WinDDK\6001.17121\src\oark\oark_driver\oark_driver"
 
   * *oark usermode*, we recommend use *Release*:
       * From *Visual Studio GUI:* open the oark_usermode.sln, select if you want a Release or Debug Build, and click in Build in the top of window and after: Build Solution.
-      * Fom *Visual Studio Command line:* Using the Visual Studio 2008 Command Prompt: *cmd.exe /k "c:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" x86*
+      * From *Visual Studio Command line:* Using the Visual Studio 2008 Command Prompt: *cmd.exe /k "c:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" x86*
         * Release: C:\oark\oark_usermode>*msbuild /p:configuration=Release oark_usermode.sln*
         * Debug: C:\oark\oark_usermode>*msbuild /p:configuration=Debug oark_usermode.sln*
