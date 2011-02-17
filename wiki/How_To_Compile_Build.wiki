@@ -2,6 +2,8 @@
 
 = Introduction =
 
+*(Get the sources from the Subversion: svn checkout http://oark.googlecode.com/svn/trunk/)*
+
 To build/compile oark is necessary the Visual Studio (we are using the 2008 version). Build *ALWAYS* first the driver, and after the User Mode project, it needs the driver to compile:
 
 *To build the driver* you need the *DDKWIZARD, the WINDDK (we are using WinDDK 6001.17121) and the DDKBUILDCMD:*  View this page to know how it works, installation etc.: [http://code.google.com/p/oark/wiki/Developers_Guide#Environment_for_Developers]
