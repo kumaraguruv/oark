@@ -19,4 +19,4 @@ To build/compile oark is necessary the Visual Studio (we are using the 2008 vers
         * Release: C:\oark\oark_usermode>*msbuild /p:configuration=Release oark_usermode.sln*
         * Debug: C:\oark\oark_usermode>*msbuild /p:configuration=Debug oark_usermode.sln*
 
-After this. The oark.exe is in the *oark\Release* directory. The executable have inside the driver.
+After this. The *oark.exe* is in the *oark\Release* directory. The executable have inside the driver.
