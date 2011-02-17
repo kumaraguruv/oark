@@ -27,6 +27,7 @@ THE SOFTWARE.
 #include "debug.h"
 #include "others.h"
 #include "driverusr.h"
+#include "common.h"
 
 #define CALL_GATE_32_TYPE 0x1C
 #define LDT_TYPE 0x12
@@ -87,6 +88,52 @@ typedef struct DESCRIPTOR_CORE_TAB_WNR_s
     DWORD          nr;
 
 } DESCRIPTOR_CORE_TAB_WNR_t;
+
+typedef struct GDT_INFO_s
+{
+    SLIST_ENTRY SingleListEntry;
+
+    DWORD          core;
+    GDTR           gdt;
+
+} GDT_INFO_t;
+
+typedef struct LDT_INFO_s
+{
+
+
+    GDT_INFO_t gdt_info;
+    BOOLEAN is_gdt;
+
+} LDT_INFO_t;
+
+typedef struct CALL_GATES_INFO_s
+{
+    SLIST_ENTRY SingleListEntry;
+
+    DWORD selector;
+    DWORD address;
+    DWORD pflag;
+    DWORD sflag;
+    DWORD dpl;
+    DWORD arg_count;
+
+    union source
+    {
+        LDT_INFO_t ldt_info;
+        GDT_INFO_t gdt_info;
+    };
+
+    BOOLEAN is_gdt;
+
+} CALL_GATES_INFO_t;
+
+
+typedef struct REPORT_s
+{
+    PSLIST_HEADER CALL_GATES;
+
+} REPORT_t;
 
 STATUS_t CheckCallGates( FUNC_ARGS_t *, FUNC_ARGS_GLOBAL_t * );
 BOOLEAN InitTypes( DWORD, TYPES_t * );
