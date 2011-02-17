@@ -18,3 +18,5 @@ To build/compile oark is necessary the Visual Studio (we are using the 2008 vers
       * From *Visual Studio Command line:* Using the Visual Studio 2008 Command Prompt: *cmd.exe /k "c:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" x86*
         * Release: C:\oark\oark_usermode>*msbuild /p:configuration=Release oark_usermode.sln*
         * Debug: C:\oark\oark_usermode>*msbuild /p:configuration=Debug oark_usermode.sln*
+
+After this. The oark.exe is in the *oark\Release* directory. The executable have inside the driver.
